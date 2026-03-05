@@ -1,0 +1,116 @@
+2026-03-05 21:33:56,098  INFO     main – Building system …
+2026-03-05 21:33:56,103  WARNING  serial_interface – Could not auto-detect hub port. Specify port manually.
+2026-03-05 21:33:56,138  INFO     comtypes.client._code_cache – Could not import comtypes.gen, trying to create it.
+2026-03-05 21:33:56,138  INFO     comtypes.client._code_cache – Created comtypes.gen directory: 'C:\Users\halas\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\comtypes\gen'
+2026-03-05 21:33:56,139  INFO     comtypes.client._code_cache – Writing __init__.py file: 'C:\Users\halas\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\comtypes\gen\__init__.py'
+2026-03-05 21:33:56,148  INFO     comtypes.client._code_cache – Using writeable comtypes cache directory: 'C:\Users\halas\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\comtypes\gen'
+2026-03-05 21:33:56,155  INFO     comtypes.client._generate – Could not import comtypes.gen._C866CA3A_32F7_11D2_9602_00C04F8EE628_0_5_4: No module named 'comtypes.gen._C866CA3A_32F7_11D2_9602_00C04F8EE628_0_5_4'
+2026-03-05 21:33:56,159  INFO     comtypes.client._generate – # Generating comtypes.gen._C866CA3A_32F7_11D2_9602_00C04F8EE628_0_5_4
+2026-03-05 21:33:56,237  INFO     comtypes.client._generate – # Generating comtypes.gen.SpeechLib
+2026-03-05 21:33:56,244  INFO     comtypes.client._generate – Could not import comtypes.gen._00020430_0000_0000_C000_000000000046_0_2_0: No module named 'comtypes.gen._00020430_0000_0000_C000_000000000046_0_2_0'
+2026-03-05 21:33:56,245  INFO     comtypes.client._generate – # Generating comtypes.gen._00020430_0000_0000_C000_000000000046_0_2_0
+2026-03-05 21:33:56,251  INFO     comtypes.client._generate – # Generating comtypes.gen.stdole
+2026-03-05 21:34:44,125  INFO     main – Building system …
+2026-03-05 21:34:44,130  WARNING  serial_interface – Could not auto-detect hub port. Specify port manually.
+2026-03-05 21:34:44,172  INFO     comtypes.client._code_cache – Imported existing <module 'comtypes.gen' from 'C:\\Users\\halas\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-03-05 21:34:44,172  INFO     comtypes.client._code_cache – Using writeable comtypes cache directory: 'C:\Users\halas\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\comtypes\gen'
+2026-03-05 21:34:44,286  INFO     vision.face_tracking – Face tracker started.
+2026-03-05 21:34:44,288  INFO     main – Robot logic thread started.
+2026-03-05 21:34:44,288  INFO     main – Starting eye animation window (main thread).
+2026-03-05 21:34:44,352  INFO     mode_manager – Hub is ready – entering menu.
+2026-03-05 21:34:44,352  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HEART'}
+2026-03-05 21:34:44,353  INFO     modules.audio_player – [TTS] Flaŝkartoj
+2026-03-05 21:34:44,368  INFO     mode_manager – Menu: [0] Flaŝkartoj
+2026-03-05 21:34:44,369  INFO     modules.audio_player – [TTS] Bonvenon! Mi estas via Esperanto-roboto.
+2026-03-05 21:34:44,635  INFO     vision.face_tracking – Webcam opened successfully.
+2026-03-05 21:37:27,721  INFO     main – Window closed – shutting down.
+2026-03-05 21:37:27,721  INFO     serial_interface – Serial interface stopped.
+2026-03-05 21:37:27,742  INFO     vision.face_tracking – Webcam released.
+2026-03-05 21:37:27,746  INFO     vision.face_tracking – Face tracker stopped.
+2026-03-05 21:37:27,746  INFO     main – Goodbye!
+2026-03-05 21:40:16,759  INFO     main – Building system …
+2026-03-05 21:40:16,764  WARNING  serial_interface – Could not auto-detect hub port. Specify port manually.
+2026-03-05 21:40:16,800  INFO     comtypes.client._code_cache – Imported existing <module 'comtypes.gen' from 'C:\\Users\\halas\\AppData\\Local\\Python\\pythoncore-3.14-64\\Lib\\site-packages\\comtypes\\gen\\__init__.py'>
+2026-03-05 21:40:16,800  INFO     comtypes.client._code_cache – Using writeable comtypes cache directory: 'C:\Users\halas\AppData\Local\Python\pythoncore-3.14-64\Lib\site-packages\comtypes\gen'
+2026-03-05 21:40:16,912  INFO     main – Face tracking disabled (--camera -1).
+2026-03-05 21:40:16,913  INFO     main – Robot logic thread started.
+2026-03-05 21:40:16,913  INFO     main – Starting eye animation window (main thread).
+2026-03-05 21:40:16,990  INFO     mode_manager – Hub is ready – entering menu.
+2026-03-05 21:40:16,990  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HEART'}
+2026-03-05 21:40:16,991  INFO     modules.audio_player – [TTS] Flaŝkartoj
+2026-03-05 21:40:16,991  INFO     mode_manager – Menu: [0] Flaŝkartoj
+2026-03-05 21:40:16,991  INFO     modules.audio_player – [TTS] Bonvenon! Mi estas via Esperanto-roboto.
+2026-03-05 21:41:05,843  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'SMILE'}
+2026-03-05 21:41:05,843  INFO     modules.audio_player – [TTS] Poemoj
+2026-03-05 21:41:05,843  INFO     mode_manager – Menu: [1] Poemoj
+2026-03-05 21:41:23,865  INFO     mode_manager – User selected: Poemoj
+2026-03-05 21:41:23,865  INFO     mode_manager – Entering mode: POETRY
+2026-03-05 21:41:23,865  INFO     modules.poems – Loaded 0 poem(s).
+2026-03-05 21:41:23,866  INFO     modules.audio_player – [TTS] Neniu poemo trovita. Bonvolu aldoni .txt dosierojn en data/poems/
+2026-03-05 21:41:30,115  INFO     mode_manager – Entering mode: MENU
+2026-03-05 21:41:30,115  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'SMILE'}
+2026-03-05 21:41:30,115  INFO     modules.audio_player – [TTS] Poemoj
+2026-03-05 21:41:30,116  INFO     mode_manager – Menu: [1] Poemoj
+2026-03-05 21:41:30,116  INFO     modules.audio_player – [TTS] Reen al la menuo.
+2026-03-05 21:41:35,631  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HAPPY'}
+2026-03-05 21:41:35,632  INFO     modules.audio_player – [TTS] Kantoj
+2026-03-05 21:41:35,632  INFO     mode_manager – Menu: [2] Kantoj
+2026-03-05 21:41:36,992  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'CIRCLE'}
+2026-03-05 21:41:36,992  INFO     modules.audio_player – [TTS] Faktoj
+2026-03-05 21:41:36,993  INFO     mode_manager – Menu: [3] Faktoj
+2026-03-05 21:41:37,561  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'ARROW_UP'}
+2026-03-05 21:41:37,561  INFO     modules.audio_player – [TTS] Zamenhof
+2026-03-05 21:41:37,561  INFO     mode_manager – Menu: [4] Zamenhof
+2026-03-05 21:41:38,088  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'SQUARE'}
+2026-03-05 21:41:38,089  INFO     modules.audio_player – [TTS] Prononco
+2026-03-05 21:41:38,089  INFO     mode_manager – Menu: [5] Prononco
+2026-03-05 21:41:48,526  INFO     main – Window closed – shutting down.
+2026-03-05 21:41:48,527  INFO     serial_interface – Serial interface stopped.
+2026-03-05 21:41:48,527  INFO     vision.face_tracking – Face tracker stopped.
+2026-03-05 21:41:48,527  INFO     main – Goodbye!
+2026-03-05 21:58:05,492  INFO     main – Building system …
+2026-03-05 21:58:05,497  WARNING  serial_interface – Could not auto-detect hub port. Specify port manually.
+2026-03-05 21:58:05,498  INFO     vision.face_tracking – Face tracker started.
+2026-03-05 21:58:05,500  INFO     main – Robot logic thread started.
+2026-03-05 21:58:05,500  INFO     main – Starting eye animation window (main thread).
+2026-03-05 21:58:05,573  INFO     mode_manager – Hub is ready – entering menu.
+2026-03-05 21:58:05,573  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HEART'}
+2026-03-05 21:58:05,573  INFO     modules.audio_player – [TTS] Flaŝkartoj
+2026-03-05 21:58:05,574  INFO     mode_manager – Menu: [0] Flaŝkartoj
+2026-03-05 21:58:05,574  INFO     modules.audio_player – [TTS] Bonvenon! Mi estas via Esperanto-roboto.
+2026-03-05 21:58:05,726  INFO     modules.audio_player – pyttsx3 TTS engine ready.
+2026-03-05 21:58:05,883  INFO     vision.face_tracking – Webcam opened successfully.
+2026-03-05 21:58:27,687  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'SMILE'}
+2026-03-05 21:58:27,687  INFO     modules.audio_player – [TTS] Poemoj
+2026-03-05 21:58:27,687  INFO     mode_manager – Menu: [1] Poemoj
+2026-03-05 21:58:36,148  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HAPPY'}
+2026-03-05 21:58:36,148  INFO     modules.audio_player – [TTS] Kantoj
+2026-03-05 21:58:36,149  INFO     mode_manager – Menu: [2] Kantoj
+2026-03-05 21:58:39,069  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'CIRCLE'}
+2026-03-05 21:58:39,070  INFO     modules.audio_player – [TTS] Faktoj
+2026-03-05 21:58:39,070  INFO     mode_manager – Menu: [3] Faktoj
+2026-03-05 21:58:40,530  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'ARROW_UP'}
+2026-03-05 21:58:40,530  INFO     modules.audio_player – [TTS] Zamenhof
+2026-03-05 21:58:40,531  INFO     mode_manager – Menu: [4] Zamenhof
+2026-03-05 21:58:41,666  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'SQUARE'}
+2026-03-05 21:58:41,666  INFO     modules.audio_player – [TTS] Prononco
+2026-03-05 21:58:41,667  INFO     mode_manager – Menu: [5] Prononco
+2026-03-05 21:58:42,742  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'ARROW_RIGHT'}
+2026-03-05 21:58:42,742  INFO     modules.audio_player – [TTS] AI Asistanto
+2026-03-05 21:58:42,742  INFO     mode_manager – Menu: [6] AI Asistanto
+2026-03-05 21:58:43,714  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HEART'}
+2026-03-05 21:58:43,714  INFO     modules.audio_player – [TTS] Flaŝkartoj
+2026-03-05 21:58:43,715  INFO     mode_manager – Menu: [0] Flaŝkartoj
+2026-03-05 21:58:45,929  INFO     mode_manager – User selected: Flaŝkartoj
+2026-03-05 21:58:45,930  INFO     mode_manager – Entering mode: FLASHCARD
+2026-03-05 21:58:45,930  WARNING  modules.flashcards – No vocabulary CSV files found in E:\Pliki\Projects\WRO2026\laptop\modules\..\data\vocabulary
+2026-03-05 21:58:45,930  INFO     modules.audio_player – [TTS] Neniu vortaro trovita. Bonvolu aldoni dosierojn en data/vocabulary/
+2026-03-05 21:58:49,678  INFO     modules.audio_player – [TTS] Neniu vortaro trovita. Bonvolu aldoni dosierojn en data/vocabulary/
+2026-03-05 21:58:49,678  INFO     modules.audio_player – [TTS] Neniu vortaro trovita. Bonvolu aldoni dosierojn en data/vocabulary/
+2026-03-05 21:58:51,810  INFO     mode_manager – Entering mode: MENU
+2026-03-05 21:58:51,810  INFO     modules.flashcards – Flashcard mode stopped.
+2026-03-05 21:58:51,810  WARNING  serial_interface – Serial not open, cannot send: {'type': 'SHOW_ICON', 'icon': 'HEART'}
+2026-03-05 21:58:51,810  INFO     modules.audio_player – [TTS] Flaŝkartoj
+2026-03-05 21:58:51,811  INFO     mode_manager – Menu: [0] Flaŝkartoj
+2026-03-05 21:58:51,811  INFO     modules.audio_player – [TTS] Reen al la menuo.
+2026-03-05 21:58:53,416  INFO     main – Quit requested by user.

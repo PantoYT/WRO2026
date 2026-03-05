@@ -1,0 +1,31 @@
+{
+  "_comment": "AI Assistant configuration for the Esperanto Robot.",
+  "_comment2": "Rename this file to ai_config.json and fill in your API key.",
+
+  "provider": "groq",
+
+  "_providers": {
+    "groq": {
+      "_info": "Free tier available at https://console.groq.com – very fast inference.",
+      "api_key": "YOUR_GROQ_API_KEY_HERE",
+      "model":   "llama3-8b-8192",
+      "base_url": ""
+    },
+    "openrouter": {
+      "_info": "Many free models at https://openrouter.ai/",
+      "api_key": "YOUR_OPENROUTER_KEY_HERE",
+      "model":   "meta-llama/llama-3-8b-instruct:free",
+      "base_url": ""
+    },
+    "ollama": {
+      "_info": "100% offline. Install Ollama from https://ollama.ai then run: ollama pull llama3",
+      "api_key": "",
+      "model":   "llama3",
+      "base_url": "http://localhost:11434"
+    }
+  },
+
+  "api_key":  "YOUR_API_KEY_HERE",
+  "model":    "llama3-8b-8192",
+  "base_url": ""
+}

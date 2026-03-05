@@ -1,0 +1,23 @@
+# Esperanto language facts – one fact per line
+# Lines starting with # are comments and are ignored.
+
+Esperanto estas la plej vaste parolata planlingvo en la mondo.
+Esperanto estis kreita de Ludwik Lazarz Zamenhof kaj publikigita en 1887.
+La nomo "Esperanto" signifas "tiu, kiu esperas" en la lingvo mem.
+Esperanto havas nur 16 bazajn gramatikajn regulojn kaj neniujn esceptojn.
+Oni taksas ke inter 1 kaj 2 milionoj da homoj parolas Esperanton kiel duan lingvon.
+Ekzistas ĉirkaŭ 1000 denaskaj parolantoj de Esperanto, nomitaj "denaskuloj".
+La Esperanto-alfabeto havas 28 literojn, inkluzive de 6 litoj kun ĉapeleto (ĉ, ĝ, ĥ, ĵ, ŝ, ŭ).
+Ĉiuj substantivoj en Esperanto finiĝas per -o. Ekzemple: hundo, libro, domo.
+Ĉiuj adjektivoj en Esperanto finiĝas per -a. Ekzemple: bela, granda, rapida.
+Ĉiuj verboj en Esperanto en la prezenco finiĝas per -as. Ekzemple: mi manĝas, vi parolas.
+Esperanto havas nur unu konjugaciforomon por ĉiuj personoj. Mi iras, vi iras, li iras.
+La akuzativo en Esperanto estas markita per -n. Ekzemple: mi vidas hundon.
+Esperanto estas parolata en pli ol 120 landoj tra la mondo.
+La Universala Kongreso de Esperanto okazas ĉiujare en malsama lando.
+Pli ol 250 lernolibroj estis eldonitaj en Esperanto ekde 1887.
+Esperanto havas literaturon, muzikon, filmojn kaj eĉ Vikipedion en la lingvo.
+La vorto "internacia" estas la sama en Esperanto kaj en multaj eŭropaj lingvoj.
+Esperanto prenas vortojn el la latina, greka, franca, germana, slavaj lingvoj kaj aliaj.
+En Esperanto ne estas neregulaj verboj – ĉio sekvas la samajn regulojn.
+Lerni Esperanton estas 5-10 fojojn pli rapide ol lernar alian fremdan lingvon laŭ studoj.
