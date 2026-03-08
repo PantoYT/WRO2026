@@ -1,0 +1,3 @@
+wordlist.json    # dane z postępem nauki
+__pycache__/
+*.pyc
