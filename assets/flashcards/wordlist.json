@@ -98,11 +98,11 @@
     "unit": "Basics",
     "page": 1,
     "correct_count": 1,
-    "wrong_count": 0,
-    "sr_ease": 2.5,
+    "wrong_count": 1,
+    "sr_ease": 2.1799999999999997,
     "sr_interval": 1,
     "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796789"
+    "next_review": "2026-03-14T15:23:33.224132"
   },
   {
     "word": "familio",
@@ -127,12 +127,12 @@
     "translation": "father / ojciec",
     "unit": "Basics",
     "page": 1,
-    "correct_count": 0,
+    "correct_count": 1,
     "wrong_count": 0,
     "sr_ease": 2.5,
     "sr_interval": 1,
-    "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796794"
+    "sr_repetitions": 1,
+    "next_review": "2026-03-14T15:23:25.844623"
   },
   {
     "word": "patrino",
@@ -142,12 +142,12 @@
     "translation": "mother / matka",
     "unit": "Basics",
     "page": 1,
-    "correct_count": 0,
+    "correct_count": 1,
     "wrong_count": 0,
     "sr_ease": 2.5,
     "sr_interval": 1,
-    "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796796"
+    "sr_repetitions": 1,
+    "next_review": "2026-03-14T15:15:32.809414"
   },
   {
     "word": "frato",
@@ -218,11 +218,11 @@
     "unit": "Places",
     "page": 2,
     "correct_count": 0,
-    "wrong_count": 0,
-    "sr_ease": 2.5,
+    "wrong_count": 1,
+    "sr_ease": 2.1799999999999997,
     "sr_interval": 1,
     "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796804"
+    "next_review": "2026-03-14T15:23:15.404160"
   },
   {
     "word": "mondo",
@@ -277,12 +277,12 @@
     "translation": "hospital / szpital",
     "unit": "Places",
     "page": 2,
-    "correct_count": 0,
+    "correct_count": 1,
     "wrong_count": 1,
     "sr_ease": 2.5,
     "sr_interval": 1,
-    "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796810"
+    "sr_repetitions": 1,
+    "next_review": "2026-03-14T15:15:22.729468"
   },
   {
     "word": "vendejo",
@@ -308,11 +308,11 @@
     "unit": "Places",
     "page": 2,
     "correct_count": 1,
-    "wrong_count": 1,
-    "sr_ease": 2.5,
+    "wrong_count": 2,
+    "sr_ease": 2.1799999999999997,
     "sr_interval": 1,
     "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796813"
+    "next_review": "2026-03-14T15:15:45.109341"
   },
   {
     "word": "manĝi",
@@ -727,12 +727,12 @@
     "translation": "slow / wolny",
     "unit": "Adjectives",
     "page": 4,
-    "correct_count": 0,
+    "correct_count": 1,
     "wrong_count": 0,
     "sr_ease": 2.5,
     "sr_interval": 1,
-    "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796859"
+    "sr_repetitions": 1,
+    "next_review": "2026-03-14T15:15:41.929155"
   },
   {
     "word": "facila",
@@ -788,11 +788,11 @@
     "unit": "Adjectives",
     "page": 4,
     "correct_count": 0,
-    "wrong_count": 0,
-    "sr_ease": 2.5,
+    "wrong_count": 1,
+    "sr_ease": 2.1799999999999997,
     "sr_interval": 1,
     "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796865"
+    "next_review": "2026-03-14T15:18:12.647763"
   },
   {
     "word": "varma",
@@ -937,12 +937,12 @@
     "translation": "eight / osiem",
     "unit": "Numbers",
     "page": 5,
-    "correct_count": 0,
+    "correct_count": 1,
     "wrong_count": 0,
     "sr_ease": 2.5,
     "sr_interval": 1,
-    "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796881"
+    "sr_repetitions": 1,
+    "next_review": "2026-03-14T15:15:25.609361"
   },
   {
     "word": "naŭ",
@@ -1448,11 +1448,11 @@
     "unit": "Culture",
     "page": 9,
     "correct_count": 0,
-    "wrong_count": 0,
-    "sr_ease": 2.5,
+    "wrong_count": 1,
+    "sr_ease": 2.1799999999999997,
     "sr_interval": 1,
     "sr_repetitions": 0,
-    "next_review": "2026-03-08T19:49:28.796936"
+    "next_review": "2026-03-14T15:15:17.269790"
   },
   {
     "word": "kulturo",

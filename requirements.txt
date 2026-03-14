@@ -1,18 +1,11 @@
-# WRO2026 - Esperanto Flashcard Robot
-# Instalacja: pip install -r requirements.txt
-# Wymaga Python 3.13+ (nie 3.14 - brak wheelów dla niektórych paczek)
-# Lub Python 3.14 jeśli pygame-ce jest dostępne
+# WRO2026 — Esperanto Flashcard Robot
+# Instalacja (venv):
+#   python -m venv .venv
+#   .venv\Scripts\activate      # Windows
+#   pip install -r requirements.txt
 
-# Pybricks - komunikacja z SPIKE Prime
 pybricks
 pybricksdev
-
-# TTS
 gTTS
-
-# Audio
-pygame-ce   # community edition - działa na Python 3.14
-            # jeśli brak: pip install pygame-ce
-
-# Opcjonalnie jeśli pygame-ce nie działa:
-# pydub     # wymaga ffmpeg zainstalowanego osobno
+pygame-ce
+yt-dlp          # pobieranie muzyki/poezji (opcjonalne)
