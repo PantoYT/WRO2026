@@ -1,90 +1,59 @@
 # Roadmap — WRO2026 Esperanto Flashcard Robot
 
-## Obecny stan (prototyp)
+## Planowane: Tryb konwersacji AI
 
-Pełna logika huba (`hub.py`) — menu, tryby, animacje LED, BLE.
-Logika PC (`computer.py`) — SM-2, TTS, odtwarzanie MP3.
-Sterowanie: przyciski fizyczne na SPIKE Prime.
-
----
-
-## Planowane: Warstwa AI (multimodal agent)
-
-### Koncepcja
-
-Przyciski fizyczne zostaną **uzupełnione** (nie zastąpione) przez agenta AI,
-który słyszy i widzi użytkownika i autonomicznie reaguje w czasie rzeczywistym.
+Nowy tryb (Mode 3) — rozmowa po esperanto z LLM jako partnerem językowym.
 
 ```
-[Kamera / telefon]  ──┐
-                       ├──► [agent.py]  ──► [computer.py ModeManager]
-[Mikrofon]          ──┘
-                            ▲
-                     LLM (vision + audio)
-                     lokalne lub API
+[Mikrofon]  →  Whisper STT  →  LLM (Ollama / API)  →  gTTS  →  głośnik
+                                     ↑
+                          system prompt: poziom trudności,
+                          rola: natywny użytkownik esperanto
 ```
 
-### Wejście
+### Poziomy trudności (wybierane w menu huba)
 
-| Źródło | Technologia | Uwagi |
-|--------|-------------|-------|
-| Mikrofon | Whisper (OpenAI, open source) | STT lokalnie |
-| Kamera | Phone Link / kamera USB | obraz do LLM |
+| Poziom | Opis |
+|--------|------|
+| A1 | krótkie zdania, podstawowe słownictwo z wordlist.json |
+| B1 | swobodna rozmowa, korekta błędów |
+| C1 | natywne tempo, idiomy, kultura |
 
-### LLM
-
-| Środowisko | Model | Uwagi |
-|------------|-------|-------|
-| Development (RTX 3060) | Ollama + LLaVA / moondream | lokalnie, bez internetu |
-| Konkurs (laptop bez GPU) | API (Gemini / GPT-4o) + hotspot | niska latencja |
-
-Agent dostaje ścisły system prompt z listą dozwolonych akcji — nie może robić
-nic poza zdefiniowanym zestawem komend. Żadnych "wolnych" odpowiedzi.
-
-### Komendy głosowe (planowane)
-
-| Komenda | Akcja |
-|---------|-------|
-| "tak" / "znam" / "yes" | YES (fiszki) |
-| "nie" / "no" | NO (fiszki) |
-| "następny" / "next" | następny utwór |
-| "poprzedni" / "back" | poprzedni utwór |
-| "pauza" / "pause" | pauza/play |
-| "info" / "powiedz więcej" | ACTION_HOLD (TTS opis) |
-| "menu" | powrót do menu trybów |
-
-### Reakcja na obraz (planowane)
-
-Agent analizuje twarz/gestykulację użytkownika i może np.:
-- wykryć że użytkownik się waha → automatycznie powtórzyć definicję
-- wykryć gest "kciuk w górę/dół" jako alternatywę dla przycisku
-- dostosować tempo nauki do widocznego poziomu skupienia
+- Ollama lokalnie (RTX 3060) = fallback offline na konkurs, brak zależności od internetu
+- API (Gemini / GPT-4o) jako opcja gdy dostępny hotspot
+- Zakres ograniczony do dialogów edukacyjnych — AI uczy się poziomu użytkownika i dostosowuje język
 
 ---
 
-## Planowane: Czujniki fizyczne
+## Planowane: Fizyczna interakcja / "robotyczność"
 
-Zakomentowane w `hub.py`, zostaną aktywowane gdy dostępny sprzęt:
+WRO wymaga fizycznego systemu z sensorami — samo PC + przyciski to za mało.
 
-- **Motor** (Port A) — fizyczny przycisk/dźwignia jako alternatywa sterowania
-- **ColorSensor** (Port B) — wykrywanie gestów / kart kolorowych jako wejście
+- **Kamera laptopa + detekcja obecności** — gdy ktoś podejdzie, robot się "budzi" (wychodzi ze snu, odpala menu). Zamiast dedykowanego sensora używamy kamery która już jest.
+- **Tryb snu** — po X sekundach bezczynności robot przechodzi w tryb uśpienia (animacja LED, wyciszenie). Proaktywne zachowanie bez przycisku.
 
 ---
 
-## Harmonogram (orientacyjny)
+## Planowane: Proaktywna autonomia
 
-| Tydzień | Cel |
-|---------|-----|
-| 1–2 | Whisper STT → komendy głosowe → `computer.py` |
-| 3–4 | Integracja vision LLM (moondream lokalnie) |
-| 5–6 | System prompt, limity, testy autonomii |
-| 7 | Czujniki fizyczne (motor + kolor) |
-| 8 | Testy końcowe, fallback API na konkurs |
+Teraz robot tylko reaguje na przyciski. Upgrade:
+
+- Brak aktywności → auto-start muzyki / powrót do fiszek
+- Dużo błędów w fiszkach → robot sam proponuje powrót do trudnych słów
+- (opcjonalnie) pora dnia → zmiana trybu
+
+---
+
+## Planowane: Prezentacja WRO
+
+- [ ] Slajdy (problem → rozwiązanie → demo → wpływ kulturowy → SDG 4 + 11)
+- [ ] Demo na żywo: fiszki SM-2, muzyka/poezja z TTS, tryb rozmowy AI
+- [ ] Uzasadnienie wyboru esperanto jako dziedzictwa kulturowego
 
 ---
 
 ## Uwagi techniczne
 
-- Agent działa jako **osobny proces** (`agent.py`), komunikuje się z `computer.py` przez kolejkę / socket — żeby awaria AI nie zawieszała logiki robota
-- Przyciski fizyczne **zawsze działają** niezależnie od stanu agenta (redundancja)
-- Na konkursie: hotspot z telefonu jako backup internetu dla API
+- Agent AI jako osobny proces — awaria nie zawiesza reszty robota
+- Przyciski fizyczne zawsze działają niezależnie od stanu AI (redundancja)
+- Kamera laptopa zamiast dedykowanego sensora — prostsze, mniej sprzętu

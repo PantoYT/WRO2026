@@ -10,9 +10,16 @@ Modes:
 Hub signals:
   YES          — FC: correct      | MEDIA: skip forward
   NO           — FC: wrong        | MEDIA: skip backward
-  ACTION       — FC: definition   | MEDIA: pause / resume
-  ACTION_HOLD  — FC: definition   | MEDIA: read info via TTS, then resume
-  MODE:<n>     — switch to mode n (left button hold on hub)
+  ACTION_HOLD  — FC: repeat def   | MEDIA: read info via TTS, then resume
+  MODE:<n>     — switch to mode n
+
+Adaptive queue (MediaMode):
+  Tracks play_count and last_played per entry (persisted in JSON).
+  Next track is picked by weighted random:
+    - Unplayed tracks get highest weight
+    - Tracks not heard recently score higher
+    - Manual skip-back never affects weights
+  After every session the JSON is saved with updated stats.
 """
 
 import subprocess
@@ -50,17 +57,11 @@ def _ensure_mixer():
     if not pygame.mixer.get_init():
         pygame.mixer.init()
 
-# Kolejka sygnałów z huba — wypełniana przez wątek czytający stdout
 _signal_queue: queue.Queue = queue.Queue()
-_speaking = False   # czy TTS aktualnie gra
+_speaking = False
 
 
 def _speak(text: str, lang: str = "en"):
-    """
-    Synthesize via gTTS and play — ale przerywalny sygnałami z huba.
-    Podczas odtwarzania główna pętla może wrzucić sygnał do kolejki
-    który przerwie TTS (YES/NO/ACTION/MODE).
-    """
     global _speaking
     tts = gTTS(text=text, lang=lang)
     with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
@@ -73,7 +74,6 @@ def _speak(text: str, lang: str = "en"):
     try:
         while pygame.mixer.music.get_busy():
             pygame.time.wait(50)
-            # Sprawdź czy przyszedł sygnał przerywający
             if not _signal_queue.empty():
                 pygame.mixer.music.stop()
                 break
@@ -93,36 +93,33 @@ def _speak(text: str, lang: str = "en"):
 # METADATA HELPERS
 # ============================================================
 
-def load_metadata(json_path: Path) -> dict:
-    """
-    Load media JSON and return a dict keyed by filename.
-    Returns {} silently if file is missing or malformed.
-    """
+def load_metadata(json_path: Path) -> list:
+    """Load media JSON list. Returns [] on error."""
     if not json_path.exists():
-        print(f"[META] No metadata file at {json_path} — continuing without it.")
-        return {}
+        print(f"[META] No metadata file at {json_path}.")
+        return []
     try:
         with open(json_path, encoding="utf-8") as f:
-            entries = json.load(f)
-        return {e["filename"]: e for e in entries if "filename" in e}
+            return json.load(f)
     except Exception as exc:
         print(f"[META] Failed to parse {json_path}: {exc}")
-        return {}
+        return []
+
+
+def save_metadata(json_path: Path, entries: list):
+    try:
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(entries, f, ensure_ascii=False, indent=2)
+    except Exception as exc:
+        print(f"[META] Failed to save {json_path}: {exc}")
 
 
 def build_info_speech(entry: dict) -> str:
-    """
-    Build a TTS-friendly info sentence from a metadata entry.
-    Only includes fields that are present, non-null, and non-empty.
-    Everything in English for consistency.
-    """
     parts = []
-
     title  = entry.get("title")
     author = entry.get("author") or entry.get("artist")
     year   = entry.get("year")
     origin = entry.get("origin")
-    lang   = entry.get("language")
     genre  = entry.get("genre")
     themes = entry.get("themes")
     desc   = entry.get("description")
@@ -131,15 +128,94 @@ def build_info_speech(entry: dict) -> str:
     if author: parts.append(f"By {author}.")
     if year:   parts.append(f"Year: {year}.")
     if origin: parts.append(f"Origin: {origin}.")
-    if lang:   parts.append(f"Language: {lang}.")
     if genre:  parts.append(f"Genre: {genre}.")
     if themes: parts.append(f"Themes: {', '.join(themes)}.")
     if desc:   parts.append(desc)
 
-    return "  ".join(parts) if parts else "No information available for this track."
+    return "  ".join(parts) if parts else "No information available."
+
 
 # ============================================================
-# SM-2  (from Fiszki v5 by PantoYT)
+# ADAPTIVE QUEUE
+# ============================================================
+
+def _compute_weight(entry: dict, now: datetime) -> float:
+    """
+    Higher weight = more likely to be picked next.
+
+    Factors:
+      - Never played:          weight 10.0  (strong preference for new content)
+      - play_count:            weight decreases with each play
+      - last_played recency:   tracks not heard for >7 days get a boost
+      - rating (1-5 or null):  bonus/penalty; null = neutral
+    """
+    play_count = entry.get("play_count", 0)
+    last_played_str = entry.get("last_played")
+    rating = entry.get("rating")  # 1–5 or null
+
+    if play_count == 0:
+        return 10.0
+
+    # Base weight: decays with play count, floor at 1.0
+    base = max(1.0, 5.0 / play_count)
+
+    # Recency bonus: hours since last play, capped at 7 days
+    if last_played_str:
+        try:
+            last_played = datetime.fromisoformat(last_played_str)
+            hours_ago = (now - last_played).total_seconds() / 3600
+            recency_bonus = min(hours_ago / 24.0, 7.0)  # max bonus at 7 days
+        except Exception:
+            recency_bonus = 3.5
+    else:
+        recency_bonus = 7.0
+
+    # Rating multiplier
+    if rating is not None:
+        rating_mult = 0.5 + (rating - 1) * 0.25  # 1→0.5, 3→1.0, 5→1.5
+    else:
+        rating_mult = 1.0
+
+    return (base + recency_bonus * 0.3) * rating_mult
+
+
+def pick_next_adaptive(entries: list, current_index: int) -> int:
+    """
+    Weighted random selection excluding current track.
+    Returns the index of the chosen entry.
+    """
+    now = datetime.now()
+    n = len(entries)
+    if n == 0:
+        return 0
+    if n == 1:
+        return 0
+
+    weights = []
+    for i, e in enumerate(entries):
+        if i == current_index:
+            weights.append(0.0)   # never pick the same track again immediately
+        else:
+            weights.append(_compute_weight(e, now))
+
+    total = sum(weights)
+    if total == 0:
+        # fallback: pick any track except current
+        candidates = [i for i in range(n) if i != current_index]
+        return random.choice(candidates)
+
+    r = random.uniform(0, total)
+    cumulative = 0.0
+    for i, w in enumerate(weights):
+        cumulative += w
+        if r <= cumulative:
+            return i
+
+    return (current_index + 1) % n  # safety fallback
+
+
+# ============================================================
+# SM-2
 # ============================================================
 
 def sr_init(word: dict) -> dict:
@@ -187,6 +263,7 @@ def pick_next_word(words: list) -> dict:
         return random.choice(not_started)
     return min(words, key=lambda w: w.get("next_review", ""))
 
+
 # ============================================================
 # BASE MODE
 # ============================================================
@@ -196,9 +273,9 @@ class Mode:
     def on_enter(self):       pass
     def on_yes(self):         pass
     def on_no(self):          pass
-    def on_action(self):      pass
     def on_action_hold(self): pass
     def tick(self):           pass
+
 
 # ============================================================
 # FLASHCARDS MODE
@@ -227,7 +304,7 @@ class FlashcardsMode(Mode):
         self.shown_definition = False
         word = self.current["word"]
         print(f"[FC] Word: {word}")
-        _speak(word, lang="pl")  # gTTS nie wspiera "eo"; pl jest fonetycznie najbliższe
+        _speak(word, lang="pl")
 
     def _speak_definition(self):
         translation = self.current.get("translation", "")
@@ -247,80 +324,77 @@ class FlashcardsMode(Mode):
         sr_update(self.current, False)
         self._save()
         if not self.shown_definition:
+            self.shown_definition = True
             self._speak_definition()
         self._next()
 
-    def on_action(self):
-        self._speak_definition()
-        self.shown_definition = True
-
     def on_action_hold(self):
-        self.on_action()
+        self.shown_definition = True
+        self._speak_definition()
+
 
 # ============================================================
-# MEDIA MODE  (poems & music)
+# MEDIA MODE  (poems + music — shared logic, adaptive queue)
 # ============================================================
 
 class MediaMode(Mode):
-    """
-    Plays MP3s from a directory using a JSON file as the master list.
 
-    Order: sorted by 'order' field in JSON, then by 'id'.
-    Orphan MP3s (no JSON entry) are appended alphabetically at the end.
-    Missing MP3s referenced in JSON are skipped with a console warning.
-
-    Controls:
-      YES          — skip forward
-      NO           — skip backward
-      ACTION       — pause / resume
-      ACTION_HOLD  — pause, read track info via TTS, resume
-    """
-
-    def __init__(self, directory: Path, mode_name: str, meta_filename: str):
-        self.directory     = directory
-        self.name          = mode_name
-        self.meta_filename = meta_filename
-        self.entries: list[dict] = []
-        self.index  : int  = 0
-        self.playing: bool = False
-        self.paused : bool = False
-
-    # ---- setup ----
+    def __init__(self, directory: Path, name: str, json_filename: str):
+        self.directory    = directory
+        self.name         = name
+        self.json_path    = directory / json_filename
+        self.entries:     list = []
+        self.index:       int  = 0
+        self.playing:     bool = False
+        self.paused:      bool = False
 
     def on_enter(self):
-        meta  = load_metadata(self.directory / self.meta_filename)
+        raw_entries = load_metadata(self.json_path)
+
+        # Build lookup by filename for quick access
+        meta_by_filename = {e["filename"]: e for e in raw_entries if "filename" in e}
+
         files = sorted(self.directory.glob("*.mp3"))
-
-        # JSON entries sorted by optional 'order', then 'id'
-        json_entries = sorted(
-            meta.values(),
-            key=lambda e: (e.get("order", 9999), e.get("id", ""))
-        )
-
-        known = {e["filename"] for e in json_entries}
+        known = set(meta_by_filename.keys())
         orphans = [f for f in files if f.name not in known]
 
         valid: list[dict] = []
-        for entry in json_entries:
-            if (self.directory / entry["filename"]).exists():
-                valid.append(entry)
+        for e in raw_entries:
+            path = self.directory / e["filename"]
+            if path.exists():
+                # Ensure adaptive fields exist
+                e.setdefault("play_count", 0)
+                e.setdefault("last_played", None)
+                e.setdefault("rating", None)
+                valid.append(e)
             else:
-                print(f"[{self.name}] '{entry['filename']}' listed in JSON but MP3 not found — skipped.")
+                print(f"[{self.name}] '{e['filename']}' in JSON but MP3 missing — skipped.")
 
         for f in orphans:
             print(f"[{self.name}] '{f.name}' has no JSON entry — added without metadata.")
-            valid.append({"id": None, "filename": f.name})
+            valid.append({
+                "id": None, "filename": f.name,
+                "play_count": 0, "last_played": None, "rating": None
+            })
 
         self.entries = valid
         self.index   = 0
+        self.playing = False
         self.paused  = False
 
         if not self.entries:
-            print(f"[{self.name}] No playable files found in {self.directory}.")
+            print(f"[{self.name}] No playable files in {self.directory}.")
             return
 
         print(f"[{self.name}] {len(self.entries)} track(s) ready.")
         self._play_current()
+
+    # ---- persistence ----
+
+    def _save(self):
+        # Only save entries that have JSON metadata (have an "id" key)
+        to_save = [e for e in self.entries if e.get("id") is not None]
+        save_metadata(self.json_path, to_save)
 
     # ---- playback ----
 
@@ -335,7 +409,14 @@ class MediaMode(Mode):
             return
         entry = self.entries[self.index]
         label = entry.get("title") or path.stem
-        print(f"[{self.name}] ({self.index + 1}/{len(self.entries)}) {label}")
+
+        # Update play stats
+        entry["play_count"] = entry.get("play_count", 0) + 1
+        entry["last_played"] = datetime.now().isoformat()
+        self._save()
+
+        print(f"[{self.name}] ({self.index + 1}/{len(self.entries)}) {label}  "
+              f"[played {entry['play_count']}x]")
         _ensure_mixer()
         pygame.mixer.music.load(str(path))
         pygame.mixer.music.play()
@@ -351,33 +432,23 @@ class MediaMode(Mode):
     # ---- controls ----
 
     def on_yes(self):
+        """Skip forward — adaptive pick."""
         if not self.entries:
             return
         self._stop()
-        self.index = (self.index + 1) % len(self.entries)
+        self.index = pick_next_adaptive(self.entries, self.index)
         self._play_current()
 
     def on_no(self):
+        """Skip backward — simple previous, no weight effect."""
         if not self.entries:
             return
         self._stop()
         self.index = (self.index - 1) % len(self.entries)
         self._play_current()
 
-    def on_action(self):
-        if not pygame.mixer.get_init():
-            return
-        if self.playing and not self.paused:
-            pygame.mixer.music.pause()
-            self.paused = True
-            print(f"[{self.name}] Paused.")
-        else:
-            pygame.mixer.music.unpause()
-            self.paused = False
-            print(f"[{self.name}] Resumed.")
-
     def on_action_hold(self):
-        """Pause music, read metadata aloud in English, then resume."""
+        """Pause, read metadata aloud, resume."""
         was_playing = self.playing and not self.paused
         if was_playing:
             pygame.mixer.music.pause()
@@ -391,13 +462,16 @@ class MediaMode(Mode):
             pygame.mixer.music.unpause()
             self.paused = False
 
-    # ---- auto-advance ----
+    # ---- auto-advance (adaptive) ----
 
     def tick(self):
         if self.playing and not self.paused and pygame.mixer.get_init():
             if not pygame.mixer.music.get_busy():
-                print(f"[{self.name}] Track ended — auto-advancing.")
-                self.on_yes()
+                print(f"[{self.name}] Track ended — adaptive next.")
+                self._stop()
+                self.index = pick_next_adaptive(self.entries, self.index)
+                self._play_current()
+
 
 # ============================================================
 # MODE MANAGER
@@ -411,7 +485,7 @@ class ModeManager:
             MediaMode(MUSIC_DIR, "MUSIC", "music.json"),
         ]
         self.current_idx = 0
-        self._started    = False   # czy jakikolwiek tryb już wystartował
+        self._started    = False
 
     @property
     def current(self) -> Mode:
@@ -436,7 +510,6 @@ class ModeManager:
         m = self.current
         if   signal == "YES":          m.on_yes()
         elif signal == "NO":           m.on_no()
-        elif signal == "ACTION":       m.on_action()
         elif signal == "ACTION_HOLD":  m.on_action_hold()
         elif signal.startswith("MODE:"):
             try:
@@ -449,17 +522,17 @@ class ModeManager:
     def tick(self):
         self.current.tick()
 
+
 # ============================================================
 # MAIN
 # ============================================================
 
 def _hub_reader(stdout, q: queue.Queue):
-    """Wątek czytający stdout huba i wrzucający linie do kolejki."""
     for line in stdout:
         line = line.strip()
         if line:
             q.put(line)
-    q.put(None)   # sentinel — koniec połączenia
+    q.put(None)
 
 
 def main():
@@ -480,7 +553,6 @@ def main():
             env={**os.environ, "PYTHONUNBUFFERED": "1"},
         )
 
-        # Uruchom wątek czytający
         reader = threading.Thread(
             target=_hub_reader,
             args=(process.stdout, _signal_queue),
@@ -488,7 +560,6 @@ def main():
         )
         reader.start()
 
-        # Czekaj na READY — czytaj z kolejki
         connected = False
         while True:
             try:
@@ -511,7 +582,6 @@ def main():
 
         print("Waiting for mode selection on hub...")
 
-        # Główna pętla — nieblokująca, przetwarza kolejkę
         while True:
             try:
                 line = _signal_queue.get(timeout=0.05)
