@@ -1,11 +1,33 @@
 # WRO2026 — Esperanto Flashcard Robot
-# Instalacja (venv):
-#   python -m venv .venv
-#   .venv\Scripts\activate      # Windows
+# Instalacja:
 #   pip install -r requirements.txt
 
+# --- Core ---
 pybricks
 pybricksdev
 gTTS
 pygame-ce
-yt-dlp          # pobieranie muzyki/poezji (opcjonalne)
+
+# --- STT warstwa 1: wav2vec2 fine-tuned na esperanto ---
+# Pobiera ~1GB model przy pierwszym uruchomieniu
+# (cache w ~/.cache/huggingface, kolejne starty natychmiastowe)
+transformers>=4.30
+torch
+
+# --- STT warstwa 2: Whisper (fallback gdy wav2vec2 zwróci pusty string) ---
+# faster-whisper używa ctranslate2, NIE wymaga osobnego torch
+faster-whisper
+
+# --- Audio input (mikrofon) ---
+sounddevice
+numpy
+
+# --- Groq SDK ---
+# Używa oficjalnego klienta zamiast urllib — omija blokadę Cloudflare (błąd 1010)
+groq
+
+# --- .env support (opcjonalne — przechowuje GROQ_API_KEY poza kodem) ---
+python-dotenv
+
+# --- Pobieranie muzyki/poezji (opcjonalne) ---
+yt-dlp
