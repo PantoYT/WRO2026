@@ -1,6 +1,7 @@
 # ROADMAP — WRO 2026 Esperanto Flashcard Robot
 
 > Ostatnia aktualizacja: marzec 2026 · Wersja bieżąca: v1.3
+> Uwaga: sekcja "Poprawki techniczne hub.py" dodana po przeglądzie kodu — są to rzeczy działające, ale podatne na problemy przy dłuższym użytkowaniu.
 
 ---
 
@@ -165,6 +166,122 @@ Dodaj do README przykładowe pliki `poems.json` i `music.json` z co najmniej 2�
 
 ---
 
+## Poprawki techniczne hub.py — stabilność
+
+Te punkty nie zmieniają logiki ani funkcji — tylko usuwają potencjalne problemy przy dłuższym użytkowaniu. Wszystkie są małe i niezależne od siebie.
+
+### H1. Literówka w wordliście attract (PILNE — jury może zobaczyć)
+
+W `computer.py`, lista `_ATTRACT_TEASER_WORDS`:
+```python
+("riди",  "to laugh", "śmiać się"),  # ← cyrylica zamiast esperanto!
+```
+Poprawka:
+```python
+("ridi",  "to laugh", "śmiać się"),
+```
+
+**Czas:** 30 sekund.
+
+---
+
+### H2. Silnik skanowania — eliminacja szarpania
+
+Aktualnie `_scan_step()` wywołuje `run_target()` co ~100ms nawet jeśli cel się nie zmienił, co powoduje ciągłe restartowanie ruchu silnika.
+
+```python
+# Dodaj na górze pliku:
+_scan_target = None
+
+def _scan_step():
+    global _scan_idx, _scan_target
+    if not _has_motor:
+        return
+    try:
+        physical_target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
+        angle = _scan_motor.angle()
+        if abs(angle - physical_target) <= 8:
+            _scan_idx = 1 - _scan_idx
+            physical_target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
+        if _scan_target != physical_target:          # ← tylko gdy cel się zmienia
+            _scan_target = physical_target
+            _scan_motor.run_target(SCAN_SPEED, physical_target, wait=False)
+    except Exception:
+        pass
+```
+
+**Czas:** 15 minut.
+
+---
+
+### H3. Czujnik odległości — filtr ostatniej poprawnej wartości
+
+Czujnik ultradźwiękowy bywa niestabilny i może zwracać `None` lub skrajne wartości. Bez filtra robot może chwilowo "nie widzieć" osoby stojącej przed nim.
+
+```python
+_last_distance = None
+
+def _read_distance_cm():
+    global _last_distance
+    if not _has_distance:
+        return None
+    try:
+        d = _distance.distance()
+        if d is not None:
+            _last_distance = d / 10
+    except Exception:
+        pass
+    return _last_distance
+```
+
+**Czas:** 10 minut.
+
+---
+
+### H4. Literówka Whisper fallback — język "it" zamiast auto
+
+W `computer.py`, metoda `_listen_and_reply`:
+```python
+segments, info = whisper.transcribe(audio_float, language="it")
+```
+Włoski (`"it"`) był obejściem fonetycznym — ale powoduje że Whisper może odrzucać poprawne esperanto. Lepiej użyć autodetekcji:
+```python
+segments, info = whisper.transcribe(audio_float, language=None)
+```
+Jeśli autodetekcja działa gorzej w praktyce — zostaw `"it"`, ale warto przetestować.
+
+**Czas:** 5 minut + test.
+
+---
+
+### H5. Statystyki sesji FLASHCARDS (WOW-efekt dla jury)
+
+Robot aktualnie nie informuje użytkownika o postępach. Dodanie głosowego podsumowania sesji to bezpośredni, widoczny dowód na to że robot analizuje dane użytkownika.
+
+W `FlashcardsMode.__init__` dodaj:
+```python
+self.session_correct = 0
+self.session_wrong   = 0
+```
+
+W `on_yes()` i `on_no()` inkrementuj liczniki. W `on_sleep()` lub po przejściu do menu:
+```python
+if self.session_correct + self.session_wrong > 0:
+    weak = max(self.words, key=lambda w: w.get("wrong_count", 0))
+    _speak(
+        f"Session summary: {self.session_correct} correct, "
+        f"{self.session_wrong} wrong. "
+        f"Weakest word: {weak['word']}.",
+        lang="en"
+    )
+    self.session_correct = 0
+    self.session_wrong   = 0
+```
+
+**Czas:** 1–2 godziny.
+
+---
+
 ## Stan spełnienia wymagań — po wdrożeniu roadmapy
 
 | Kryterium WRO | Przed | Po |
@@ -182,7 +299,8 @@ Dodaj do README przykładowe pliki `poems.json` i `music.json` z co najmniej 2�
 
 ## Kolejność implementacji (sugerowana)
 
-1. **Dziś/jutro:** Wyślij mail do PTE lub lokalnego esperantysty (pkt 1)
-2. **Ten tydzień:** Kontekstowe przejście CONV → MEDIA (pkt 2) + esperanto TTS (pkt 6)
-3. **Następny tydzień:** Skrypt importu słownika (pkt 4) + statystyki sesji (pkt 5)
-4. **Przed zawodami:** Wzmocnienie README/prezentacji (pkt 3+7)
+1. **Teraz (30 min):** Literówka `riди` → `ridi` (H1) + Whisper lang=None test (H4) -- zrobione
+2. **Dziś/jutro:** Filtr czujnika (H3) + fix skanowania (H2) + konsultacja esperantysta w prezentacji (pkt 1)
+3. **Ten tydzień:** Statystyki sesji (H5) + kontekstowe przejście CONV → MEDIA (pkt 2) + esperanto TTS test (pkt 6)
+4. **Następny tydzień:** Skrypt importu słownika (pkt 4)
+5. **Przed zawodami:** Wzmocnienie README/prezentacji (pkt 3+7)

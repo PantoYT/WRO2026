@@ -837,7 +837,7 @@ _ATTRACT_TEASER_WORDS = [
     ("lerni",     "to learn",       "uczyć się"),
     ("paroli",    "to speak",       "mówić"),
     ("kanti",     "to sing",        "śpiewać"),
-    ("riди",      "to laugh",       "śmiać się"),
+    ("ridi",      "to laugh",       "śmiać się"),
     ("frato",     "brother",        "brat"),
 ]
 
