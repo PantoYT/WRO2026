@@ -19,19 +19,19 @@ MUSIC_FRAME_MS = 150
 NUM_MODES = 5  # FC, POEMS, MUSIC, CONVERSATION, ATTRACT
 
 # --- Sleep / wake ---
-INACTIVITY_TIMEOUT_MS = 60_000   # 1 minuta
-WAKE_DISTANCE_CM      = 200      # poniżej tej wartości = ktoś jest blisko
-ATTRACT_LOST_MS       = 30_000   # ms bez osoby w zasięgu → smutny dźwięk + sen
+INACTIVITY_TIMEOUT_MS = 60_000
+WAKE_DISTANCE_CM      = 200
+ATTRACT_LOST_MS       = 30_000
 SCAN_ANGLE_MAX        = 180
 SCAN_SPEED            = 300
 SCAN_STEP_MS          = 100
 
 # Korekcja offsetu montażu sensora (+= w prawo, -= w lewo)
-SCAN_OFFSET_DEG = 15   # <-- dostosuj do fizycznego montażu
+SCAN_OFFSET_DEG = 15
 
-# --- Porty zewnętrzne (zmień gdy robot będzie gotowy fizycznie) ---
-DISTANCE_PORT = Port.A           # czujnik odległości ultrasoniczny
-SCAN_MOTOR_PORT = Port.B         # silnik skanowania
+# --- Porty ---
+DISTANCE_PORT   = Port.A
+SCAN_MOTOR_PORT = Port.B
 
 HUB_BUTTONS = [
     (Button.RIGHT, "YES",  "ACTION_HOLD"),
@@ -39,7 +39,7 @@ HUB_BUTTONS = [
 ]
 
 # ============================================================
-# IKONY TRYBÓW  (5×5, row 0 = góra)
+# IKONY TRYBÓW
 # ============================================================
 
 O = False
@@ -69,7 +69,6 @@ MU_ICON = [
     [I, I, I, I, I],
 ]
 
-# Ikona trybu konwersacji
 CV_ICON = [
     [O, I, I, I, O],
     [O, I, I, I, O],
@@ -78,7 +77,6 @@ CV_ICON = [
     [O, O, I, O, O],
 ]
 
-# Ikona attract mode — wykrzyknik = zaproszenie
 AT_ICON = [
     [O, O, I, O, O],
     [O, O, I, O, O],
@@ -87,7 +85,6 @@ AT_ICON = [
     [O, O, I, O, O],
 ]
 
-# Ikona snu — "Zzz"
 SLEEP_ICON = [
     [I, I, I, I, O],
     [O, O, O, I, O],
@@ -96,7 +93,6 @@ SLEEP_ICON = [
     [I, I, I, I, O],
 ]
 
-# Ikona mikrofonu (słuchanie w trybie CONV)
 MIC_ICON = [
     [O, O, I, O, O],
     [O, I, I, I, O],
@@ -144,16 +140,15 @@ MODE_SOUNDS = [
     [(440, 60), (440, 60), (554, 150)],
     [(330, 50), (415, 50), (523, 50), (659, 100)],
     [(523, 60), (587, 60), (659, 60), (784, 120)],
-    [(600, 60), (700, 60), (800, 60), (900, 80), (1000, 120)],  # attract = wznoszące
+    [(600, 60), (700, 60), (800, 60), (900, 80), (1000, 120)],
 ]
 
 SLEEP_SOUND   = [(300, 100), (250, 150), (200, 200)]
 WAKE_SOUND    = [(400, 80),  (500, 80),  (600, 80),  (700, 120)]
 ATTRACT_SAD   = [(400, 100), (320, 150), (260, 200), (220, 300)]
 
-
 # ============================================================
-# POEMS — ramki znaków interpunkcyjnych
+# POEMS — ramki
 # ============================================================
 
 POEMS_FRAMES = [
@@ -176,7 +171,6 @@ POEMS_FRAMES = [
 hub = PrimeHub()
 hub.speaker.volume(SPEAKER_VOLUME)
 
-# Podłącz sensory gdy fizyczny robot będzie gotowy:
 try:
     _distance = UltrasonicSensor(DISTANCE_PORT)
     _has_distance = True
@@ -187,7 +181,6 @@ except Exception:
 try:
     _scan_motor = Motor(SCAN_MOTOR_PORT, Direction.CLOCKWISE)
     _scan_motor.reset_angle(0)
-    # Jedź fizycznie do 0 stopni (silnik wie gdzie jest dzięki encoderowi)
     _scan_motor.run_target(SCAN_SPEED, 0, wait=True)
     _has_motor = True
 except Exception:
@@ -205,15 +198,14 @@ music_heights   = [urandom.randint(1, 5) for _ in range(5)]
 in_menu         = False
 menu_selection  = 0
 sleeping        = False
-last_activity_ms = 0   # ustawiany przez poke_activity()
-conv_listening  = False  # animacja mikrofonu w trybie CONV
+last_activity_ms = 0
+conv_listening  = False
 
-# --- Attract state ---
 in_attract          = False
 attract_frame       = 0
 attract_anim_ms     = 0
 attract_lost_ms     = 0
-attract_speaking    = False   # True gdy PC gra sekwencję — nie śpij w połowie
+attract_speaking    = False
 ATTRACT_ANIM_FRAME_MS = 400
 
 # ============================================================
@@ -225,7 +217,6 @@ def poke_activity():
     last_activity_ms = _elapsed_ms()
 
 def _elapsed_ms():
-    """Pseudo-zegar na podstawie liczby ticków."""
     return _tick_counter * ANIM_TICK_MS
 
 _tick_counter = 0
@@ -261,11 +252,9 @@ def draw_music():
             hub.display.pixel(row, col, 100)
 
 def draw_conv_idle():
-    """Ikona trybu konwersacji — oczekuje na przycisk."""
     draw_icon(CV_ICON)
 
 def draw_conv_listening():
-    """Animacja mikrofonu — pulsuje gdy nagrywa."""
     draw_icon(MIC_ICON)
 
 def draw_menu(sel):
@@ -277,7 +266,6 @@ def draw_menu(sel):
                 hub.display.pixel(r, c, 100)
 
 def draw_sleep_animation():
-    """Powoli pulsujące Zzz."""
     draw_icon(SLEEP_ICON)
 
 def draw_attract_frame():
@@ -305,26 +293,37 @@ def play_wake_sound():
 
 # ============================================================
 # SLEEP / WAKE
+# H3: filtr ostatniej poprawnej wartości czujnika odległości
 # ============================================================
 
+_last_distance = None   # H3: cache ostatniej dobrej wartości
+
 def _read_distance_cm():
-    """Odczytuje dystans z czujnika. Zwraca None gdy brak sensora lub błąd."""
+    """Odczytuje dystans z czujnika.
+    H3: jeśli odczyt zwróci None, używa ostatniej poprawnej wartości.
+    Eliminuje fałszywe 'nikogo nie ma' gdy sensor chwilowo zawiedzie.
+    """
+    global _last_distance
     if not _has_distance:
         return None
     try:
         d = _distance.distance()
-        return d / 10  # mm → cm
+        if d is not None:
+            _last_distance = d / 10  # mm → cm
     except Exception:
-        return None
+        pass
+    return _last_distance
 
-# Wahadlo: 0 -> 90 -> -90 -> 90 -> -90 ...
-# Nigdy nie przekracza ±90, kable bezpieczne
-_SCAN_LOGICAL = [45, -45]   # logiczne cele ±45° (razem 90° zasięgu)
-_scan_idx = 0
+# H2: debounce celu silnika skanowania — nie restart gdy cel się nie zmienił
+_SCAN_LOGICAL = [45, -45]
+_scan_idx     = 0
+_scan_target  = None   # H2: poprzedni cel fizyczny
 
 def _scan_step():
-    """Wahadlo z korekcja offsetu montazu sensora."""
-    global _scan_idx
+    """Wahadło z korekcją offsetu montażu sensora.
+    H2: run_target() wywoływane tylko przy zmianie celu — eliminuje szarpanie.
+    """
+    global _scan_idx, _scan_target
     if not _has_motor:
         return
     try:
@@ -333,16 +332,20 @@ def _scan_step():
         if abs(angle - physical_target) <= 8:
             _scan_idx = 1 - _scan_idx
             physical_target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
-        _scan_motor.run_target(SCAN_SPEED, physical_target, wait=False)
+        if _scan_target != physical_target:   # H2: tylko gdy cel się zmienia
+            _scan_target = physical_target
+            _scan_motor.run_target(SCAN_SPEED, physical_target, wait=False)
     except Exception:
         pass
 
 def _motor_home():
     """Wraca do pozycji startowej (0 = prosto przed siebie)."""
+    global _scan_target
     if not _has_motor:
         return
     try:
         _scan_motor.run_target(SCAN_SPEED, 0, wait=True)
+        _scan_target = 0   # H2: sync cache
     except Exception:
         pass
 
@@ -361,14 +364,13 @@ def exit_sleep():
     play_wake_sound()
     print("WAKE")
     _motor_home()
-    enter_attract()   # zawsze attract po przebudzeniu
+    enter_attract()
 
 def check_wake():
-    """Skanuje silnikiem i sprawdza dystans. Po wykryciu budzi robota."""
     _scan_step()
     dist = _read_distance_cm()
     if dist is not None and dist < WAKE_DISTANCE_CM:
-        exit_sleep()   # exit_sleep sam wywoluje _motor_home()
+        exit_sleep()
 
 # ============================================================
 # ATTRACT MODE
@@ -399,16 +401,13 @@ def tick_attract():
     if dist is not None and dist < WAKE_DISTANCE_CM:
         attract_lost_ms = 0
     else:
-        # Nie licz czasu gdy PC gra sekwencję (attract_speaking = True)
         if not attract_speaking:
             attract_lost_ms += ANIM_TICK_MS
             if attract_lost_ms >= ATTRACT_LOST_MS:
                 attract_lost_ms = 0
                 in_attract      = False
                 print("ATTRACT_LOST")
-                # Nie przerywaj — PC sam skończy sekwencję i wyśle ATTRACT_DONE
-                # Hub gra smutny dźwięk dopiero gdy dostanie ATTRACT_SAD_PLAY
-                print("ATTRACT_TIMEOUT")  # PC zdecyduje kiedy zagrać smutny dźwięk
+                print("ATTRACT_TIMEOUT")
 
 def exit_attract_to_menu():
     global in_attract
@@ -427,8 +426,6 @@ def update_anim():
     if current_mode == 0:
         return
     if current_mode == 3:
-        # CONV — animacja zależy od stanu (idle / listening)
-        # conv_listening jest ustawiany przez sygnał CONV_LISTEN z PC
         return
     anim_counter += ANIM_TICK_MS
     if current_mode == 1 and anim_counter >= POEMS_FRAME_MS:
@@ -478,7 +475,6 @@ def open_menu():
     in_menu        = True
     menu_selection = current_mode
     draw_menu(menu_selection)
-    # Sygnalizuj PC żeby spauzował odtwarzanie
     if current_mode in (1, 2):
         print("MEDIA_PAUSE")
     hub.speaker.beep(frequency=600, duration=100)
@@ -494,7 +490,6 @@ def menu_cycle():
 def menu_confirm():
     global in_menu
     in_menu = False
-    # Jeśli wracamy do trybu mediów który był pauzowany — wznów
     if menu_selection in (1, 2):
         print("MEDIA_RESUME")
     enter_mode(menu_selection)
@@ -523,16 +518,6 @@ def wait_release_all():
 # ============================================================
 
 def handle_pc_signal(line):
-    """Obsługuje dodatkowe sygnały przychodzące z komputera przez stdout echo.
-    
-    Uwaga: pybricksdev echo'uje print() z huba, ale hub nie czyta stdin.
-    Sygnały z PC → hub realizujemy przez print() z PC odczytywany na konsoli
-    przez operatora LUB przez osobny mechanizm BLE characteristic (przyszłość).
-    
-    Na razie: hub wysyła sygnały → PC reaguje.
-    PC nie wysyła do huba bezpośrednio w tej architekturze.
-    CONV_LISTEN jest emitowany przez PC na stdout — nie przez huba.
-    """
     global conv_listening
     if line == "CONV_LISTEN":
         conv_listening = True

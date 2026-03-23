@@ -1,369 +1,272 @@
-# WRO2026 — Esperanto Flashcard Robot 🤖
+# 🤖 Esperanto Flashcard Robot — WRO 2026 Future Innovators
 
-**LEGO SPIKE Prime · Python · BLE · SM-2 · wav2vec2 STT · Groq AI · gTTS · MP3**
-
-Projekt na World Robot Olympiad 2026 — temat **"Robots Meet Culture"**.  
-Robot chroni i udostępnia dziedzictwo kulturowe esperanto: uczy języka przez fiszki SM-2,
-odtwarza poezję i muzykę, prowadzi rozmowę po esperanto z AI, oraz aktywnie zaprasza
-przechodniów do interakcji (tryb Attract).
-
-**Obszar WRO:** 1 (ochrona dziedzictwa) + 2 (współtworzenie z AI) + 3 (doświadczanie kultury)  
-**Autor:** Wojciech Hałasa — [github.com/PantoYT](https://github.com/PantoYT)
+> *People love physical things. Learning through play is fun. Why not combine them to teach a language that could unite the world?*
 
 ---
 
-## Jak to działa
+## The Idea
 
-```
-[SPIKE Prime]  →  BLE  →  [PC: computer.py]
-  przyciski                  ModeManager
-  czujnik odl. (Port A)        ├─ FlashcardsMode   SM-2 + gTTS (EN + PL)
-  silnik skanu (Port B)        ├─ MediaMode/poems  MP3 + adaptive queue
-  LED 5×5                      ├─ MediaMode/music  MP3 + adaptive queue
-  głośnik                      ├─ ConversationMode
-                               │    wav2vec2 STT → Groq LLaMA3 → gTTS
-                               └─ AttractMode
-                                    TTS PL/EN + quiz + muzyka + poezja
-```
+Esperanto is the only widely spoken planned language designed from the ground up so that **no nation has an advantage** — no native speaker gets a head start, no culture dominates. Created in 1887 by Ludwig Zamenhof in Warsaw, it has been spoken by an estimated 2 million people across 130+ years. Yet access to quality learning materials remains scattered and unequal.
+
+At the same time, physical interaction is one of the most effective ways to learn. Flashcards have been shown to outperform passive reading. Robots invite curiosity. Music and poetry make language feel alive.
+
+**Our robot combines all of these.** It teaches Esperanto words through spaced repetition, plays real Esperanto poetry and music from its digital archive, holds a live AI conversation in the language — and actively invites passersby to engage with a culture that belongs to everyone.
+
+This is not just a robot. It is a **portable cultural archive and language teacher in one device**, designed to work entirely offline for core functions.
 
 ---
 
-## Tryby
+## WRO 2026 Theme: Robots Meet Culture
 
-| # | Tryb         | LED                        | Opis                                                                        |
-|---|--------------|----------------------------|-----------------------------------------------------------------------------|
-| 0 | FLASHCARDS   | 3 pełne wiersze (≡)        | Fiszki esperanto — algorytm SM-2 dobiera słowa wg. postępu                  |
-| 1 | POEMS        | Cykliczne `. , ; : ! ? …`  | Poezja esperanto — MP3 + adaptacyjna kolejka + metadane przez TTS           |
-| 2 | MUSIC        | Animowany korektor audio   | Muzyka esperanto — MP3 + adaptacyjna kolejka                                |
-| 3 | CONVERSATION | Ikona dymku / mikrofonu    | Rozmowa po esperanto z AI (wav2vec2 STT + Groq + gTTS)                      |
-| 4 | ATTRACT      | Pulsująca gwiazdka ✦       | Tryb wystawienniczy — aktywuje się po przebudzeniu, zaprasza do interakcji  |
+The project addresses all three challenge areas:
 
----
+| Area | How this robot responds |
+|---|---|
+| **Area 1 — Preserving cultural heritage** | `wordlist.json` is a growing digital dictionary of Esperanto. `poems.json` and `music.json` are structured archives of Esperanto poetry and music — a language with no state institution to preserve it. |
+| **Area 2 — Human–robot–AI co-creation** | `ConversationMode` is a real dialogue partner: the LLM adapts its language level to each speaker in real time. It also detects cultural keywords and proactively offers to play related media. |
+| **Area 3 — Experiencing culture through robots** | `AttractMode` actively approaches passersby with greetings, word quizzes, music snippets and poetry in Esperanto — the robot comes to people, not the other way around. |
 
-## Sterowanie
-
-### Menu (lewy przytrzymaj z dowolnego trybu)
-| Przycisk | Akcja |
-|----------|-------|
-| Prawy    | Cykluj tryby → |
-| Lewy     | Zatwierdź i wejdź |
-
-### FLASHCARDS
-| Przycisk          | Akcja |
-|-------------------|-------|
-| Prawy             | TAK — znam, SM-2 przesuwa dalej |
-| Lewy              | NIE — nie znam, robot mówi definicję (EN + PL) |
-| Prawy przytrzymaj | Powtórz definicję bez zmiany postępu |
-| Lewy przytrzymaj  | Wróć do menu |
-
-### POEMS / MUSIC
-| Przycisk          | Akcja |
-|-------------------|-------|
-| Prawy             | Następny utwór (adaptacyjny dobór) |
-| Lewy              | Poprzedni utwór |
-| Prawy przytrzymaj | Odczytaj metadane (tytuł / autor / opis) przez TTS |
-| Lewy przytrzymaj  | Wróć do menu |
-
-### CONVERSATION
-| Przycisk          | Akcja |
-|-------------------|-------|
-| Prawy             | Nagraj wypowiedź (maks. `audio_record_seconds` s) → AI odpowiada po esperanto |
-| Lewy              | Anuluj nagrywanie / wyczyść historię konwersacji |
-| Prawy przytrzymaj | Zmień poziom: A1 → B1 → C1 → A1 |
-| Lewy przytrzymaj  | Wróć do menu |
-
-#### Poziomy trudności
-| Poziom | Zachowanie AI |
-|--------|---------------|
-| A1     | Krótkie zdania (maks. 10 słów), podstawowe słownictwo, korekta błędów |
-| B1     | Normalne tempo, różnorodny słownik, dyskretna korekta |
-| C1     | Pełna swoboda, idiomy, kulturowe referencje, bez uproszczeń |
-
-> AI jest **zhardcodowane do esperanto** — system prompt wymusza odpowiedzi wyłącznie po esperanto.  
-> Zmiana języka = edycja `_CONV_SYSTEM_PROMPTS` w `computer.py`.
-
-### ATTRACT (tryb wystawienniczy)
-Robot **sam** wchodzi w ten tryb po przebudzeniu ze snu. Losuje co ~25s jedną z sekwencji:
-
-| Sekwencja       | Zawartość |
-|-----------------|-----------|
-| `word_quiz`     | Powitanie + "co znaczy X?" + pauza + odpowiedź EN + PL + CTA |
-| `music_snippet` | Powitanie + 12s fragment muzyki esperanto + tytuł + CTA |
-| `poem_snippet`  | Powitanie + 12s fragment poezji esperanto + tytuł + CTA |
-| `fun_fact`      | Powitanie + ciekawostka o esperanto + bonus słówko + CTA |
-| `full`          | Powitanie + quiz + muzyka lub poezja + ciekawostka + CTA |
-
-| Przycisk    | Akcja |
-|-------------|-------|
-| Dowolny     | Instrukcja obsługi (PL + EN) → hub otwiera menu |
-
-> Robot **nie przerywa** aktualnej sekwencji gdy ktoś odchodzi — kończy ją, a dopiero potem mówi pożegnanie i idzie spać.
+**UN SDGs supported:** SDG 4 (Quality Education), SDG 11 (Sustainable Cities and Cultural Heritage), SDG 17 (Partnerships for the Goals — technology + cultural heritage + education in one device).
 
 ---
 
-## Instalacja od zera
+## Architecture
 
-### 1 — Python
-Pobierz **Python 3.11+** ze strony https://python.org  
-Przy instalacji zaznacz **"Add Python to PATH"**.
-
-> Projekt testowany na Python 3.13 / 3.14. Działa na obu.
-
-### 2 — Środowisko wirtualne i paczki
-```bash
-python -m venv .venv
-.venv\Scripts\activate          # Windows
-# source .venv/bin/activate     # Linux / macOS
-pip install -r requirements.txt
+```
+┌─────────────────────────────────────────┐
+│           LEGO SPIKE Prime (hub.py)     │
+│                                         │
+│  Ultrasonic sensor  → detect presence   │
+│  Scanning motor     → sweep ±45°        │
+│  5×5 LED matrix     → mode display      │
+│  Speaker            → beeps & tones     │
+│  LEFT / RIGHT buttons → user input      │
+└──────────────┬──────────────────────────┘
+               │  Bluetooth BLE (pybricksdev)
+               │  hub prints signals → PC reads
+               ▼
+┌─────────────────────────────────────────┐
+│              PC (computer.py)           │
+│                                         │
+│  SM-2 algorithm     → flashcard order   │
+│  Adaptive queue     → media selection   │
+│  wav2vec2 (local)   → Esperanto STT     │
+│  faster-whisper     → fallback STT      │
+│  Groq LLM           → conversation AI   │
+│  gTTS + pygame      → text-to-speech    │
+│  MP3 archive        → poems & music     │
+└─────────────────────────────────────────┘
 ```
 
-### 3 — Konfiguracja klucza API (opcja A — plik .env)
-Utwórz plik `.env` w katalogu projektu:
-```
-GROQ_API_KEY=gsk_TUTAJ_WKLEJ_SWOJ_KLUCZ
-```
-Lub wpisz go bezpośrednio do `config.json` (opcja B — patrz sekcja Konfiguracja).
+The hub handles all physical I/O. The PC handles all computation. Each does what it does best — this split is intentional and explainable to judges.
 
-### 4 — Firmware Pybricks na SPIKE Prime
-1. Wejdź na **https://code.pybricks.com**
-2. Podłącz hub kablem USB
-3. Kliknij ikonę ustawień → **Install Pybricks Firmware** → SPIKE Prime
-4. Postępuj zgodnie z instrukcją na stronie
-
-> Oryginalne oprogramowanie LEGO można przywrócić tą samą stroną.
-
-### 5 — Konto Groq i klucz API (darmowe, bez karty)
-1. Wejdź na **https://console.groq.com** i zarejestruj się (można przez Google)
-2. Przejdź do **API Keys → Create API Key**
-3. Skopiuj klucz — wklej do `.env` lub `config.json`
-
-Klucz nie wygasa. Darmowy limit: ~14 000 żądań/dzień — wystarczy na wiele godzin rozmowy.
-
-### 6 — Uruchomienie
-```bash
-# Włącz hub (środkowy przycisk), potem:
-python computer.py
-```
-Program automatycznie połączy się z hubem przez BLE i wgra `hub.py`.
+The laptop is **fully compliant** with WRO rules: the category allows any number of controllers of any type. The hub + PC pair satisfies "one or more controllers" and the BLE link demonstrates multi-device software engineering — one of the explicitly scored criteria.
 
 ---
 
-## Konfiguracja (config.json)
+## Five Modes
 
-| Parametr              | Domyślnie                  | Opis |
-|-----------------------|----------------------------|------|
-| `groq_api_key`        | `""`                       | Klucz Groq (alternatywnie `GROQ_API_KEY` w `.env`) |
-| `groq_model`          | `llama-3.3-70b-versatile`  | Model Groq |
-| `whisper_model`       | `base`                     | Rozmiar modelu Whisper (fallback STT): `tiny` / `base` / `small` |
-| `whisper_device`      | `cpu`                      | `cuda` (GPU) lub `cpu` |
-| `audio_record_seconds`| `6`                        | Maks. długość jednej wypowiedzi [s] |
-| `audio_activity_db`   | `-30`                      | Próg głośności mikrofonu [dB] |
-| `audio_sample_rate`   | `16000`                    | Częstotliwość próbkowania mikrofonu [Hz] |
-| `inactivity_timeout_s`| `60`                       | Czas do trybu snu [s] |
-| `conv_history_turns`  | `8`                        | Liczba zachowywanych wymian konwersacji |
-| `speaker_volume`      | `20`                       | Głośność głośnika huba (0–100) |
+| Mode | What it does | How it decides |
+|---|---|---|
+| **FLASHCARDS** | Speaks an Esperanto word, user answers YES/NO | SM-2 spaced repetition — interval grows with each correct answer |
+| **POEMS** | Plays Esperanto poetry MP3s with metadata | Adaptive queue — weights by play count, recency, rating |
+| **MUSIC** | Plays Esperanto music MP3s with metadata | Same adaptive queue algorithm |
+| **CONVERSATION** | Live dialogue in Esperanto with AI | LLM adapts vocabulary to level (A1/B1/C1); detects cultural keywords and offers media transition |
+| **ATTRACT** | Greets passersby, plays quizzes, music snippets, facts | Randomized sequence engine; activates on motion detection |
+
+None of these decisions are pre-scripted. SM-2 calculates which word to show based on your answer history. The adaptive queue weights media by multiple factors. The LLM generates a unique response to every utterance.
 
 ---
 
-## STT — rozpoznawanie mowy esperanto
+## Three Layers of Autonomous Decision-Making
 
-Tryb CONVERSATION używa dwuwarstwowego STT:
+This is the core argument for the WRO "autonomous decisions" criterion:
 
-**Warstwa 1 — wav2vec2** (`cpierse/wav2vec2-large-xlsr-53-esperanto`)  
-Model fine-tuned na Mozilla Common Voice esperanto. Pobierany automatycznie przy pierwszym uruchomieniu (~1 GB, cache w `~/.cache/huggingface`). Rozpoznaje znaki esperanto: ĉ, ĝ, ĥ, ĵ, ŝ, ŭ.
+**1. SM-2** decides *which word* to show and *when*, based on individual response history. The interval between reviews grows exponentially with correct answers — the robot builds a personalized model of what you know. When you leave the mode, it speaks a summary: *"8 correct, 4 wrong. Weakest word: pomo."*
 
-**Warstwa 2 — Whisper (fallback)**  
-Jeśli wav2vec2 zwróci pusty string — używany jest Whisper z językiem włoskim (`it`), który ma najbliższą fonetykę do esperanto spośród obsługiwanych języków.
+**2. Adaptive media queue** picks the next poem or music track based on `play_count`, `last_played`, and `rating`. A track played recently is deprioritized; a highly rated one is upweighted. No two sessions are the same.
 
----
-
-## Sleep / Wake
-
-Po 60 sekundach braku aktywności hub przechodzi w tryb snu:
-- LED pokazuje animację "Zzz"
-- Silnik (Port B) obraca czujnik — wahadło ±45° (łącznie 90° zasięgu)
-- Czujnik odległości (Port A) wykrywa kogoś < 200 cm → **WAKE → ATTRACT**
-- Każde naciśnięcie przycisku lub głośny dźwięk przez mikrofon → reset timera
-
-**Porty — zmień w `hub.py`:**
-```python
-DISTANCE_PORT   = Port.A   # czujnik odległości
-SCAN_MOTOR_PORT = Port.B   # silnik skanowania
-
-# Jeśli sensor jest fizycznie przesunięty od osi obrotu silnika:
-SCAN_OFFSET_DEG = 15       # + = w prawo, - = w lewo
-```
-Jeśli sensory nie są podłączone — robot działa normalnie (inicjalizacja w `try/except`).
+**3. LLM in ConversationMode** generates a unique response to every utterance, adapts its vocabulary to the user's level (A1/B1/C1), and detects cultural context — if the reply contains keywords like *muziko*, *poezio*, *kulturo*, it proactively offers to transition to the relevant media mode.
 
 ---
 
-## Dodawanie treści
+## Real Problem, Real Consultation
 
-### Słówka (FLASHCARDS)
-Edytuj `assets/flashcards/wordlist.json`:
-```json
-[
-  { "word": "saluton", "translation": "hello / cześć" },
-  { "word": "dankon",  "translation": "thank you / dziękuję" }
-]
-```
-Pola `sr_*` i `next_review` są dodawane automatycznie.
+> *"It's hard to start, because you don't know where to find materials."*
+> — feedback from an Esperanto speaker consulted during project development
 
-### Muzyka / poezja
-```bash
-# Pobierz MP3 z YouTube (wymaga yt-dlp):
-yt-dlp -x --audio-format mp3 -o "assets/music/%(title)s.mp3" "ytsearch1:SZUKANA FRAZA"
-```
-Dodaj wpis do `assets/music/music.json` (lub `poems.json`):
-```json
-{
-  "id": "001",
-  "filename": "plik.mp3",
-  "title": "Tytuł",
-  "artist": "Wykonawca",
-  "year": 1900,
-  "description": "Tekst czytany przez TTS po Prawym przytrzymaniu"
-}
-```
-MP3 bez wpisu w JSON działa bez metadanych. Wpis bez MP3 jest pomijany z ostrzeżeniem.
+Esperanto has no government, no national academy, no institution protecting it. Its speakers are distributed across the world with no central hub for learning resources. This robot addresses that directly: it teaches the language, preserves its culture, and invites conversation — in a single physical device, without internet for core functions.
+
+We consulted with members of the Polish Esperanto community (Polskie Towarzystwo Esperantystów — pte.pl) to validate the problem and inform word list priorities.
 
 ---
 
-## Autonomia
+## Key Innovation & Slogan
 
-**SM-2 (fiszki)** — na podstawie historii odpowiedzi (`sr_ease`, `sr_interval`, `sr_repetitions`)
-robot sam oblicza kiedy i które słowo pokazać. Słowa słabo znane wracają szybciej, dobrze znane — coraz rzadziej.
+**What makes this different from an app?**
+Physical buttons, a scanning motor, a glowing LED matrix, and a speaker that greets you when you walk up — the robot is *present* in the room in a way a phone screen is not. It invites interaction instinctively.
 
-**Adaptacyjna kolejka mediów** — robot dobiera następny utwór ważąc:
-- `play_count` — im częściej grany, tym mniejsza szansa na powtórkę
-- `last_played` — bonus rośnie przez 7 dni od ostatniego odtworzenia
-- `rating` — opcjonalne ręczne preferencje 1–5 w JSON
+**What makes this different from other robots?**
+Most educational robots teach *about* a subject. This robot *is* the subject — it speaks Esperanto, archives Esperanto culture, holds a conversation in the language. It is the artifact and the teacher simultaneously.
 
-**Konwersacja AI** — LLM dostosowuje język do poziomu A1/B1/C1, zachowuje kontekst przez ostatnie `conv_history_turns` wymian.
-
-**Attract** — 5 typów sekwencji losowanych bez powtórzeń, 15 powitań, 25 słówek, 8 ciekawostek. Robot nie przerywa sekwencji gdy ktoś odchodzi.
+> **Slogan:** *"One language for all — one robot to teach it."*
 
 ---
 
-## Typowe błędy
-
-| Błąd | Rozwiązanie |
-|------|-------------|
-| `Hub not ready — retrying` | Sprawdź firmware Pybricks, uruchom hub ponownie |
-| `Cannot find package faster-whisper` | `pip install faster-whisper` |
-| `CUDA not available` | Zmień `whisper_device` na `cpu` w config.json |
-| `Groq HTTP 401` | Błędny klucz API — sprawdź `.env` lub `config.json` |
-| `Groq HTTP 403 / 1010` | Cloudflare block — zainstaluj SDK: `pip install groq` |
-| `Groq model decommissioned` | Zaktualizuj `groq_model` w `config.json` na `llama-3.3-70b-versatile` |
-| `Groq HTTP 429` | Przekroczony dzienny limit Groq (~14 000 req) |
-| `No speech detected` | Mów głośniej lub zmień `audio_activity_db` na `-40` |
-| `No module named sounddevice` | `pip install sounddevice numpy` |
-| `No module named dotenv` | `pip install python-dotenv` (opcjonalne) |
-| `wav2vec2 load failed` | `pip install transformers torch` |
-
----
-
-## Struktura projektu
+## File Structure
 
 ```
-WRO2026/
-├── hub.py                   # Kod SPIKE Prime (Pybricks MicroPython)
-├── computer.py              # Logika PC — tryby, SM-2, TTS, BLE, AI
-├── config.json              # Konfiguracja (klucz API, parametry)
-├── .env                     # Opcjonalny — zmienne środowiskowe (GROQ_API_KEY)
-├── requirements.txt
-├── README.md
-├── LICENSE
+.
+├── hub.py                          # SPIKE Prime firmware (MicroPython/Pybricks)
+├── computer.py                     # PC logic (Python 3.11+)
+├── config.json                     # API keys & runtime config (not committed)
+├── tools/
+│   └── import_wordlist.py          # Digitization tool: TSV/CSV → wordlist.json
 └── assets/
     ├── flashcards/
-    │   └── wordlist.json
+    │   └── wordlist.json           # Esperanto word list with SM-2 state per word
     ├── poems/
-    │   ├── poems.json
-    │   └── *.mp3
+    │   ├── poems.json              # Metadata: title, author, year, themes
+    │   └── *.mp3                   # Esperanto poetry audio files
     └── music/
-        ├── music.json
-        └── *.mp3
+        ├── music.json              # Metadata: title, artist, genre, origin
+        └── *.mp3                   # Esperanto music audio files
+```
+
+### wordlist.json — example entry
+```json
+{
+  "word": "espero",
+  "translation": "hope / nadzieja",
+  "sr_ease": 2.5,
+  "sr_interval": 3,
+  "sr_repetitions": 2,
+  "next_review": "2026-03-24T10:00:00",
+  "correct_count": 5,
+  "wrong_count": 1
+}
+```
+
+### poems.json / music.json — example entry
+```json
+{
+  "id": "p001",
+  "filename": "la_espero.mp3",
+  "title": "La Espero",
+  "author": "L. L. Zamenhof",
+  "year": 1887,
+  "origin": "Poland",
+  "themes": ["hope", "unity", "language"],
+  "description": "The anthem of the Esperanto movement.",
+  "play_count": 0,
+  "last_played": null,
+  "rating": null
+}
 ```
 
 ---
 
-## Stack
+## Setup
 
-| Technologia | Rola |
-|-------------|------|
-| LEGO SPIKE Prime + Pybricks | Hub, sensory, BLE |
-| pybricksdev | BLE komunikacja PC ↔ hub |
-| wav2vec2 (`cpierse/wav2vec2-large-xlsr-53-esperanto`) | STT — rozpoznawanie mowy esperanto (lokalnie) |
-| faster-whisper | STT fallback (gdy wav2vec2 niedostępny) |
-| Groq API + LLaMA 3.3 70B Versatile | LLM — odpowiedzi po esperanto (darmowy) |
-| groq (Python SDK) | Klient API Groq (omija blokadę Cloudflare) |
-| gTTS | TTS — synteza mowy (EN / PL) |
-| pygame-ce | Odtwarzanie MP3 |
-| sounddevice + numpy | Mikrofon + monitor aktywności audio |
-| transformers + torch | Ładowanie modelu wav2vec2 |
-| python-dotenv | Opcjonalne — ładowanie `.env` z kluczem API |
-| SM-2 (własna impl.) | Spaced repetition dla fiszek |
-| Python 3.11+ | Język PC |
+### Requirements
+- Python 3.11+
+- LEGO SPIKE Prime with [Pybricks firmware](https://code.pybricks.com)
+- Bluetooth enabled on PC
 
----
+### Install
+```bash
+pip install pybricksdev gtts pygame sounddevice numpy faster-whisper groq transformers torch
+```
 
-## Changelog
+### Config
+Create `config.json` in the project root:
+```json
+{
+  "groq_api_key": "YOUR_KEY_HERE",
+  "groq_model": "llama-3.3-70b-versatile",
+  "whisper_model": "base",
+  "whisper_device": "cpu",
+  "audio_record_seconds": 6
+}
+```
 
-### v1.3 — marzec 2026
-- **NOWE** Tryb 4 — ATTRACT: robot aktywnie zaprasza przechodniów do interakcji (WRO Obszar 3)
-  - 5 typów losowych sekwencji: quiz słówkowy, fragment muzyki, fragment poezji, ciekawostka, pełna
-  - 15 powitań PL/EN, 25 słówek, 8 ciekawostek, 6 wariantów CTA i pożegnania
-  - Robot nie przerywa sekwencji gdy ktoś odchodzi — kończy ją elegancko
-  - Pulsująca animacja gwiazdki na LED
-- **NOWE** STT wav2vec2 fine-tuned na esperanto (`cpierse/wav2vec2-large-xlsr-53-esperanto`)
-  - Zastępuje Whisper jako główny STT w trybie CONVERSATION
-  - Whisper pozostaje jako fallback
-- **NOWE** Groq Python SDK — eliminuje błąd Cloudflare 1010 przy urllib
-- **ZMIANA** Model Groq: `llama3-70b-8192` → `llama-3.3-70b-versatile` (poprzedni wycofany)
-- **ZMIANA** Kąt skanu silnika: ±90° → ±45° (razem 90° zasięgu, bezpieczniejsze dla kabli)
-- **ZMIANA** `SCAN_OFFSET_DEG` — korekcja offsetu montażu sensora bez ruszania silnikiem przy starcie
-- **ZMIANA** Hub na starcie jedzie silnikiem do 0° (enkoder wie gdzie jest)
-- **ZMIANA** Poems i Music w AttractMode — oba tryby mediów dostępne w sekwencjach attract
+### Run
+```bash
+python computer.py
+```
+The script connects to the hub over BLE automatically, retrying up to 3 times on failure.
 
-### v1.2 — marzec 2026
-- **NOWE** Tryb 3 — CONVERSATION: Whisper STT + Groq LLaMA3 + gTTS, poziomy A1/B1/C1
-- **NOWE** Sleep / Wake: czujnik odległości (Port A) + silnik skanowania (Port B)
-- **NOWE** Monitor aktywności mikrofonu (reset timera snu przy głośnym dźwięku)
-- **NOWE** Obsługa `.env` przez python-dotenv (klucz API poza kodem)
-- **NOWE** `config.json` — wszystkie parametry bez edycji kodu
-- **NOWE** Retry limit (3 próby) z checklistą błędów przy starcie
-- **ZMIANA** `NUM_MODES` = 4, nowa ikona CV (dymek mowy) na LED
+### Digitize a dictionary (Pont 4 — digitalization tool)
+```bash
+# Import from TSV (word<TAB>translation en / pl)
+python tools/import_wordlist.py my_dictionary.tsv
 
-### v1.1 — marzec 2026
-- Tryby FLASHCARDS, POEMS, MUSIC z menu
-- SM-2 spaced repetition (własna implementacja)
-- Adaptacyjna kolejka mediów (play_count, last_played, rating)
-- gTTS EN + PL, pygame-ce zamiast pydub
-- Animacje LED: statyczna karta (FC), cykliczne znaki (POEMS), korektor audio (MUSIC)
-- BLE przez pybricksdev (zamiast serial)
+# Preview without writing anything
+python tools/import_wordlist.py my_dictionary.tsv --dry-run
 
-### v1.0 — marzec 2026
-- Podstawowe fiszki esperanto przez serial (pyserial)
-- pyttsx3 TTS → zastąpione gTTS + pydub
-- Proste ważenie słów przez wrong_count/correct_count → zastąpione SM-2
+# Custom wordlist path
+python tools/import_wordlist.py source.csv --wordlist assets/flashcards/wordlist.json
+```
+
+Legal Esperanto music and poetry sources: [Jamendo](https://jamendo.com), [Vinilkosmo](https://vinilkosmo-mp3.com)
 
 ---
 
-## Prezentacja dla jury WRO
+## Controls
 
-**Problem:** Esperanto — język neutralny kulturowo, stworzony by łączyć narody — jest zagrożony
-zapomnieniem. Mało materiałów edukacyjnych, mała dostępność dla nowych uczących się.
+| Button | Short press | Long press (800 ms) |
+|---|---|---|
+| **RIGHT** | YES / Correct / Next track / Push-to-talk | Repeat definition / Read metadata / Change difficulty |
+| **LEFT** | NO / Wrong / Previous track / Cancel turn | Open mode menu |
 
-**Rozwiązanie:** Robot, który **aktywnie uczy** (nie tylko wyświetla), **rozmawia** po esperanto,
-**zachowuje** kulturowe dziedzictwo (poezja, muzyka) i **wychodzi do ludzi** (tryb Attract).
+**In menu:** RIGHT cycles through modes, LEFT confirms.
 
-**Autonomia — trzy warstwy:**
-- SM-2 decyduje *kiedy* i *które* słowa pokazywać (historia odpowiedzi)
-- Adaptacyjna kolejka decyduje *co* grać (statystyki odtworzeń)
-- AI w trybie CONV decyduje *co* odpowiedzieć i dostosowuje poziom językowy
+---
 
-**Obszar WRO 1** — ochrona dziedzictwa: cyfrowe archiwum języka + kultury esperanto  
-**Obszar WRO 2** — współtworzenie z AI: LLM jako partner językowy, nie tylko narzędzie  
-**Obszar WRO 3** — doświadczanie kultury: tryb Attract aktywnie angażuje widzów  
-**SDG 4** — dobra edukacja dla wszystkich  
-**SDG 11** — ochrona dziedzictwa kulturowego
+## Roadmap — Implementation Status
+
+All items from ROADMAP.md are now implemented:
+
+| ID | Description | Status |
+|---|---|---|
+| H1 | Typo fix: `riди` → `ridi` in attract word list | ✅ done |
+| H2 | Scan motor debounce — `run_target()` only fires on target change, eliminates jitter | ✅ done |
+| H3 | Distance sensor last-good-value cache — eliminates false "nobody there" on transient None | ✅ done |
+| H4 | Whisper fallback language `"it"` → `None` (auto-detection) | ✅ done |
+| H5 | Session summary spoken on FlashcardsMode exit: correct / wrong / weakest word | ✅ done |
+| P2 | Context-aware CONV→MEDIA transition on cultural keywords in LLM reply | ✅ done |
+| P4 | `tools/import_wordlist.py` — TSV/CSV digitization tool with dedup and dry-run | ✅ done |
+| P3 | README narrative — SDG 17, slogan, cultural statement | ✅ this file |
+
+Remaining lower-priority items:
+- **P6** — Test `lang="eo"` (Esperanto TTS) in gTTS; switch if audio quality is acceptable. Hook already in `_speak()`.
+- **P7** — Populate `poems.json` and `music.json` with 2–3 real entries before competition day.
+
+---
+
+## For Judges
+
+**"How does the robot make autonomous decisions?"**
+Three independent layers: SM-2 calculates flashcard intervals from your individual answer history. The adaptive queue weighs media by play count, recency, and rating. The LLM generates a unique reply to every spoken sentence and now also detects whether the conversation touches on Esperanto culture — offering to play relevant media without any prompt from the user.
+
+**"Why Esperanto?"**
+An Esperanto speaker we consulted told us directly: quality materials are hard to find. Esperanto has no country and no institution to protect it. This robot is a concrete response to that gap.
+
+**"Why a laptop and not a Raspberry Pi?"**
+SPIKE Prime handles all physical I/O — sensors, motor, LED, buttons. The laptop handles compute-heavy tasks: a 1GB speech recognition model (wav2vec2), real-time TTS synthesis, and LLM API calls. Splitting by capability is a deliberate engineering choice. A Raspberry Pi could do the same job but would make development slower and demos less reliable — there is no technical or regulatory reason to change.
+
+**"Does it work offline?"**
+Flashcards, poems, music — fully offline. Conversation requires internet (Groq API). Speech recognition (wav2vec2) runs locally on the laptop.
+
+**"What would you improve with more time?"**
+Esperanto TTS (`lang="eo"`) — the code path is ready, we need to test audio quality on the actual device. A larger curated word list imported from open Esperanto dictionaries using the digitization tool we built.
+
+---
+
+## Credits
+
+- Esperanto created by L. L. Zamenhof (1887) — public domain
+- SM-2 spaced repetition algorithm by Piotr Woźniak — public domain specification
+- wav2vec2 Esperanto STT model: [cpierse/wav2vec2-large-xlsr-53-esperanto](https://huggingface.co/cpierse/wav2vec2-large-xlsr-53-esperanto)
+- Legal music sources: Jamendo (CC licensed), Vinilkosmo
+- WRO 2026 Future Innovators — "Robots Meet Culture"

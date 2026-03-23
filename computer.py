@@ -366,11 +366,17 @@ class FlashcardsMode(Mode):
         self.words:   list = []
         self.current: dict = {}
         self.shown_definition = False
+        # H5: statystyki sesji — mówione przy wyjściu z trybu
+        self.session_correct: int = 0
+        self.session_wrong:   int = 0
 
     def on_enter(self):
         with open(WORDS_FILE, encoding="utf-8") as f:
             self.words = json.load(f)
         print("[FC] Wordlist loaded.")
+        # H5: reset liczników przy każdym wejściu w tryb
+        self.session_correct = 0
+        self.session_wrong   = 0
         self._next()
 
     def _save(self):
@@ -397,12 +403,14 @@ class FlashcardsMode(Mode):
         ACTIVITY.poke()
         sr_update(self.current, True)
         self._save()
+        self.session_correct += 1   # H5
         self._next()
 
     def on_no(self):
         ACTIVITY.poke()
         sr_update(self.current, False)
         self._save()
+        self.session_wrong += 1     # H5
         if not self.shown_definition:
             self.shown_definition = True
             self._speak_definition()
@@ -412,6 +420,26 @@ class FlashcardsMode(Mode):
         ACTIVITY.poke()
         self.shown_definition = True
         self._speak_definition()
+
+    def _speak_session_summary(self):
+        """H5: Mówione podsumowanie sesji — dowód autonomicznej analizy danych."""
+        total = self.session_correct + self.session_wrong
+        if total == 0:
+            return
+        weak = max(self.words, key=lambda w: w.get("wrong_count", 0), default=None)
+        summary = (
+            f"Session summary: {self.session_correct} correct, "
+            f"{self.session_wrong} wrong out of {total} cards."
+        )
+        if weak and weak.get("wrong_count", 0) > 0:
+            summary += f" Weakest word: {weak['word']}."
+        print(f"[FC] {summary}")
+        _speak(summary, lang="en")
+        self.session_correct = 0
+        self.session_wrong   = 0
+
+    def on_sleep(self):
+        self._speak_session_summary()
 
 # ============================================================
 # MEDIA MODE
@@ -629,6 +657,7 @@ class ConversationMode(Mode):
         self._whisper_model       = None
         self._wav2vec2_model      = None
         self._wav2vec2_processor  = None
+        self._pending_media_offer: bool = False   # Punkt 2
 
     @property
     def difficulty(self) -> str:
@@ -723,7 +752,7 @@ class ConversationMode(Mode):
                     _speak("Pardonu, mi ne povas aŭdi.", lang="en")
                     return
                 audio_float = audio.astype(np.float32) / 32768.0
-                segments, info = whisper.transcribe(audio_float, language="it")
+                segments, info = whisper.transcribe(audio_float, language=None)  # H4: autodetekcja zamiast "it"
                 print(f"[CONV] Whisper fallback STT lang={info.language} conf={info.language_probability:.0%}")
                 user_text = " ".join(seg.text.strip() for seg in segments).strip()
 
@@ -749,7 +778,23 @@ class ConversationMode(Mode):
                                api_key=api_key, model=CFG["groq_model"])
             print(f"[CONV] Robot: {reply!r}")
             self.history.append({"role": "assistant", "content": reply})
-            _speak(reply, lang="en")
+
+            # Punkt 2: kontekstowe przejście do POEMS/MUSIC
+            # Jeśli odpowiedź LLM dotyczy kultury esperanto — zaproponuj media
+            _CULTURE_KEYWORDS = [
+                "poezio", "kanto", "muziko", "poemo", "literaturo",
+                "kulturo", "zamenhof", "libro", "arte", "kanti", "muzik",
+            ]
+            if any(kw in reply.lower() for kw in _CULTURE_KEYWORDS):
+                self._pending_media_offer = True
+                reply_with_offer = reply + (
+                    " — Ĉu vi volas aŭdi muzikon aŭ poezion en Esperanto? "
+                    "Premu la dekstran butonon por jes."
+                )
+                _speak(reply_with_offer, lang="en")
+            else:
+                self._pending_media_offer = False
+                _speak(reply, lang="en")
 
         finally:
             with self._lock:
@@ -757,6 +802,7 @@ class ConversationMode(Mode):
 
     def on_enter(self):
         self.history = []
+        self._pending_media_offer = False   # Punkt 2: reset przy wejściu
         if not CFG.get("groq_api_key"):
             print("[CONV] WARNING: groq_api_key not set.")
         print(f"[CONV] Ready. Difficulty: {self.difficulty}. Press YES to speak.")
@@ -768,10 +814,18 @@ class ConversationMode(Mode):
 
     def on_yes(self):
         ACTIVITY.poke()
+        # Punkt 2: jeśli była oferta mediów — przejdź do POEMS (1) lub MUSIC (2)
+        if self._pending_media_offer:
+            self._pending_media_offer = False
+            target = random.choice([1, 2])
+            print(f"[CONV] Media offer accepted → MODE:{target}")
+            print(f"MODE:{target}")   # sygnał do ModeManagera
+            return
         threading.Thread(target=self._listen_and_reply, daemon=True).start()
 
     def on_no(self):
         ACTIVITY.poke()
+        self._pending_media_offer = False   # Punkt 2: anuluj ofertę
         with self._lock:
             if self._recording:
                 print("[CONV] Cancelling current turn.")
@@ -1209,6 +1263,9 @@ class ModeManager:
             return
         old = self.current.name
         if self._started:
+            # H5: jeśli opuszczamy FlashcardsMode — najpierw powiedz podsumowanie
+            if isinstance(self.current, FlashcardsMode):
+                self.current._speak_session_summary()
             if hasattr(self.current, "_stop_sequence"):
                 self.current._stop_sequence()
             elif hasattr(self.current, "_stop"):
