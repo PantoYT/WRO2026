@@ -387,14 +387,22 @@ class FlashcardsMode(Mode):
         self.current = pick_next_word(self.words)
         self.shown_definition = False
         word = self.current["word"]
-        print(f"[FC] Word: {word}")
-        _speak(word, lang="pl")
+        pronunciation = self.current.get("pronunciation", "")
+        print(f"[FC] Word: {word}  [{pronunciation}]" if pronunciation else f"[FC] Word: {word}")
+        # Czytaj słowo głosem esperanto (eo) — naturalniejsza wymowa
+        # Fallback na "en" jeśli gTTS eo nie działa dobrze na tym systemie
+        _speak(word, lang="eo")
+        # Wymowa fonetyczna jako podpowiedź (np. "HUN-do") — po słowie
+        if pronunciation:
+            _speak(pronunciation, lang="en")
 
     def _speak_definition(self):
         translation = self.current.get("translation", "")
         parts = translation.split(" / ")
         en = parts[0].strip() if parts else self.current.get("definition", "")
         pl = parts[1].strip() if len(parts) > 1 else ""
+        # Dodaj definition jako kontekst jeśli istnieje i różni się od translation
+        definition = self.current.get("definition", "")
         print(f"[FC] Definition: {en} | {pl}")
         if en: _speak(en, lang="en")
         if pl: _speak(pl, lang="pl")

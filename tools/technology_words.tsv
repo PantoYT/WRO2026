@@ -1,0 +1,19 @@
+# Technology & Robotics words for WRO 2026 Esperanto Robot
+# Import with: python tools/import_wordlist.py tools/technology_words.tsv
+roboto	robot / robot
+komputilo	computer / komputer
+teknologio	technology / technologia
+artefarita inteligento	artificial intelligence / sztuczna inteligencja
+sensilo	sensor / czujnik
+programi	to program / programować
+datumoj	data / dane
+ekrano	screen, display / ekran
+aŭtomata	automatic, autonomous / automatyczny
+inventi	to invent / wynaleźć
+inteligenta	intelligent, smart / inteligentny
+# Culture / Esperanto-specific
+kongreso	congress, conference / kongres
+verda stelo	green star — symbol of Esperanto / zielona gwiazda
+himno	anthem, hymn / hymn
+pioniro	pioneer / pionier
+eldonejo	publishing house / wydawnictwo
