@@ -362,37 +362,72 @@ class Mode:
 class FlashcardsMode(Mode):
     name = "FLASHCARDS"
 
+    # Stałe CTA po sesji — odsyłają do innych modułów
+    _SESSION_CTAS = [
+        ("Great practice! Now listen to some real Esperanto music to hear the language in action. "
+         "Open the menu and try Music mode.", "en"),
+        ("Well done! Esperanto has real poets too. Try Poems mode to hear the language come alive.", "en"),
+        ("Nice session! Want to use these words in a real conversation? "
+         "Try Conversation mode — press and hold the left button to open the menu.", "en"),
+        ("Świetna sesja! Teraz posłuchaj muzyki esperanto — otwórz menu i wybierz tryb Muzyka.", "pl"),
+    ]
+
     def __init__(self):
         self.words:   list = []
+        self._all_words: list = []          # pełna lista — nigdy nie nadpisywana
         self.current: dict = {}
         self.shown_definition = False
-        # H5: statystyki sesji — mówione przy wyjściu z trybu
         self.session_correct: int = 0
         self.session_wrong:   int = 0
+        self.active_filter: str | None = None   # np. "Technology", None = wszystkie
 
     def on_enter(self):
         with open(WORDS_FILE, encoding="utf-8") as f:
-            self.words = json.load(f)
+            self._all_words = json.load(f)
         print("[FC] Wordlist loaded.")
-        # H5: reset liczników przy każdym wejściu w tryb
         self.session_correct = 0
         self.session_wrong   = 0
+        self._apply_filter()
+        self._announce_filter()
         self._next()
 
+    def _apply_filter(self):
+        """Filtruje self.words wg active_filter. None = wszystkie."""
+        if self.active_filter:
+            filtered = [w for w in self._all_words
+                        if w.get("unit", "").lower() == self.active_filter.lower()]
+            self.words = filtered if filtered else self._all_words
+            if not filtered:
+                print(f"[FC] Filter '{self.active_filter}' matched 0 words — using all.")
+        else:
+            self.words = self._all_words
+
+    def _announce_filter(self):
+        if self.active_filter:
+            count = len(self.words)
+            _speak(f"Flashcard filter: {self.active_filter}. {count} words.", lang="en")
+        else:
+            _speak(f"Flashcards — {len(self.words)} words ready.", lang="en")
+
+    def set_filter(self, unit: str | None):
+        """Wywoływane przez ModeManager przy sygnale FILTER:Unit."""
+        self.active_filter = unit
+        print(f"[FC] Filter set to: {unit!r}")
+
     def _save(self):
+        # Zapisuj zawsze do pełnej listy, nie do przefiltrowanej
         with open(WORDS_FILE, "w", encoding="utf-8") as f:
-            json.dump(self.words, f, ensure_ascii=False, indent=2)
+            json.dump(self._all_words, f, ensure_ascii=False, indent=2)
 
     def _next(self):
         self.current = pick_next_word(self.words)
         self.shown_definition = False
         word = self.current["word"]
+        unit = self.current.get("unit", "")
         pronunciation = self.current.get("pronunciation", "")
-        print(f"[FC] Word: {word}  [{pronunciation}]" if pronunciation else f"[FC] Word: {word}")
-        # Czytaj słowo głosem esperanto (eo) — naturalniejsza wymowa
-        # Fallback na "en" jeśli gTTS eo nie działa dobrze na tym systemie
+        print(f"[FC] Word: {word}  [{pronunciation}]  ({unit})" if pronunciation
+              else f"[FC] Word: {word}  ({unit})")
         _speak(word, lang="eo")
-        # Wymowa fonetyczna jako podpowiedź (np. "HUN-do") — po słowie
         if pronunciation:
             _speak(pronunciation, lang="en")
 
@@ -401,24 +436,23 @@ class FlashcardsMode(Mode):
         parts = translation.split(" / ")
         en = parts[0].strip() if parts else self.current.get("definition", "")
         pl = parts[1].strip() if len(parts) > 1 else ""
-        # Dodaj definition jako kontekst jeśli istnieje i różni się od translation
-        definition = self.current.get("definition", "")
         print(f"[FC] Definition: {en} | {pl}")
         if en: _speak(en, lang="en")
         if pl: _speak(pl, lang="pl")
 
     def on_yes(self):
         ACTIVITY.poke()
+        # Sync zmiana w _all_words (words jest widokiem do _all_words)
         sr_update(self.current, True)
         self._save()
-        self.session_correct += 1   # H5
+        self.session_correct += 1
         self._next()
 
     def on_no(self):
         ACTIVITY.poke()
         sr_update(self.current, False)
         self._save()
-        self.session_wrong += 1     # H5
+        self.session_wrong += 1
         if not self.shown_definition:
             self.shown_definition = True
             self._speak_definition()
@@ -430,11 +464,13 @@ class FlashcardsMode(Mode):
         self._speak_definition()
 
     def _speak_session_summary(self):
-        """H5: Mówione podsumowanie sesji — dowód autonomicznej analizy danych."""
+        """Podsumowanie sesji + ekosystemowe CTA do innego modułu."""
         total = self.session_correct + self.session_wrong
         if total == 0:
             return
-        weak = max(self.words, key=lambda w: w.get("wrong_count", 0), default=None)
+        # Najsłabsze słowo z całej listy (nie tylko filtrowanej)
+        weak = max(self._all_words,
+                   key=lambda w: w.get("wrong_count", 0), default=None)
         summary = (
             f"Session summary: {self.session_correct} correct, "
             f"{self.session_wrong} wrong out of {total} cards."
@@ -443,6 +479,9 @@ class FlashcardsMode(Mode):
             summary += f" Weakest word: {weak['word']}."
         print(f"[FC] {summary}")
         _speak(summary, lang="en")
+        # Ekosystemowe CTA — zachęć do innego modułu
+        cta_text, cta_lang = random.choice(self._SESSION_CTAS)
+        _speak(cta_text, lang=cta_lang)
         self.session_correct = 0
         self.session_wrong   = 0
 
@@ -577,8 +616,232 @@ class MediaMode(Mode):
                 self._play_current()
 
 # ============================================================
-# CONVERSATION MODE
+# A0 LESSON MODE — skryptowane lekcje, zero AI, zero tokenów
+# Aktywny nauczyciel: uczy podstaw, zachęca do innych modułów
 # ============================================================
+
+_A0_LESSONS = [
+    {
+        "id": "greetings",
+        "title": "Greetings",
+        "intro": ("Welcome to your first Esperanto lesson! "
+                  "Esperanto has no irregular words — what you see is what you say. "
+                  "Let's learn greetings.", "en"),
+        "steps": [
+            ("saluton", "SA-lu-ton", "Hello!", "en"),
+            ("saluton", "SA-lu-ton", "Saluton means: Hello.", "en"),
+            ("dankon",  "DAN-kon",   "Thank you!", "en"),
+            ("dankon",  "DAN-kon",   "Dankon means: Thank you.", "en"),
+            ("bonvolu", "bon-VO-lu", "Please!", "en"),
+            ("jes",     "yes",       "Yes!", "en"),
+            ("ne",      "ne",        "No!", "en"),
+            ("bonan matenon", "BO-nan ma-TE-non", "Good morning!", "en"),
+            ("bonan tagon",   "BO-nan TA-gon",    "Good day!", "en"),
+            ("ĝis revido",    "djis re-VI-do",    "Goodbye — see you again!", "en"),
+        ],
+        "outro": ("You know the basics! "
+                  "Now go practice in Flashcards mode — press and hold the left button "
+                  "to open the menu.", "en"),
+        "filter_cta": None,
+    },
+    {
+        "id": "numbers",
+        "title": "Numbers",
+        "intro": ("In Esperanto, numbers are completely regular. "
+                  "Learn one through ten and you can count to a million.", "en"),
+        "steps": [
+            ("unu",  "U-nu",  "One.", "en"),
+            ("du",   "du",    "Two.", "en"),
+            ("tri",  "tri",   "Three.", "en"),
+            ("kvar", "kvar",  "Four.", "en"),
+            ("kvin", "kvin",  "Five.", "en"),
+            ("ses",  "ses",   "Six.", "en"),
+            ("sep",  "sep",   "Seven.", "en"),
+            ("ok",   "ok",    "Eight.", "en"),
+            ("naŭ",  "naw",   "Nine.", "en"),
+            ("dek",  "dek",   "Ten.", "en"),
+            ("dek unu", "dek U-nu", "Eleven. Just dek plus unu — no irregulars ever!", "en"),
+        ],
+        "outro": ("Numbers done! The robot uses SM-2 to track which numbers you find hardest. "
+                  "Head to Flashcards — Numbers unit — to drill them.", "en"),
+        "filter_cta": "Numbers",
+    },
+    {
+        "id": "culture",
+        "title": "Esperanto Culture",
+        "intro": ("Esperanto isn't just grammar — it has 130 years of poetry, music, and congresses. "
+                  "Let's learn the words that connect you to that culture.", "en"),
+        "steps": [
+            ("espero",    "es-PE-ro",    "Hope. The word Esperanto itself means 'one who hopes'.", "en"),
+            ("paco",      "PA-tso",      "Peace.", "en"),
+            ("mondo",     "MON-do",      "World.", "en"),
+            ("lingvo",    "LING-vo",     "Language.", "en"),
+            ("kulturo",   "kul-TU-ro",   "Culture.", "en"),
+            ("muziko",    "mu-ZI-ko",    "Music.", "en"),
+            ("poemo",     "po-E-mo",     "Poem.", "en"),
+            ("verda stelo","VER-da STE-lo","The green star — symbol of the Esperanto movement.", "en"),
+            ("kongreso",  "kon-GRE-so",  "Congress — Esperanto speakers meet every year at the World Congress.", "en"),
+            ("zamenhof",  "za-MEN-hof",  "Zamenhof — Ludwig Lazarus Zamenhof, creator of Esperanto, 1887.", "en"),
+        ],
+        "outro": ("Beautiful! The robot has real Esperanto poetry and music in its archive. "
+                  "Try Poems mode or Music mode from the menu to hear this culture come alive.", "en"),
+        "filter_cta": "Culture",
+    },
+    {
+        "id": "technology",
+        "title": "Robots and Technology",
+        "intro": ("You're talking to a robot right now! "
+                  "Let's learn the Esperanto words for technology — perfect for this competition.", "en"),
+        "steps": [
+            ("roboto",      "ro-BO-to",      "Robot!", "en"),
+            ("komputilo",   "kom-pu-TI-lo",  "Computer.", "en"),
+            ("sensilo",     "sen-SI-lo",     "Sensor.", "en"),
+            ("ekrano",      "ek-RA-no",      "Screen, display.", "en"),
+            ("programi",    "pro-GRA-mi",    "To program — a verb! In Esperanto all verbs end in -i.", "en"),
+            ("datumoj",     "da-TU-moj",     "Data.", "en"),
+            ("aŭtomata",    "aw-to-MA-ta",   "Automatic, autonomous.", "en"),
+            ("inteligenta", "in-te-li-GEN-ta","Intelligent.", "en"),
+            ("artefarita inteligenteco",
+             "ar-te-fa-RI-ta in-te-li-gen-TE-tso",
+             "Artificial intelligence — three words, completely regular.", "en"),
+            ("inventi",     "in-VEN-ti",     "To invent. Zamenhof invented Esperanto in 1887.", "en"),
+        ],
+        "outro": ("Roboto, sensilo, programi — you speak robot Esperanto now! "
+                  "Drill these in Flashcards with the Technology filter. "
+                  "Or try the AI Conversation mode to use them in a real sentence.", "en"),
+        "filter_cta": "Technology",
+    },
+]
+
+
+class A0LessonMode(Mode):
+    """Skryptowany tryb nauczania A0 — bez AI, bez tokenów.
+    
+    Struktura lekcji:
+      intro → kroki (słowo po esperanto + wymowa fonetyczna + tłumaczenie) → outro + CTA
+    
+    YES = następny krok
+    NO  = powtórz obecny krok
+    ACTION_HOLD = powtórz intro / tytuł lekcji
+    
+    Po każdej lekcji: głosowe CTA do innego modułu (flashcards z filtrem, muzyka, poezja).
+    """
+    name = "A0_LESSON"
+
+    def __init__(self):
+        self.lesson_idx:  int  = 0
+        self.step_idx:    int  = 0
+        self._lesson:     dict = _A0_LESSONS[0]
+        self._in_lesson:  bool = False
+        self._done:       bool = False
+
+    # ---- wejście / wyjście ----
+
+    def on_enter(self):
+        self.lesson_idx = 0
+        self.step_idx   = 0
+        self._done      = False
+        self._start_lesson()
+
+    def _start_lesson(self):
+        self._lesson    = _A0_LESSONS[self.lesson_idx % len(_A0_LESSONS)]
+        self.step_idx   = 0
+        self._in_lesson = True
+        self._done      = False
+        title = self._lesson["title"]
+        print(f"[A0] Lesson: {title}")
+        _speak(f"Lesson {self.lesson_idx + 1}: {title}.", lang="en")
+        intro_text, intro_lang = self._lesson["intro"]
+        _speak(intro_text, lang=intro_lang)
+        self._speak_step()
+
+    def _speak_step(self):
+        steps = self._lesson["steps"]
+        if self.step_idx >= len(steps):
+            self._finish_lesson()
+            return
+        word, pronunciation, meaning, lang = steps[self.step_idx]
+        print(f"[A0] Step {self.step_idx + 1}/{len(steps)}: {word}")
+        _speak(word, lang="eo")
+        if pronunciation:
+            _speak(pronunciation, lang="en")
+        _speak(meaning, lang=lang)
+        _speak("Press YES to continue, NO to hear it again.", lang="en")
+
+    def _finish_lesson(self):
+        """Outro + ekosystemowe CTA."""
+        self._in_lesson = False
+        outro_text, outro_lang = self._lesson["outro"]
+        _speak(outro_text, lang=outro_lang)
+
+        # Jeśli lekcja ma filtr — wyślij FILTER sygnał do ModeManagera
+        filter_unit = self._lesson.get("filter_cta")
+        if filter_unit:
+            print(f"LESSON_FILTER:{filter_unit}")
+
+        # Następna lekcja dostępna?
+        next_idx = self.lesson_idx + 1
+        if next_idx < len(_A0_LESSONS):
+            next_title = _A0_LESSONS[next_idx]["title"]
+            _speak(
+                f"When you're ready, press YES to start the next lesson: {next_title}. "
+                f"Or press NO to go back to the main menu.",
+                lang="en"
+            )
+            self._done = True
+        else:
+            _speak(
+                "You've completed all A0 lessons! "
+                "You're ready to explore the full robot. Press NO for the menu.",
+                lang="en"
+            )
+            self._done = True
+
+    # ---- przyciski ----
+
+    def on_yes(self):
+        ACTIVITY.poke()
+        if self._done:
+            # Przejdź do następnej lekcji jeśli istnieje
+            next_idx = self.lesson_idx + 1
+            if next_idx < len(_A0_LESSONS):
+                self.lesson_idx = next_idx
+                self.step_idx   = 0
+                self._done      = False
+                self._start_lesson()
+            else:
+                _speak("All lessons complete! Open the menu to explore other modes.", lang="en")
+        elif self._in_lesson:
+            self.step_idx += 1
+            self._speak_step()
+
+    def on_no(self):
+        ACTIVITY.poke()
+        if self._done:
+            # Wróć do menu — sygnał MODE do ModeManagera (hub otworzy menu)
+            _speak("Opening menu.", lang="en")
+            print("LESSON_EXIT")
+        elif self._in_lesson:
+            # Powtórz obecny krok
+            _speak("Let's hear that again.", lang="en")
+            self._speak_step()
+
+    def on_action_hold(self):
+        ACTIVITY.poke()
+        # Powtórz tytuł i intro bieżącej lekcji
+        title = self._lesson["title"]
+        _speak(f"You're in lesson: {title}.", lang="en")
+        intro_text, intro_lang = self._lesson["intro"]
+        _speak(intro_text, lang=intro_lang)
+
+    def on_sleep(self):
+        pass  # Lekcja nie ma sesji do podsumowania
+
+    def tick(self):
+        pass
+
+
+
 
 _CONV_SYSTEM_PROMPTS = {
     "A1": (
@@ -1248,15 +1511,20 @@ class AttractMode(Mode):
 
 class ModeManager:
     def __init__(self):
-        _music_mode = MediaMode(MUSIC_DIR, "MUSIC", "music.json")
-        _poems_mode = MediaMode(POEMS_DIR, "POEMS", "poems.json")
+        _music_mode   = MediaMode(MUSIC_DIR, "MUSIC", "music.json")
+        _poems_mode   = MediaMode(POEMS_DIR, "POEMS", "poems.json")
+        _fc_mode      = FlashcardsMode()
+        _a0_mode      = A0LessonMode()
         self.modes: list[Mode] = [
-            FlashcardsMode(),
-            _poems_mode,
-            _music_mode,
-            ConversationMode(),
-            AttractMode(_music_mode, _poems_mode),
+            _fc_mode,       # 0 — FLASHCARDS
+            _poems_mode,    # 1 — POEMS
+            _music_mode,    # 2 — MUSIC
+            ConversationMode(),  # 3 — CONVERSATION
+            AttractMode(_music_mode, _poems_mode),  # 4 — ATTRACT
+            _a0_mode,       # 5 — A0 LESSON
         ]
+        self._fc_mode = _fc_mode
+        self._a0_mode = _a0_mode
         self.current_idx = 0
         self._started    = False
         self._sleeping   = False
@@ -1327,6 +1595,24 @@ class ModeManager:
                 pygame.mixer.music.unpause()
                 self.current.paused = False
                 print("[MGR] Media resumed")
+        elif signal.startswith("FILTER:"):
+            # Ustaw filtr w FlashcardsMode i przełącz na flashcards
+            unit = signal.split(":", 1)[1].strip()
+            self._fc_mode.set_filter(unit if unit.lower() != "none" else None)
+            print(f"[MGR] Filter → {unit!r} — switching to FLASHCARDS")
+            self.switch_to(0)
+        elif signal == "LESSON_FILTER:Technology":
+            # A0 lekcja technologii → przejdź do flashcards z filtrem Technology
+            self._fc_mode.set_filter("Technology")
+            _speak("Now drill those words in Flashcards! Switching to Technology filter.", lang="en")
+            self.switch_to(0)
+        elif signal.startswith("LESSON_FILTER:"):
+            unit = signal.split(":", 1)[1].strip()
+            self._fc_mode.set_filter(unit)
+            self.switch_to(0)
+        elif signal == "LESSON_EXIT":
+            # A0 prosi o powrót do menu — wyślij sygnał żeby hub otworzył menu
+            self.switch_to(0)   # wróć do flashcards (menu i tak się otworzy)
         elif signal.startswith("CONV_") or signal.startswith("["):
             pass
         else:

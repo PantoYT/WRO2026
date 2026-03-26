@@ -1,0 +1,146 @@
+# Esperanto wordlist — complete export
+# word	translation	unit	pronunciation	part_of_speech
+
+# === Basics ===
+hundo	dog / pies	Basics	HUN-do	noun
+kato	cat / kot	Basics	KA-to	noun
+homo	person / człowiek	Basics	HO-mo	noun
+viro	man / mężczyzna	Basics	VI-ro	noun
+virino	woman / kobieta	Basics	vi-RI-no	noun
+infano	child / dziecko	Basics	in-FA-no	noun
+amiko	friend / przyjaciel	Basics	a-MI-ko	noun
+familio	family / rodzina	Basics	fa-MI-li-o	noun
+patro	father / ojciec	Basics	PA-tro	noun
+patrino	mother / matka	Basics	pa-TRI-no	noun
+frato	brother / brat	Basics	FRA-to	noun
+fratino	sister / siostra	Basics	fra-TI-no	noun
+
+# === Places ===
+domo	house / dom	Places	DO-mo	noun
+urbo	city / miasto	Places	UR-bo	noun
+lando	country / kraj	Places	LAN-do	noun
+mondo	world / świat	Places	MON-do	noun
+strato	street / ulica	Places	STRA-to	noun
+lernejo	school / szkoła	Places	ler-NE-yo	noun
+hospitalo	hospital / szpital	Places	hos-pi-TA-lo	noun
+vendejo	shop / sklep	Places	ven-DE-yo	noun
+parko	park / park	Places	PAR-ko	noun
+
+# === Verbs ===
+manĝi	to eat / jeść	Verbs	MAN-dji	verb
+trinki	to drink / pić	Verbs	TRIN-ki	verb
+dormi	to sleep / spać	Verbs	DOR-mi	verb
+iri	to go / iść	Verbs	I-ri	verb
+veni	to come / przychodzić	Verbs	VE-ni	verb
+paroli	to speak / mówić	Verbs	pa-RO-li	verb
+lerni	to learn / uczyć się	Verbs	LER-ni	verb
+scii	to know / wiedzieć	Verbs	STSI-i	verb
+ami	to love / kochać	Verbs	A-mi	verb
+helpi	to help / pomagać	Verbs	HEL-pi	verb
+labori	to work / pracować	Verbs	la-BO-ri	verb
+vidi	to see / widzieć	Verbs	VI-di	verb
+aŭdi	to hear / słyszeć	Verbs	AW-di	verb
+ludi	to play / grać / bawić się	Verbs	LU-di	verb
+kuri	to run / biegać	Verbs	KU-ri	verb
+skribi	to write / pisać	Verbs	SKRI-bi	verb
+legi	to read / czytać	Verbs	LE-gi	verb
+doni	to give / dawać	Verbs	DO-ni	verb
+preni	to take / brać	Verbs	PRE-ni	verb
+
+# === Adjectives ===
+bona	good / dobry	Adjectives	BO-na	adjective
+malbona	bad / zły	Adjectives	mal-BO-na	adjective
+granda	big / duży	Adjectives	GRAN-da	adjective
+malgranda	small / mały	Adjectives	mal-GRAN-da	adjective
+nova	new / nowy	Adjectives	NO-va	adjective
+malnova	old / stary	Adjectives	mal-NO-va	adjective
+bela	beautiful / piękny	Adjectives	BE-la	adjective
+rapida	fast / szybki	Adjectives	ra-PI-da	adjective
+malrapida	slow / wolny	Adjectives	mal-ra-PI-da	adjective
+facila	easy / łatwy	Adjectives	fa-TSI-la	adjective
+malfacila	difficult / trudny	Adjectives	mal-fa-TSI-la	adjective
+feliĉa	happy / szczęśliwy	Adjectives	fe-LI-cha	adjective
+malfeliĉa	sad / smutny	Adjectives	mal-fe-LI-cha	adjective
+varma	warm / ciepły	Adjectives	VAR-ma	adjective
+malvarma	cold / zimny	Adjectives	mal-VAR-ma	adjective
+
+# === Numbers ===
+unu	one / jeden	Numbers	U-nu	number
+du	two / dwa	Numbers	du	number
+tri	three / trzy	Numbers	tri	number
+kvar	four / cztery	Numbers	kvar	number
+kvin	five / pięć	Numbers	kvin	number
+ses	six / sześć	Numbers	ses	number
+sep	seven / siedem	Numbers	sep	number
+ok	eight / osiem	Numbers	ok	number
+naŭ	nine / dziewięć	Numbers	naw	number
+dek	ten / dziesięć	Numbers	dek	number
+cent	hundred / sto	Numbers	tsent	number
+mil	thousand / tysiąc	Numbers	mil	number
+
+# === Grammar ===
+kaj	and / i	Grammar	kai	conjunction
+aŭ	or / albo	Grammar	aw	conjunction
+sed	but / ale	Grammar	sed	conjunction
+ĉar	because / ponieważ	Grammar	char	conjunction
+se	if / jeśli	Grammar	se	conjunction
+ne	no / nie	Grammar	ne	adverb
+jes	yes / tak	Grammar	yes	adverb
+tre	very / bardzo	Grammar	tre	adverb
+ankaŭ	also / też	Grammar	AN-kaw	adverb
+nur	only / tylko	Grammar	nur	adverb
+jam	already / już	Grammar	yam	adverb
+ankoraŭ	still / jeszcze	Grammar	an-KO-raw	adverb
+
+# === Time ===
+hodiaŭ	today / dzisiaj	Time	ho-DI-aw	adverb
+hieraŭ	yesterday / wczoraj	Time	h-i-e-RAW	adverb
+morgaŭ	tomorrow / jutro	Time	mor-GAW	adverb
+tago	day / dzień	Time	TA-go	noun
+nokto	night / noc	Time	NOK-to	noun
+semajno	week / tydzień	Time	se-MAY-no	noun
+monato	month / miesiąc	Time	mo-NA-to	noun
+jaro	year / rok	Time	YA-ro	noun
+horo	hour / godzina	Time	HO-ro	noun
+
+# === Food ===
+akvo	water / woda	Food	AK-vo	noun
+pano	bread / chleb	Food	PA-no	noun
+viando	meat / mięso	Food	v-i-AN-do	noun
+legomo	vegetable / warzywo	Food	le-GO-mo	noun
+frukto	fruit / owoc	Food	FRUK-to	noun
+lakto	milk / mleko	Food	LAK-to	noun
+kafo	coffee / kawa	Food	KA-fo	noun
+teo	tea / herbata	Food	TE-o	noun
+
+# === Culture ===
+lingvo	language / język	Culture	LING-vo	noun
+kulturo	culture / kultura	Culture	kul-TU-ro	noun
+muziko	music / muzyka	Culture	mu-ZI-ko	noun
+arto	art / sztuka	Culture	AR-to	noun
+libro	book / książka	Culture	LI-bro	noun
+scienca	scientific / naukowy	Culture	STSI-en-tsa	adjective
+paco	peace / pokój	Culture	PA-tso	noun
+espero	hope / nadzieja	Culture	es-PE-ro	noun
+Esperanto	Esperanto / esperanto	Culture	es-pe-RAN-to	noun
+
+# === Technology ===
+roboto	robot / robot	Technology	ro-BO-to	noun
+komputilo	computer / komputer	Technology	kom-pu-TI-lo	noun
+teknologio	technology / technologia	Technology	tech-no-lo-g-i-o	noun
+artefarita inteligenteco	artificial intelligence / sztuczna inteligencja	Technology	ar-te-fa-RI-ta in-te-li-gen-TE-tso	noun phrase
+sensilo	sensor / czujnik	Technology	sen-SI-lo	noun
+programi	to program / programować	Technology	pro-GRA-mi	verb
+datumoj	data / dane	Technology	da-TU-moj	noun
+ekrano	screen, display / ekran	Technology	ek-RA-no	noun
+aŭtomata	automatic, autonomous / automatyczny	Technology	aw-to-MA-ta	adjective
+inventi	to invent / wynaleźć	Technology	in-VEN-ti	verb
+inteligenta	intelligent, smart / inteligentny	Technology	in-te-li-GEN-ta	adjective
+
+# === Culture ===
+kongreso	congress (most often used to describe an Esperanto event) / kongres	Culture	kon-GRE-so	noun
+flago	flag / flaga	Culture	FLA-go	noun
+verda stelo	green star — symbol of Esperanto / zielona gwiazda	Culture	VER-da STE-lo	noun phrase
+himno	anthem, hymn / hymn	Culture	HIM-no	noun
+pioniro	pioneer / pionier	Culture	pi-o-NI-ro	noun
+eldonejo	publishing house / wydawnictwo	Culture	el-do-NE-yo	noun

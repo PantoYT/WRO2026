@@ -16,7 +16,7 @@ ANIM_TICK_MS   = 50
 POEMS_FRAME_MS = 1200
 MUSIC_FRAME_MS = 150
 
-NUM_MODES = 5  # FC, POEMS, MUSIC, CONVERSATION, ATTRACT
+NUM_MODES = 6  # FC, POEMS, MUSIC, CONVERSATION, ATTRACT, A0_LESSON
 
 # --- Sleep / wake ---
 INACTIVITY_TIMEOUT_MS = 60_000
@@ -135,12 +135,25 @@ ATTRACT_PULSE_FRAMES = [
 MODE_ICONS = [FC_ICON, PO_ICON, MU_ICON, CV_ICON, AT_ICON]
 MODE_NAMES = ["FLASHCARDS", "POEMS", "MUSIC", "CONVERSATION", "ATTRACT"]
 
+# Ikona trybu A0 — litera A (lekcja / nauka)
+A0_ICON = [
+    [O, O, I, O, O],
+    [O, I, O, I, O],
+    [O, I, I, I, O],
+    [O, I, O, I, O],
+    [O, I, O, I, O],
+]
+
+MODE_ICONS = [FC_ICON, PO_ICON, MU_ICON, CV_ICON, AT_ICON, A0_ICON]
+MODE_NAMES = ["FLASHCARDS", "POEMS", "MUSIC", "CONVERSATION", "ATTRACT", "A0_LESSON"]
+
 MODE_SOUNDS = [
     [(523, 80), (659, 120)],
     [(440, 60), (440, 60), (554, 150)],
     [(330, 50), (415, 50), (523, 50), (659, 100)],
     [(523, 60), (587, 60), (659, 60), (784, 120)],
     [(600, 60), (700, 60), (800, 60), (900, 80), (1000, 120)],
+    [(523, 60), (659, 60), (784, 60), (659, 60), (523, 120)],  # A0 = melodyjka w górę i dół
 ]
 
 SLEEP_SOUND   = [(300, 100), (250, 150), (200, 200)]
@@ -461,6 +474,8 @@ def enter_mode(mode_idx):
     elif current_mode == 4:
         enter_attract()
         return
+    elif current_mode == 5:
+        draw_icon(A0_ICON)
 
     play_mode_sound(current_mode)
     print(f"MODE:{current_mode}")
