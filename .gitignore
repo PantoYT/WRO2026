@@ -1,4 +1,5 @@
 assets/
+*.7z
 tools/
 __pycache__/
 *.pyc
