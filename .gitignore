@@ -1,5 +1,6 @@
 assets/
 *.7z
+*.docx
 tools/
 __pycache__/
 *.pyc
