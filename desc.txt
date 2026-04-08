@@ -1,0 +1,7 @@
+Espero-bot
+--"espero" znaczy "nadzieja" po esperanto
+
+Espero-bot to robot edukacyjny uczący języka esperanto przez fiszki z algorytmem SM-2,
+archiwum poezji i muzyki esperanckiej oraz rozmowę z AI.
+Działa offline dla treści kulturowych, wykrywa obecność człowieka i sam podchodzi do rozmowy.
+Jeden robot — jeden język dla wszystkich.
