@@ -1,6 +1,6 @@
 from pybricks.hubs import PrimeHub
 from pybricks.parameters import Button, Direction, Port, Stop
-from pybricks.pupdevices import ColorSensor, Motor, UltrasonicSensor
+from pybricks.pupdevices import ColorSensor, Motor, UltrasonicSensor, ForceSensor
 from pybricks.tools import wait
 import urandom
 
@@ -32,11 +32,11 @@ SCAN_OFFSET_DEG = 15
 # --- Porty ---
 DISTANCE_PORT   = Port.A
 SCAN_MOTOR_PORT = Port.B
+BTN_LEFT_PORT   = Port.E   # Zewnętrzny przycisk LEWY  — NO / MODE
+BTN_RIGHT_PORT  = Port.F   # Zewnętrzny przycisk PRAWY — YES / ACTION_HOLD
 
-HUB_BUTTONS = [
-    (Button.RIGHT, "YES",  "ACTION_HOLD"),
-    (Button.LEFT,  "NO",   "MODE"),
-]
+# Próg nacisku ForceSensor [N]; ~3 = wyraźne naciśnięcie, nie przypadkowe
+BTN_FORCE_THRESHOLD = 1
 
 # ============================================================
 # IKONY TRYBÓW
@@ -191,6 +191,17 @@ except Exception:
     _has_distance = False
     print("distance sensor not found on port A — sleep/wake disabled")
 
+# Zewnętrzne przyciski siłowe (ForceSensor) na portach E i F
+try:
+    _btn_left  = ForceSensor(BTN_LEFT_PORT)   # Port E — NO / MODE
+    _btn_right = ForceSensor(BTN_RIGHT_PORT)  # Port F — YES / ACTION_HOLD
+    _has_force_btns = True
+    print("Force buttons on E/F ready")
+except Exception:
+    _btn_left = _btn_right = None
+    _has_force_btns = False
+    print("Force buttons not found on E/F — falling back to hub buttons")
+
 try:
     _scan_motor = Motor(SCAN_MOTOR_PORT, Direction.CLOCKWISE)
     _scan_motor.reset_angle(0)
@@ -239,25 +250,39 @@ def _inc_tick():
     _tick_counter += 1
 
 # ============================================================
+# ROTACJA MATRYCY — 90° zgodnie z ruchem zegara
+# Hub jest zamontowany obrócony — ta funkcja koryguje wyświetlanie.
+# Wzór CW 90°: new[r][c] = old[4-c][r]
+# ============================================================
+
+def rotate_cw(icon):
+    """Obraca wzór 5x5 o 90° zgodnie z ruchem zegara."""
+    return [[icon[4 - c][r] for c in range(5)] for r in range(5)]
+
+# ============================================================
 # RYSOWANIE
 # ============================================================
 
 def draw_icon(icon):
     hub.display.off()
+    rotated = rotate_cw(icon)
     for r in range(5):
         for c in range(5):
-            if icon[r][c]:
+            if rotated[r][c]:
                 hub.display.pixel(r, c, 100)
 
 def draw_poems():
     hub.display.off()
-    frame = POEMS_FRAMES[poems_frame % len(POEMS_FRAMES)]
+    frame   = POEMS_FRAMES[poems_frame % len(POEMS_FRAMES)]
+    rotated = rotate_cw(frame)
     for r in range(5):
         for c in range(5):
-            if frame[r][c]:
+            if rotated[r][c]:
                 hub.display.pixel(r, c, 100)
 
 def draw_music():
+    """Słupki equalizer — dla muzyki nie robimy rotacji bo to dynamiczny pattern.
+    Jeśli po zamontowaniu słupki są poziome zamiast pionowych zmień na rotate_cw."""
     hub.display.off()
     for col in range(5):
         h = music_heights[col]
@@ -513,18 +538,47 @@ def menu_confirm():
 # HELPERS PRZYCISKÓW
 # ============================================================
 
+# Stany przycisków force z poprzedniego ticku — do debounce
+_prev_left  = False
+_prev_right = False
+
+def _read_buttons():
+    """Czyta stan przycisków E/F (ForceSensor) albo wbudowanych guzików huba.
+    Zwraca (left_pressed, right_pressed) jako bool.
+    Próg BTN_FORCE_THRESHOLD [N] eliminuje przypadkowe dotknięcia.
+    """
+    if _has_force_btns:
+        try:
+            left  = _btn_left.pressed(BTN_FORCE_THRESHOLD)
+            right = _btn_right.pressed(BTN_FORCE_THRESHOLD)
+            return left, right
+        except Exception:
+            pass
+    # fallback — wbudowane guziki
+    pressed = hub.buttons.pressed()
+    return (Button.LEFT in pressed), (Button.RIGHT in pressed)
+
 def is_held(button, ms):
+    """Czeka czy dany przycisk jest trzymany przez ms milisekund.
+    button: 'left' lub 'right' (string) — nie Button enum.
+    """
     elapsed = 0
-    while button in hub.buttons.pressed():
+    while True:
+        left, right = _read_buttons()
+        still_held = (left if button == 'left' else right)
+        if not still_held:
+            return False
         wait(ANIM_TICK_MS)
         elapsed += ANIM_TICK_MS
         update_anim()
         if elapsed >= ms:
             return True
-    return False
 
 def wait_release_all():
-    while hub.buttons.pressed():
+    while True:
+        left, right = _read_buttons()
+        if not left and not right:
+            break
         wait(ANIM_TICK_MS)
         update_anim()
 
@@ -560,14 +614,16 @@ while True:
         if scan_tick >= SCAN_STEP_MS:
             scan_tick = 0
             check_wake()
-        if hub.buttons.pressed():
+        _sl, _sr = _read_buttons()
+        if _sl or _sr or hub.buttons.pressed():
             poke_activity()
             exit_sleep()
         wait(ANIM_TICK_MS)
         continue
 
     if in_attract:
-        if hub.buttons.pressed():
+        _al, _ar = _read_buttons()
+        if _al or _ar or hub.buttons.pressed():
             poke_activity()
             wait_release_all()
             wait(DEBOUNCE_MS)
@@ -582,44 +638,54 @@ while True:
         wait(ANIM_TICK_MS)
         continue
 
-    pressed = hub.buttons.pressed()
+    left_now, right_now = _read_buttons()
 
     if in_menu:
-        if Button.RIGHT in pressed:
+        # W menu: RIGHT = cykl, LEFT = potwierdź.
+        # Hold nie jest potrzebny w menu — krótkie naciśnięcie wystarczy.
+        if right_now:
             poke_activity()
             wait_release_all()
             wait(DEBOUNCE_MS)
             menu_cycle()
-        elif Button.LEFT in pressed:
+        elif left_now:
             poke_activity()
             wait_release_all()
             wait(DEBOUNCE_MS)
             menu_confirm()
 
     else:
-        for (btn, short_action, long_action) in HUB_BUTTONS:
-            if btn in pressed:
-                poke_activity()
-                if is_held(btn, HOLD_TIME_MS):
-                    hub.speaker.beep(
-                        frequency=1000 if btn == Button.RIGHT else 500,
-                        duration=200
-                    )
-                    wait_release_all()
-                    wait(DEBOUNCE_MS)
-                    if long_action == "MODE":
-                        open_menu()
-                    else:
-                        print(long_action)
-                else:
-                    hub.speaker.beep(
-                        frequency=880 if btn == Button.RIGHT else 440,
-                        duration=100
-                    )
-                    wait_release_all()
-                    wait(DEBOUNCE_MS)
-                    print(short_action)
-                break
+        # Poza menu: krótkie = akcja, długie (hold) = akcja alternatywna.
+        # is_held() liczy czas OD momentu wykrycia naciśnięcia.
+        # Ważne: is_held kontynuuje czytać _read_buttons() w pętli — działa na E/F i na hubie.
+        if right_now:
+            poke_activity()
+            if is_held('right', HOLD_TIME_MS):
+                # Długie RIGHT — powtórz definicję / przeczytaj metadata / zmień poziom
+                hub.speaker.beep(frequency=1000, duration=200)
+                wait_release_all()
+                wait(DEBOUNCE_MS)
+                print("ACTION_HOLD")
+            else:
+                # Krótkie RIGHT — YES / następny / push-to-talk
+                hub.speaker.beep(frequency=880, duration=100)
+                wait_release_all()
+                wait(DEBOUNCE_MS)
+                print("YES")
+        elif left_now:
+            poke_activity()
+            if is_held('left', HOLD_TIME_MS):
+                # Długie LEFT — otwórz menu trybów
+                hub.speaker.beep(frequency=500, duration=200)
+                wait_release_all()
+                wait(DEBOUNCE_MS)
+                open_menu()
+            else:
+                # Krótkie LEFT — NO / poprzedni / anuluj
+                hub.speaker.beep(frequency=440, duration=100)
+                wait_release_all()
+                wait(DEBOUNCE_MS)
+                print("NO")
 
     update_anim()
     wait(ANIM_TICK_MS)

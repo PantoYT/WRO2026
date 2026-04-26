@@ -1,6 +1,7 @@
 # WRO2026 — Esperanto Flashcard Robot
 # Instalacja:
 #   pip install -r requirements.txt
+#   python3 -m venv espero_env && pip install -r requirements.txt
 
 # --- Core ---
 pybricks
