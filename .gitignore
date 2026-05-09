@@ -1,9 +1,14 @@
 assets/
+docs/
+
+espero_env/
+.venv/
 *.7z
-*.docx
+
 tools/
+
 __pycache__/
+
 *.pyc
 *.json
 *.env
-.venv/

@@ -2,6 +2,7 @@
 # Instalacja:
 #   pip install -r requirements.txt
 #   python3 -m venv espero_env && pip install -r requirements.txt
+# .\espero_env\Scripts\activate
 
 # --- Core ---
 pybricks

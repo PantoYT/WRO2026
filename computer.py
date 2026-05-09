@@ -75,7 +75,7 @@ _DEFAULT_CONFIG = {
     "audio_activity_db":     -30,
     "audio_sample_rate":     16000,
     "audio_record_seconds":  6,
-    "inactivity_timeout_s":  60,
+    "inactivity_timeout_s":  600,
     "conv_history_turns":    8,
     "speaker_volume":        20,
 }
@@ -168,9 +168,81 @@ def _ensure_mixer():
 _signal_queue: queue.Queue = queue.Queue()
 _speaking = False
 
+# Event ustawiany gdy attract (lub inny tryb) chce natychmiast zatrzymać TTS.
+# Używaj _request_tts_stop() zamiast ustawiać Event bezpośrednio.
+_tts_stop_event = threading.Event()
+
+
+def _request_tts_stop():
+    """Zatrzymuje bieżące odtwarzanie TTS tak szybko jak możliwe."""
+    _tts_stop_event.set()
+    try:
+        if pygame.mixer.get_init():
+            pygame.mixer.music.stop()
+    except Exception:
+        pass
+
+
+def eo_to_pl_phonetic(text: str) -> str:
+    """Transkrybuje esperanto na fonetyczny polski dla gTTS (wzorowane na Parol/vocx Martina Rue).
+
+    Algorytm:
+      1. Litery specjalne (ĉ ŝ ĝ ĵ ĥ ŭ) chowamy pod placeholdery z Unicode PUA
+         żeby nie kolidowały z regułą c→ts.
+      2. Sekwencje samogłoskowe: io→ijo, ia→ija, ie→ije (oddzielna sylaba).
+      3. c→ts (esperanckie c = [ts], polskie TTS nie wie o tym).
+      4. Przywracamy placeholdery → finalne polskie sekwencje.
+
+    Źródło reguł: https://github.com/martinrue/vocx (MIT Licence, Martin Rue).
+    """
+    # Placeholdery z Unicode Private Use Area — nie mogą wystąpić w normalnym tekście
+    specials = [
+        ("ĉ", "\uE000"), ("Ĉ", "\uE001"),
+        ("ŝ", "\uE002"), ("Ŝ", "\uE003"),
+        ("ĝ", "\uE004"), ("Ĝ", "\uE005"),
+        ("ĵ", "\uE006"), ("Ĵ", "\uE007"),
+        ("ĥ", "\uE008"), ("Ĥ", "\uE009"),
+        ("ŭ", "\uE00A"), ("Ŭ", "\uE00B"),
+    ]
+    result = text
+    for src, ph in specials:
+        result = result.replace(src, ph)
+
+    # Sekwencje samogłoskowe — i przed samogłoską tworzy oddzielną sylabę
+    result = result.replace("io", "ijo").replace("Io", "Ijo").replace("IO", "IJO")
+    result = result.replace("ia", "ija").replace("Ia", "Ija")
+    result = result.replace("ie", "ije").replace("Ie", "Ije")
+
+    # c → ts (teraz bezpieczne — ĉ jest schowane jako \uE000)
+    result = result.replace("c", "ts").replace("C", "Ts")
+
+    # Przywróć placeholdery → finalne polskie sekwencje
+    finals = [
+        ("\uE000", "cz"), ("\uE001", "Cz"),
+        ("\uE002", "sz"), ("\uE003", "Sz"),
+        ("\uE004", "dż"), ("\uE005", "Dż"),
+        ("\uE006", "ż"),  ("\uE007", "Ż"),
+        ("\uE008", "h"),  ("\uE009", "H"),
+        ("\uE00A", "ł"),  ("\uE00B", "Ł"),
+    ]
+    for ph, dst in finals:
+        result = result.replace(ph, dst)
+
+    return result
+
 
 def _speak(text: str, lang: str = "en"):
     global _speaking
+    # Nie mów nic jeśli ktoś już zażądał zatrzymania
+    if _tts_stop_event.is_set():
+        return
+    # gTTS nie obsługuje 'eo' — transkrybuj esperanto na fonetyczny polski
+    # używając reguł wzorowanych na projekcie Parol/vocx (Martin Rue, MIT).
+    # Polski TTS + fonetyczna transkrypcja daje znacznie lepszy wynik niż
+    # puszczanie tekstu esperanckiego bezpośrednio przez polski głos.
+    if lang == "eo":
+        text = eo_to_pl_phonetic(text)
+        lang = "pl"
     try:
         tts = gTTS(text=text, lang=lang)
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
@@ -183,7 +255,7 @@ def _speak(text: str, lang: str = "en"):
         try:
             while pygame.mixer.music.get_busy():
                 pygame.time.wait(50)
-                if not _signal_queue.empty():
+                if _tts_stop_event.is_set():
                     pygame.mixer.music.stop()
                     break
         finally:
@@ -427,18 +499,28 @@ class FlashcardsMode(Mode):
         pronunciation = self.current.get("pronunciation", "")
         print(f"[FC] Word: {word}  [{pronunciation}]  ({unit})" if pronunciation
               else f"[FC] Word: {word}  ({unit})")
+        # Słowo esperanckie: dwa razy (przez PL TTS — najbliższe fonetyce eo)
         _speak(word, lang="eo")
+        _speak(word, lang="eo")
+        # Wymowa fonetyczna po angielsku jako podpowiedź
         if pronunciation:
-            _speak(pronunciation, lang="en")
+            _speak(f"Pronunciation: {pronunciation}", lang="en")
 
     def _speak_definition(self):
+        word        = self.current.get("word", "")
         translation = self.current.get("translation", "")
+        definition  = self.current.get("definition", "")
         parts = translation.split(" / ")
-        en = parts[0].strip() if parts else self.current.get("definition", "")
+        en = parts[0].strip() if parts else definition
         pl = parts[1].strip() if len(parts) > 1 else ""
         print(f"[FC] Definition: {en} | {pl}")
-        if en: _speak(en, lang="en")
+        # Powtórz słowo jeszcze raz przed definicją
+        _speak(word, lang="eo")
+        if en: _speak(f"means: {en}", lang="en")
         if pl: _speak(pl, lang="pl")
+        # Jeśli jest rozszerzona definicja — przeczytaj ją
+        if definition and definition.lower() not in (en.lower(), pl.lower()):
+            _speak(definition, lang="en")
 
     def on_yes(self):
         ACTIVITY.poke()
@@ -762,9 +844,13 @@ class A0LessonMode(Mode):
             return
         word, pronunciation, meaning, lang = steps[self.step_idx]
         print(f"[A0] Step {self.step_idx + 1}/{len(steps)}: {word}")
+        # Słowo esperanckie dwa razy (PL TTS ≈ fonetyka eo)
         _speak(word, lang="eo")
+        _speak(word, lang="eo")
+        # Wymowa fonetyczna jako podpowiedź
         if pronunciation:
-            _speak(pronunciation, lang="en")
+            _speak(f"Pronunciation: {pronunciation}", lang="en")
+        # Znaczenie
         _speak(meaning, lang=lang)
         _speak("Press YES to continue, NO to hear it again.", lang="en")
 
@@ -941,7 +1027,7 @@ class ConversationMode(Mode):
     def _cycle_difficulty(self):
         self.difficulty_idx = (self.difficulty_idx + 1) % len(_DIFFICULTY_LABELS)
         print(f"[CONV] Difficulty → {self.difficulty}")
-        _speak(f"Nivelo {self.difficulty}", lang="en")
+        _speak(f"Nivelo {self.difficulty}", lang="eo")
 
     def _get_whisper(self):
         if self._whisper_model is None:
@@ -1020,7 +1106,7 @@ class ConversationMode(Mode):
             if not user_text:
                 whisper = self._get_whisper()
                 if whisper is None:
-                    _speak("Pardonu, mi ne povas aŭdi.", lang="en")
+                    _speak("Pardonu, mi ne povas aŭdi.", lang="eo")
                     return
                 audio_float = audio.astype(np.float32) / 32768.0
                 segments, info = whisper.transcribe(audio_float, language=None)  # H4: autodetekcja zamiast "it"
@@ -1029,7 +1115,7 @@ class ConversationMode(Mode):
 
             if not user_text:
                 print("[CONV] No speech detected.")
-                _speak("Mi ne aŭdis vin. Bonvolu paroli denove.", lang="en")
+                _speak("Mi ne aŭdis vin. Bonvolu paroli denove.", lang="eo")
                 return
 
             print(f"[CONV] User said: {user_text!r}")
@@ -1042,7 +1128,7 @@ class ConversationMode(Mode):
             api_key = CFG.get("groq_api_key", "")
             if not api_key:
                 print("[CONV] No GROQ_API_KEY set!")
-                _speak("Mankas la API-ŝlosilo. Bonvolu agordi config.json.", lang="en")
+                _speak("Mankas la API-ŝlosilo. Bonvolu agordi config.json.", lang="eo")
                 return
 
             reply = _groq_chat(history=self.history, system=self.system_prompt,
@@ -1062,10 +1148,10 @@ class ConversationMode(Mode):
                     " — Ĉu vi volas aŭdi muzikon aŭ poezion en Esperanto? "
                     "Premu la dekstran butonon por jes."
                 )
-                _speak(reply_with_offer, lang="en")
+                _speak(reply_with_offer, lang="eo")
             else:
                 self._pending_media_offer = False
-                _speak(reply, lang="en")
+                _speak(reply, lang="eo")
 
         finally:
             with self._lock:
@@ -1078,7 +1164,7 @@ class ConversationMode(Mode):
             print("[CONV] WARNING: groq_api_key not set.")
         print(f"[CONV] Ready. Difficulty: {self.difficulty}. Press YES to speak.")
         _speak("Saluton! Mi estas via esperanto-konversaciisto. "
-               "Premu la dekstran butonon por paroli.", lang="en")
+               "Premu la dekstran butonon por paroli.", lang="eo")
         # Preload wav2vec2 w tle (pierwsze uruchomienie pobiera ~1GB)
         threading.Thread(target=self._get_wav2vec2, daemon=True).start()
         threading.Thread(target=self._get_whisper, daemon=True).start()
@@ -1103,7 +1189,7 @@ class ConversationMode(Mode):
                 return
         self.history = []
         print("[CONV] History cleared.")
-        _speak("Konversacio rekomencita.", lang="en")
+        _speak("Konversacio rekomencita.", lang="eo")
 
     def on_action_hold(self):
         ACTIVITY.poke()
@@ -1114,7 +1200,7 @@ class ConversationMode(Mode):
             pygame.mixer.music.stop()
 
     def on_wake(self):
-        _speak("Saluton denove!", lang="en")
+        _speak("Saluton denove!", lang="eo")
 
 # ============================================================
 # ATTRACT MODE  (Mode 4 — WRO Obszar 3)
@@ -1292,7 +1378,10 @@ class AttractMode(Mode):
 
         intro_text, intro_lang = random.choice(_ATTRACT_QUIZ_INTROS)
         word, en_meaning, pl_meaning = random.choice(_ATTRACT_TEASER_WORDS)
-        _speak(intro_text + word, lang=intro_lang)
+        # Intro osobno, potem słowo przez PL TTS (≈ fonetyka esperanto)
+        _speak(intro_text, lang=intro_lang)
+        _speak(word, lang="eo")
+        _speak(word, lang="eo")
         if self._sleep_check(2.5): return
 
         _speak(f"It means: {en_meaning}!", lang="en")
@@ -1360,9 +1449,11 @@ class AttractMode(Mode):
         _speak(fact_text, lang=fact_lang)
         if self._stop_flag: return
 
-        # bonus: jedno słówko
+        # bonus: jedno słówko — słowo przez PL TTS
         word, en_meaning, pl_meaning = random.choice(_ATTRACT_TEASER_WORDS)
-        _speak(f"A przy okazji — '{word}' znaczy '{pl_meaning}'!", lang="pl")
+        _speak("A przy okazji — słowo", lang="pl")
+        _speak(word, lang="eo")
+        _speak(f"znaczy: {pl_meaning}!", lang="pl")
         if self._stop_flag: return
 
         cta_text, cta_lang = random.choice(_ATTRACT_CTAS)
@@ -1377,7 +1468,9 @@ class AttractMode(Mode):
         # quiz
         intro_text, intro_lang = random.choice(_ATTRACT_QUIZ_INTROS)
         word, en_meaning, pl_meaning = random.choice(_ATTRACT_TEASER_WORDS)
-        _speak(intro_text + word, lang=intro_lang)
+        _speak(intro_text, lang=intro_lang)
+        _speak(word, lang="eo")
+        _speak(word, lang="eo")
         if self._sleep_check(2.5): return
         _speak(f"It means: {en_meaning}!", lang="en")
         _speak(f"Po polsku: {pl_meaning}!", lang="pl")
@@ -1433,12 +1526,14 @@ class AttractMode(Mode):
     def on_enter(self):
         self._stop_flag = False
         self._active    = True
+        _tts_stop_event.clear()   # skasuj ewentualne poprzednie żądanie stopu
         print("[ATTRACT] Active.")
         threading.Thread(target=self._loop, daemon=True).start()
 
     def _stop_sequence(self):
         self._active    = False
         self._stop_flag = True
+        _request_tts_stop()
         if pygame.mixer.get_init():
             pygame.mixer.music.stop()
 
@@ -1461,11 +1556,22 @@ class AttractMode(Mode):
     def on_yes(self):
         self._stop_sequence()
         ACTIVITY.poke()
+        # Poczekaj chwilę aż wątek _loop zakończy bieżącą sekwencję
+        for _ in range(40):
+            if not self._speaking:
+                break
+            time.sleep(0.1)
+        _tts_stop_event.clear()
         self._speak_instructions()
 
     def on_no(self):
         self._stop_sequence()
         ACTIVITY.poke()
+        for _ in range(40):
+            if not self._speaking:
+                break
+            time.sleep(0.1)
+        _tts_stop_event.clear()
         self._speak_instructions()
 
     def on_action_hold(self):
@@ -1546,6 +1652,15 @@ class ModeManager:
                 self.current._stop_sequence()
             elif hasattr(self.current, "_stop"):
                 self.current._stop()
+            # Jeśli opuszczamy attract (lub cokolwiek) — upewnij się że TTS jest zatrzymany
+            # Poczekaj krótko aż wątek attract się zatrzyma
+            if isinstance(self.current, AttractMode):
+                for _ in range(30):
+                    if not self.current._speaking:
+                        break
+                    time.sleep(0.1)
+        # Skasuj stop-event przed wejściem w nowy tryb, żeby _speak działał normalnie
+        _tts_stop_event.clear()
         self.current_idx = idx
         self._started    = True
         print(f"[MGR] {old} → {self.current.name}")
@@ -1576,7 +1691,9 @@ class ModeManager:
             if isinstance(self.current, AttractMode):
                 self.current.on_attract_timeout()
         elif signal == "ATTRACT_EXIT":
-            pass  # hub otwiera menu sam
+            # Hub otwiera menu sam, ale PC musi natychmiast zatrzymać attract
+            if isinstance(self.current, AttractMode):
+                self.current._stop_sequence()
         elif signal in ("ATTRACT_SPEAKING", "ATTRACT_IDLE"):
             pass  # sygnały dla huba — ignoruj na PC
         elif signal.startswith("MODE:"):

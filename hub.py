@@ -19,7 +19,7 @@ MUSIC_FRAME_MS = 150
 NUM_MODES = 6  # FC, POEMS, MUSIC, CONVERSATION, ATTRACT, A0_LESSON
 
 # --- Sleep / wake ---
-INACTIVITY_TIMEOUT_MS = 60_000
+INACTIVITY_TIMEOUT_MS = 60_000_000
 WAKE_DISTANCE_CM      = 200
 ATTRACT_LOST_MS       = 30_000
 SCAN_ANGLE_MAX        = 180
@@ -32,11 +32,16 @@ SCAN_OFFSET_DEG = 15
 # --- Porty ---
 DISTANCE_PORT   = Port.A
 SCAN_MOTOR_PORT = Port.B
+FLAG_MOTOR_PORT = Port.D
 BTN_LEFT_PORT   = Port.E   # Zewnętrzny przycisk LEWY  — NO / MODE
 BTN_RIGHT_PORT  = Port.F   # Zewnętrzny przycisk PRAWY — YES / ACTION_HOLD
 
 # Próg nacisku ForceSensor [N]; ~3 = wyraźne naciśnięcie, nie przypadkowe
 BTN_FORCE_THRESHOLD = 1
+
+# --- Flaga ---
+FLAG_SPEED    = 30   # stopni/s — wolno
+FLAG_ANGLE_CW = 10   # stopni zgodnie z zegarem (max wychylenie)
 
 # ============================================================
 # IKONY TRYBÓW
@@ -211,6 +216,16 @@ except Exception:
     _has_motor = False
     print("scan motor not found on port B — scanning disabled")
 
+try:
+    _flag_motor = Motor(FLAG_MOTOR_PORT, Direction.CLOCKWISE)
+    _flag_motor.reset_angle(0)
+    _has_flag = True
+    print("Flag motor on D ready")
+except Exception:
+    _flag_motor = None
+    _has_flag = False
+    print("flag motor not found on port D — flag disabled")
+
 # ============================================================
 # STAN
 # ============================================================
@@ -231,6 +246,9 @@ attract_anim_ms     = 0
 attract_lost_ms     = 0
 attract_speaking    = False
 ATTRACT_ANIM_FRAME_MS = 400
+
+# --- Stan flagi ---
+_flag_dir = 1   # 1 = CW do +FLAG_ANGLE_CW,  -1 = CCW z powrotem do 0
 
 # ============================================================
 # ACTIVITY
@@ -597,12 +615,38 @@ def handle_pc_signal(line):
             draw_conv_idle()
 
 # ============================================================
+# FLAGA
+# ============================================================
+
+def tick_flag():
+    """Wahadło flagi: 0° → +FLAG_ANGLE_CW° → 0° → ... w nieskończoność.
+    Wywoływane co tick (50 ms). Nie blokuje pętli — run_target z wait=False.
+    """
+    global _flag_dir
+    if not _has_flag:
+        return
+    try:
+        angle = _flag_motor.angle()
+        if _flag_dir == 1 and angle >= FLAG_ANGLE_CW:
+            _flag_dir = -1
+            _flag_motor.run_target(FLAG_SPEED, 0, wait=False)
+        elif _flag_dir == -1 and angle <= 0:
+            _flag_dir = 1
+            _flag_motor.run_target(FLAG_SPEED, FLAG_ANGLE_CW, wait=False)
+    except Exception:
+        pass
+
+# ============================================================
 # GŁÓWNA PĘTLA
 # ============================================================
 
 open_menu()
 poke_activity()
 print("READY")
+
+# Uruchom flagę od razu przy starcie
+if _has_flag:
+    _flag_motor.run_target(FLAG_SPEED, FLAG_ANGLE_CW, wait=False)
 
 scan_tick = 0
 
@@ -618,6 +662,7 @@ while True:
         if _sl or _sr or hub.buttons.pressed():
             poke_activity()
             exit_sleep()
+        tick_flag()
         wait(ANIM_TICK_MS)
         continue
 
@@ -630,11 +675,13 @@ while True:
             exit_attract_to_menu()
         else:
             tick_attract()
+        tick_flag()
         wait(ANIM_TICK_MS)
         continue
 
     if _elapsed_ms() - last_activity_ms >= INACTIVITY_TIMEOUT_MS:
         enter_sleep()
+        tick_flag()
         wait(ANIM_TICK_MS)
         continue
 
@@ -688,4 +735,5 @@ while True:
                 print("NO")
 
     update_anim()
+    tick_flag()
     wait(ANIM_TICK_MS)
