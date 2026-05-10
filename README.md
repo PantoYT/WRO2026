@@ -1,4 +1,4 @@
-# 🤖 Esperanto Flashcard Robot — WRO 2026 Future Innovators
+# 🤖 Espero-bot — WRO 2026 Future Innovators
 
 > *People love physical things. Learning through play is fun. Why not combine them to teach a language that could unite the world?*
 
@@ -36,24 +36,27 @@ The project addresses all three challenge areas:
 ┌─────────────────────────────────────────┐
 │           LEGO SPIKE Prime (hub.py)     │
 │                                         │
-│  Ultrasonic sensor  → detect presence   │
-│  Scanning motor     → sweep ±45°        │
-│  5×5 LED matrix     → mode display      │
-│  Speaker            → beeps & tones     │
-│  LEFT / RIGHT buttons → user input      │
+│  Ultrasonic sensor (A) → detect presence│
+│  Scanning motor    (B) → sweep ±45°     │
+│  Flag motor        (D) → wave flag      │
+│  ForceSensor LEFT  (E) → NO / menu      │
+│  ForceSensor RIGHT (F) → YES / action   │
+│  5×5 LED matrix        → mode display   │
+│  Speaker               → beeps & tones  │
 └──────────────┬──────────────────────────┘
                │  Bluetooth BLE (pybricksdev)
                │  hub prints signals → PC reads
                ▼
 ┌─────────────────────────────────────────┐
-│              PC (computer.py)           │
+│            PC / Steam Deck (computer.py)│
 │                                         │
 │  SM-2 algorithm     → flashcard order   │
 │  Adaptive queue     → media selection   │
 │  wav2vec2 (local)   → Esperanto STT     │
 │  faster-whisper     → fallback STT      │
 │  Groq LLM           → conversation AI   │
-│  gTTS + pygame      → text-to-speech    │
+│  gTTS + pygame-ce   → text-to-speech    │
+│  eo_to_pl_phonetic  → Eo TTS workaround │
 │  MP3 archive        → poems & music     │
 └─────────────────────────────────────────┘
 ```
@@ -64,17 +67,18 @@ The laptop is **fully compliant** with WRO rules: the category allows any number
 
 ---
 
-## Five Modes
+## Six Modes
 
 | Mode | What it does | How it decides |
 |---|---|---|
-| **FLASHCARDS** | Speaks an Esperanto word, user answers YES/NO | SM-2 spaced repetition — interval grows with each correct answer |
-| **POEMS** | Plays Esperanto poetry MP3s with metadata | Adaptive queue — weights by play count, recency, rating |
-| **MUSIC** | Plays Esperanto music MP3s with metadata | Same adaptive queue algorithm |
-| **CONVERSATION** | Live dialogue in Esperanto with AI | LLM adapts vocabulary to level (A1/B1/C1); detects cultural keywords and offers media transition |
-| **ATTRACT** | Greets passersby, plays quizzes, music snippets, facts | Randomized sequence engine; activates on motion detection |
+| **FLASHCARDS** (0) | Speaks an Esperanto word, user answers YES/NO. Unit filter supported. | SM-2 spaced repetition — interval grows with each correct answer. Session summary on exit. |
+| **POEMS** (1) | Plays Esperanto poetry MP3s with metadata | Adaptive queue — weights by play count, recency, rating |
+| **MUSIC** (2) | Plays Esperanto music MP3s with metadata | Same adaptive queue algorithm |
+| **CONVERSATION** (3) | Live dialogue in Esperanto with AI | LLM adapts vocabulary to level (A1/B1/C1); detects cultural keywords → offers media transition |
+| **ATTRACT** (4) | Greets passersby, plays quizzes, music snippets, facts | Randomised sequence engine; activates on motion detection |
+| **A0 LESSON** (5) | Scripted lessons (no AI): Greetings, Numbers, Culture, Technology. Fully offline. | Deterministic script; Technology lesson auto-switches flashcards to Technology filter |
 
-None of these decisions are pre-scripted. SM-2 calculates which word to show based on your answer history. The adaptive queue weights media by multiple factors. The LLM generates a unique response to every utterance.
+None of the decisions in modes 0–4 are pre-scripted. SM-2 calculates which word to show based on your answer history. The adaptive queue weights media by multiple factors. The LLM generates a unique response to every utterance.
 
 ---
 
@@ -82,11 +86,25 @@ None of these decisions are pre-scripted. SM-2 calculates which word to show bas
 
 This is the core argument for the WRO "autonomous decisions" criterion:
 
-**1. SM-2** decides *which word* to show and *when*, based on individual response history. The interval between reviews grows exponentially with correct answers — the robot builds a personalized model of what you know. When you leave the mode, it speaks a summary: *"8 correct, 4 wrong. Weakest word: pomo."*
+**1. SM-2** decides *which word* to show and *when*, based on individual response history. The easiness factor and interval grow exponentially with correct answers — the robot builds a personalised model of what you know. When you leave the mode, it speaks a summary: *"8 correct, 4 wrong. Weakest word: pomo."*
 
-**2. Adaptive media queue** picks the next poem or music track based on `play_count`, `last_played`, and `rating`. A track played recently is deprioritized; a highly rated one is upweighted. No two sessions are the same.
+**2. Adaptive media queue** picks the next poem or music track based on `play_count`, `last_played`, and `rating`. Formula: `weight = (5/play_count + recency_bonus × 0.3) × rating_multiplier`. A track played recently is deprioritised; a highly rated one is upweighted. No two sessions are the same.
 
 **3. LLM in ConversationMode** generates a unique response to every utterance, adapts its vocabulary to the user's level (A1/B1/C1), and detects cultural context — if the reply contains keywords like *muziko*, *poezio*, *kulturo*, it proactively offers to transition to the relevant media mode.
+
+---
+
+## Hardware
+
+| Component | Port | Function |
+|---|---|---|
+| Hub SPIKE Prime | — | Control centre: LED matrix, speaker, I/O, BLE |
+| Ultrasonic sensor | A | Detects human presence up to ~200 cm; last-good-value cache eliminates false `None` |
+| Scanning motor | B | Sweeps ±45° + 15° mount offset; debounce eliminates jitter |
+| Flag motor | D | Pendulum animation 0°→+10° waves the Esperanto flag |
+| ForceSensor LEFT | E | Short = NO / previous; Long (800 ms) = open mode menu |
+| ForceSensor RIGHT | F | Short = YES / next / push-to-talk; Long = repeat definition / metadata / change level |
+| PC / Steam Deck | BLE ↔ hub | wav2vec2 STT, gTTS, SM-2, adaptive queue, Groq API, pygame-ce |
 
 ---
 
@@ -119,12 +137,13 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
 .
 ├── hub.py                          # SPIKE Prime firmware (MicroPython/Pybricks)
 ├── computer.py                     # PC logic (Python 3.11+)
+├── requirements.txt                # Python dependencies (pip install -r requirements.txt)
 ├── config.json                     # API keys & runtime config (not committed)
 ├── tools/
-│   └── import_wordlist.py          # Digitization tool: TSV/CSV → wordlist.json
+│   └── import_wordlist.py          # Digitisation tool: TSV/CSV → wordlist.json
 └── assets/
     ├── flashcards/
-    │   └── wordlist.json           # Esperanto word list with SM-2 state per word
+    │   └── wordlist.json           # 122 words in 10 thematic units, with SM-2 state
     ├── poems/
     │   ├── poems.json              # Metadata: title, author, year, themes
     │   └── *.mp3                   # Esperanto poetry audio files
@@ -138,10 +157,13 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
 {
   "word": "espero",
   "translation": "hope / nadzieja",
+  "pronunciation": "es-PE-ro",
+  "unit": "Culture",
+  "part_of_speech": "noun",
   "sr_ease": 2.5,
   "sr_interval": 3,
   "sr_repetitions": 2,
-  "next_review": "2026-03-24T10:00:00",
+  "next_review": "2026-05-12T10:00:00",
   "correct_count": 5,
   "wrong_count": 1
 }
@@ -171,12 +193,19 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
 ### Requirements
 - Python 3.11+
 - LEGO SPIKE Prime with [Pybricks firmware](https://code.pybricks.com)
-- Bluetooth enabled on PC
+- Bluetooth LE enabled on PC (BlueZ on Linux / built-in on Steam Deck)
 
 ### Install
 ```bash
-pip install pybricksdev gtts pygame sounddevice numpy faster-whisper groq transformers torch
+# Recommended: virtual environment
+python3 -m venv espero_env
+source espero_env/bin/activate        # Linux / macOS / Steam Deck
+# .\espero_env\Scripts\activate       # Windows
+
+pip install -r requirements.txt
 ```
+
+> **Note on `torch`:** the first `pip install` downloads ~2 GB (PyTorch + wav2vec2 model). Subsequent runs use the local cache — startup is fast after the first time.
 
 ### Config
 Create `config.json` in the project root:
@@ -186,9 +215,12 @@ Create `config.json` in the project root:
   "groq_model": "llama-3.3-70b-versatile",
   "whisper_model": "base",
   "whisper_device": "cpu",
-  "audio_record_seconds": 6
+  "audio_record_seconds": 6,
+  "audio_activity_db": -30
 }
 ```
+
+Alternatively, set `GROQ_API_KEY` as an environment variable (or in a `.env` file — `python-dotenv` is included).
 
 ### Run
 ```bash
@@ -196,9 +228,9 @@ python computer.py
 ```
 The script connects to the hub over BLE automatically, retrying up to 3 times on failure.
 
-### Digitize a dictionary (Pont 4 — digitalization tool)
+### Digitise a dictionary (digitisation tool)
 ```bash
-# Import from TSV (word<TAB>translation en / pl)
+# Import from TSV (word<TAB>translation / pl)
 python tools/import_wordlist.py my_dictionary.tsv
 
 # Preview without writing anything
@@ -219,47 +251,72 @@ Legal Esperanto music and poetry sources: [Jamendo](https://jamendo.com), [Vinil
 | **RIGHT** | YES / Correct / Next track / Push-to-talk | Repeat definition / Read metadata / Change difficulty |
 | **LEFT** | NO / Wrong / Previous track / Cancel turn | Open mode menu |
 
-**In menu:** RIGHT cycles through modes, LEFT confirms.
+**In menu:** RIGHT cycles through modes (0–5), LEFT confirms.
+
+---
+
+## BLE Signal Protocol (hub → PC)
+
+| Signal | Meaning |
+|---|---|
+| `YES` | FC: correct \| MEDIA: next \| CONV: push-to-talk \| ATTRACT: instructions |
+| `NO` | FC: wrong \| MEDIA: previous \| CONV: cancel \| ATTRACT: skip |
+| `ACTION_HOLD` | FC: repeat definition \| MEDIA: read metadata \| CONV: change level |
+| `MODE:<n>` | Switch to mode n (0–5) |
+| `SLEEP` | Hub entering sleep (inactivity timeout) |
+| `WAKE` | Hub detected presence → enters ATTRACT |
+| `ATTRACT_ENTER` | Hub confirmed attract mode active |
+| `ATTRACT_LOST` | Nobody in range for 30 s → go back to sleep |
+| `ATTRACT_EXIT` | Button pressed in attract → stop immediately, open menu |
+| `FILTER:<unit>` | Set flashcard filter (e.g. `FILTER:Technology`) → switch to FLASHCARDS |
+| `LESSON_FILTER:<unit>` | After A0 lesson → switch flashcards to given unit filter |
 
 ---
 
 ## Roadmap — Implementation Status
 
-All items from ROADMAP.md are now implemented:
-
 | ID | Description | Status |
 |---|---|---|
 | H1 | Typo fix: `riди` → `ridi` in attract word list | ✅ done |
-| H2 | Scan motor debounce — `run_target()` only fires on target change, eliminates jitter | ✅ done |
-| H3 | Distance sensor last-good-value cache — eliminates false "nobody there" on transient None | ✅ done |
+| H2 | Scan motor debounce — `run_target()` only fires on target change | ✅ done |
+| H3 | Distance sensor last-good-value cache — eliminates false `None` | ✅ done |
 | H4 | Whisper fallback language `"it"` → `None` (auto-detection) | ✅ done |
-| H5 | Session summary spoken on FlashcardsMode exit: correct / wrong / weakest word | ✅ done |
+| H5 | Session summary spoken on FlashcardsMode exit | ✅ done |
 | P2 | Context-aware CONV→MEDIA transition on cultural keywords in LLM reply | ✅ done |
-| P4 | `tools/import_wordlist.py` — TSV/CSV digitization tool with dedup and dry-run | ✅ done |
+| P4 | `tools/import_wordlist.py` — TSV/CSV digitisation tool with dedup and dry-run | ✅ done |
 | P3 | README narrative — SDG 17, slogan, cultural statement | ✅ this file |
-
-Remaining lower-priority items:
-- **P6** — Test `lang="eo"` (Esperanto TTS) in gTTS; switch if audio quality is acceptable. Hook already in `_speak()`.
-- **P7** — Populate `poems.json` and `music.json` with 2–3 real entries before competition day.
+| **P6** | Test `lang="eo"` (Esperanto TTS) in gTTS — hook ready in `_speak()` | 🔄 pending |
+| **P7** | Populate `poems.json` and `music.json` with 2–3 real entries before competition | 🔄 pending |
 
 ---
 
 ## For Judges
 
 **"How does the robot make autonomous decisions?"**
-Three independent layers: SM-2 calculates flashcard intervals from your individual answer history. The adaptive queue weighs media by play count, recency, and rating. The LLM generates a unique reply to every spoken sentence and now also detects whether the conversation touches on Esperanto culture — offering to play relevant media without any prompt from the user.
+Three independent layers: SM-2 calculates flashcard intervals from your individual answer history. The adaptive queue weighs media by play count, recency, and rating. The LLM generates a unique reply to every spoken sentence and detects whether the conversation touches on Esperanto culture — offering to play relevant media without any prompt from the user.
 
 **"Why Esperanto?"**
 An Esperanto speaker we consulted told us directly: quality materials are hard to find. Esperanto has no country and no institution to protect it. This robot is a concrete response to that gap.
 
 **"Why a laptop and not a Raspberry Pi?"**
-SPIKE Prime handles all physical I/O — sensors, motor, LED, buttons. The laptop handles compute-heavy tasks: a 1GB speech recognition model (wav2vec2), real-time TTS synthesis, and LLM API calls. Splitting by capability is a deliberate engineering choice. A Raspberry Pi could do the same job but would make development slower and demos less reliable — there is no technical or regulatory reason to change.
+SPIKE Prime handles all physical I/O — sensors, motors, LED, buttons. The laptop handles compute-heavy tasks: a ~1 GB speech recognition model (wav2vec2), real-time TTS synthesis, and LLM API calls. Splitting by capability is a deliberate engineering choice. A Raspberry Pi could do the same job but would make development slower and demos less reliable — there is no technical or regulatory reason to change.
 
 **"Does it work offline?"**
-Flashcards, poems, music — fully offline. Conversation requires internet (Groq API). Speech recognition (wav2vec2) runs locally on the laptop.
+Flashcards, poems, music, A0 lessons — fully offline. Conversation requires internet (Groq API). Speech recognition (wav2vec2) runs locally on the laptop.
+
+**"What AI systems were used?"**
+
+| System | Purpose | Scope |
+|---|---|---|
+| Groq / LLaMA 3.3 70B | ConversationMode responses | Cloud API; requires internet |
+| wav2vec2-large-xlsr-53-eo | Esperanto speech recognition (primary STT) | Local, offline, CC-BY 4.0 |
+| faster-whisper | Fallback STT (auto language detection) | Local, offline, MIT |
+| SM-2 algorithm | Flashcard scheduling | Local, public domain |
+| Claude (Anthropic) | Code debugging during development | Not in the robot itself |
+| ChatGPT (OpenAI) | Subject matter support during development | Not in the robot itself |
 
 **"What would you improve with more time?"**
-Esperanto TTS (`lang="eo"`) — the code path is ready, we need to test audio quality on the actual device. A larger curated word list imported from open Esperanto dictionaries using the digitization tool we built.
+Esperanto TTS (`lang="eo"`) — the code path is ready, we need to test audio quality on the actual device. A larger curated word list imported from open Esperanto dictionaries (ReVo, ESPDIC) using the digitisation tool we built. A local LLM (llama.cpp) so ConversationMode works offline too.
 
 ---
 
@@ -267,6 +324,7 @@ Esperanto TTS (`lang="eo"`) — the code path is ready, we need to test audio qu
 
 - Esperanto created by L. L. Zamenhof (1887) — public domain
 - SM-2 spaced repetition algorithm by Piotr Woźniak — public domain specification
-- wav2vec2 Esperanto STT model: [cpierse/wav2vec2-large-xlsr-53-esperanto](https://huggingface.co/cpierse/wav2vec2-large-xlsr-53-esperanto)
+- wav2vec2 Esperanto STT model: [cpierse/wav2vec2-large-xlsr-53-esperanto](https://huggingface.co/cpierse/wav2vec2-large-xlsr-53-esperanto) (CC-BY 4.0)
+- Phonetic transcription rules: [martinrue/vocx](https://github.com/martinrue/vocx) (MIT)
 - Legal music sources: Jamendo (CC licensed), Vinilkosmo
 - WRO 2026 Future Innovators — "Robots Meet Culture"

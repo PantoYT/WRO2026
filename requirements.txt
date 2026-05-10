@@ -1,35 +1,49 @@
-# WRO2026 — Esperanto Flashcard Robot
+# WRO2026 — Espero-bot · Esperanto Flashcard Robot
+# ====================================================
 # Instalacja:
 #   pip install -r requirements.txt
-#   python3 -m venv espero_env && pip install -r requirements.txt
-# .\espero_env\Scripts\activate
+#
+# Zalecane środowisko wirtualne:
+#   python3 -m venv espero_env
+#   source espero_env/bin/activate        # Linux / macOS / Steam Deck
+#   .\espero_env\Scripts\activate         # Windows
+#   pip install -r requirements.txt
+#
+# Uwaga: pybricksdev wymaga Python 3.10+ i Bluetooth LE (BlueZ na Linuxie).
 
-# --- Core ---
-pybricks
-pybricksdev
-gTTS
-pygame-ce
+# ─── Hub (LEGO SPIKE Prime) ──────────────────────────────────────────────────
+# pybricks     — biblioteki MicroPython uruchamiane NA hubie (nie instaluje się przez pip;
+#                firmware pobierany z code.pybricks.com i wgrywany do huba)
+pybricksdev>=1.0.0a49          # PC-side CLI: uruchamia hub.py przez BLE
 
-# --- STT warstwa 1: wav2vec2 fine-tuned na esperanto ---
-# Pobiera ~1GB model przy pierwszym uruchomieniu
-# (cache w ~/.cache/huggingface, kolejne starty natychmiastowe)
-transformers>=4.30
-torch
+# ─── Audio output (TTS) ──────────────────────────────────────────────────────
+gTTS>=2.5.1                    # Google Text-to-Speech → MP3
+pygame-ce>=2.4.0               # Odtwarzanie MP3 (TTS + archiwum muzyki/poezji)
+                               # pygame-ce = Community Edition, aktywnie rozwijana fork
 
-# --- STT warstwa 2: Whisper (fallback gdy wav2vec2 zwróci pusty string) ---
-# faster-whisper używa ctranslate2, NIE wymaga osobnego torch
-faster-whisper
+# ─── Audio input (mikrofon / STT) ────────────────────────────────────────────
+sounddevice>=0.4.7             # Nagrywanie z mikrofonu (InputStream)
+numpy>=1.24                    # Analiza RMS sygnału audio (detekcja aktywności)
 
-# --- Audio input (mikrofon) ---
-sounddevice
-numpy
+# ─── STT warstwa 1 — wav2vec2 fine-tuned na esperanto ────────────────────────
+# Model: cpierse/wav2vec2-large-xlsr-53-esperanto (~1 GB)
+# Pobierany przy pierwszym uruchomieniu do ~/.cache/huggingface/
+# Kolejne starty natychmiastowe (model zapamiętany lokalnie).
+transformers>=4.41             # Hugging Face pipeline (wav2vec2)
+torch>=2.0                     # Backend PyTorch (CPU; GPU opcjonalnie)
 
-# --- Groq SDK ---
-# Używa oficjalnego klienta zamiast urllib — omija blokadę Cloudflare (błąd 1010)
-groq
+# ─── STT warstwa 2 — Whisper (fallback) ──────────────────────────────────────
+# Używany gdy wav2vec2 zwróci niski confidence lub pusty string.
+# faster-whisper korzysta z ctranslate2 — NIE wymaga osobnego PyTorch.
+faster-whisper>=1.0.1
 
-# --- .env support (opcjonalne — przechowuje GROQ_API_KEY poza kodem) ---
-python-dotenv
+# ─── LLM / konwersacja ───────────────────────────────────────────────────────
+groq>=0.9.0                    # Oficjalny klient Groq API (LLaMA-3.3-70B)
+                               # Używa natywnego HTTPS zamiast urllib — omija blokadę CF 1010
 
-# --- Pobieranie muzyki/poezji (opcjonalne) ---
-yt-dlp
+# ─── Konfiguracja i środowisko ────────────────────────────────────────────────
+python-dotenv>=1.0             # Opcjonalne: wczytuje GROQ_API_KEY z pliku .env
+
+# ─── Narzędzia opcjonalne ─────────────────────────────────────────────────────
+yt-dlp                         # Pobieranie muzyki/poezji CC (Jamendo, YouTube)
+                               # Nie jest wymagane do działania robota

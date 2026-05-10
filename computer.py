@@ -1,6 +1,6 @@
 """
 WRO2026 — Esperanto Flashcard Robot
-computer.py — main PC logic
+computer.py — main PC logic (English-only source)
 
 Modes:
   0 — FLASHCARDS    (SM-2 spaced repetition + gTTS)
@@ -50,6 +50,28 @@ import numpy as np
 import sounddevice as sd
 
 # ============================================================
+# UI LANGUAGE SWITCH
+# "pl" → robot speaks Polish  (+ Esperanto)
+# "en" → robot speaks English (+ Esperanto)
+# ============================================================
+
+UI_LANG: str = "pl"   # change to "en" for English UI
+
+
+def _ui(en: str, pl: str) -> str:
+    """Return text in the active UI language."""
+    return pl if UI_LANG == "pl" else en
+
+
+def _speak_ui(en: str, pl: str):
+    """Speak text in the active UI language."""
+    if UI_LANG == "pl":
+        _speak(pl, lang="pl")
+    else:
+        _speak(en, lang="en")
+
+
+# ============================================================
 # PATHS
 # ============================================================
 
@@ -75,7 +97,7 @@ _DEFAULT_CONFIG = {
     "audio_activity_db":     -30,
     "audio_sample_rate":     16000,
     "audio_record_seconds":  6,
-    "inactivity_timeout_s":  600,
+    "inactivity_timeout_s":  180,
     "conv_history_turns":    8,
     "speaker_volume":        20,
 }
@@ -168,13 +190,11 @@ def _ensure_mixer():
 _signal_queue: queue.Queue = queue.Queue()
 _speaking = False
 
-# Event ustawiany gdy attract (lub inny tryb) chce natychmiast zatrzymać TTS.
-# Używaj _request_tts_stop() zamiast ustawiać Event bezpośrednio.
 _tts_stop_event = threading.Event()
 
 
 def _request_tts_stop():
-    """Zatrzymuje bieżące odtwarzanie TTS tak szybko jak możliwe."""
+    """Stop current TTS playback as fast as possible."""
     _tts_stop_event.set()
     try:
         if pygame.mixer.get_init():
@@ -184,18 +204,24 @@ def _request_tts_stop():
 
 
 def eo_to_pl_phonetic(text: str) -> str:
-    """Transkrybuje esperanto na fonetyczny polski dla gTTS (wzorowane na Parol/vocx Martina Rue).
+    """Transcribe Esperanto text to phonetic Polish for gTTS.
 
-    Algorytm:
-      1. Litery specjalne (ĉ ŝ ĝ ĵ ĥ ŭ) chowamy pod placeholdery z Unicode PUA
-         żeby nie kolidowały z regułą c→ts.
-      2. Sekwencje samogłoskowe: io→ijo, ia→ija, ie→ije (oddzielna sylaba).
-      3. c→ts (esperanckie c = [ts], polskie TTS nie wie o tym).
-      4. Przywracamy placeholdery → finalne polskie sekwencje.
+    Algorithm based on rules from the Parol/vocx project (Martin Rue, MIT Licence):
+      https://github.com/martinrue/vocx
 
-    Źródło reguł: https://github.com/martinrue/vocx (MIT Licence, Martin Rue).
+    Steps:
+      1. Special letters (ĉ ŝ ĝ ĵ ĥ ŭ) are hidden behind Unicode PUA placeholders
+         so they don't interfere with the c → ts rule.
+      2. Vowel sequences: io → ijo, ia → ija, ie → ije (separate syllable).
+      3. c → ts  (Esperanto c = [ts]; Polish TTS doesn't know this).
+      4. qu → kw (absorbed Latinisms).
+      5. Restore placeholders → final Polish sequences.
+      6. Extra fixes for PL TTS:
+           - final -on / -an / -en → -onn / -ann / -enn
+             (prevents nasal vowel rendering as in French)
+           - -aŭ / -eŭ (diphthongs) → -ał / -eł  (already handled via ŭ → ł)
     """
-    # Placeholdery z Unicode Private Use Area — nie mogą wystąpić w normalnym tekście
+    # Unicode Private Use Area placeholders
     specials = [
         ("ĉ", "\uE000"), ("Ĉ", "\uE001"),
         ("ŝ", "\uE002"), ("Ŝ", "\uE003"),
@@ -208,15 +234,19 @@ def eo_to_pl_phonetic(text: str) -> str:
     for src, ph in specials:
         result = result.replace(src, ph)
 
-    # Sekwencje samogłoskowe — i przed samogłoską tworzy oddzielną sylabę
-    result = result.replace("io", "ijo").replace("Io", "Ijo").replace("IO", "IJO")
-    result = result.replace("ia", "ija").replace("Ia", "Ija")
-    result = result.replace("ie", "ije").replace("Ie", "Ije")
+    # Vowel sequences
+    for src, dst in [("io", "ijo"), ("Io", "Ijo"), ("IO", "IJO"),
+                     ("ia", "ija"), ("Ia", "Ija"),
+                     ("ie", "ije"), ("Ie", "Ije")]:
+        result = result.replace(src, dst)
 
-    # c → ts (teraz bezpieczne — ĉ jest schowane jako \uE000)
+    # qu → kw (before c → ts substitution)
+    result = result.replace("qu", "kw").replace("Qu", "Kw").replace("QU", "KW")
+
+    # c → ts (safe — ĉ is hidden behind placeholder)
     result = result.replace("c", "ts").replace("C", "Ts")
 
-    # Przywróć placeholdery → finalne polskie sekwencje
+    # Restore placeholders → Polish sequences
     finals = [
         ("\uE000", "cz"), ("\uE001", "Cz"),
         ("\uE002", "sz"), ("\uE003", "Sz"),
@@ -228,26 +258,66 @@ def eo_to_pl_phonetic(text: str) -> str:
     for ph, dst in finals:
         result = result.replace(ph, dst)
 
+    # Prevent nasal vowel rendering of final -on/-an/-en by Polish TTS
+    import re
+    result = re.sub(r'on\b', 'onn', result)
+    result = re.sub(r'an\b', 'ann', result)
+    result = re.sub(r'en\b', 'enn', result)
+
     return result
 
 
 def _speak(text: str, lang: str = "en"):
+    """Synthesise speech and play via pygame.
+
+    Backend priority:
+      1. edge-tts (Microsoft Neural TTS — much more natural voice, free, async)
+         Install: pip install edge-tts
+         Falls back silently to gTTS if not available.
+      2. gTTS (Google TTS — robotic but reliable, requires internet)
+
+    Esperanto (lang='eo'):
+      Transcribed to phonetic Polish via eo_to_pl_phonetic() so that the
+      Polish TTS engine produces a far better result than any other voice.
+    """
     global _speaking
-    # Nie mów nic jeśli ktoś już zażądał zatrzymania
     if _tts_stop_event.is_set():
         return
-    # gTTS nie obsługuje 'eo' — transkrybuj esperanto na fonetyczny polski
-    # używając reguł wzorowanych na projekcie Parol/vocx (Martin Rue, MIT).
-    # Polski TTS + fonetyczna transkrypcja daje znacznie lepszy wynik niż
-    # puszczanie tekstu esperanckiego bezpośrednio przez polski głos.
     if lang == "eo":
         text = eo_to_pl_phonetic(text)
         lang = "pl"
+
+    # Map lang codes to edge-tts voice names
+    _EDGE_VOICES = {
+        "pl": "pl-PL-ZofiaNeural",   # warm female Polish voice
+        "en": "en-GB-SoniaNeural",   # clear female British voice
+    }
+
+    tmp = None
     try:
-        tts = gTTS(text=text, lang=lang)
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
-            tmp = f.name
-        tts.save(tmp)
+        voice = _EDGE_VOICES.get(lang)
+        if voice:
+            try:
+                import edge_tts, asyncio
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+                    tmp = f.name
+
+                async def _edge_synth():
+                    communicate = edge_tts.Communicate(text, voice)
+                    await communicate.save(tmp)
+
+                asyncio.run(_edge_synth())
+            except Exception as e:
+                print(f"[TTS] edge-tts failed ({e}), falling back to gTTS")
+                tmp = None
+
+        if tmp is None:
+            # gTTS fallback
+            tts = gTTS(text=text, lang=lang)
+            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as f:
+                tmp = f.name
+            tts.save(tmp)
+
         _ensure_mixer()
         pygame.mixer.music.load(tmp)
         pygame.mixer.music.play()
@@ -264,12 +334,19 @@ def _speak(text: str, lang: str = "en"):
                 pygame.mixer.music.unload()
             except Exception:
                 pass
+    except Exception as e:
+        print(f"[TTS] Error: {e}")
+    finally:
+        if tmp:
             try:
                 os.unlink(tmp)
             except Exception:
                 pass
-    except Exception as e:
-        print(f"[TTS] Error: {e}")
+
+
+def _speak_eo_with_hint(word: str, pronunciation: str = ""):
+    """Speak an Esperanto word via phonetic PL transcription."""
+    _speak(word, lang="eo")
 
 # ============================================================
 # METADATA HELPERS
@@ -295,25 +372,50 @@ def save_metadata(json_path: Path, entries: list):
         print(f"[META] Failed to save {json_path}: {exc}")
 
 
-def build_info_speech(entry: dict) -> str:
+def build_info_speech(entry: dict) -> tuple[str, str]:
+    """Build an info string for the current track/poem.
+
+    Returns (text, lang) ready to pass directly to _speak().
+    Uses localised fields (title_pl, description_pl, themes_pl) when UI_LANG='pl'
+    and they are present in the entry; falls back to English fields otherwise.
+    """
     parts = []
-    title  = entry.get("title")
-    author = entry.get("author") or entry.get("artist")
-    year   = entry.get("year")
-    origin = entry.get("origin")
-    genre  = entry.get("genre")
-    themes = entry.get("themes")
-    desc   = entry.get("description")
+    if UI_LANG == "pl":
+        title  = entry.get("title_pl")  or entry.get("title")
+        author = entry.get("author")    or entry.get("artist")
+        year   = entry.get("year")
+        origin = entry.get("origin")
+        genre  = entry.get("genre")
+        themes = entry.get("themes_pl") or entry.get("themes")
+        desc   = entry.get("description_pl") or entry.get("description")
 
-    if title:  parts.append(f"Title: {title}.")
-    if author: parts.append(f"By {author}.")
-    if year:   parts.append(f"Year: {year}.")
-    if origin: parts.append(f"Origin: {origin}.")
-    if genre:  parts.append(f"Genre: {genre}.")
-    if themes: parts.append(f"Themes: {', '.join(themes)}.")
-    if desc:   parts.append(desc)
+        if title:  parts.append(f"Tytuł: {title}.")
+        if author: parts.append(f"Autor: {author}.")
+        if year:   parts.append(f"Rok: {year}.")
+        if origin: parts.append(f"Pochodzenie: {origin}.")
+        if genre:  parts.append(f"Gatunek: {genre}.")
+        if themes: parts.append(f"Tematy: {', '.join(themes)}.")
+        if desc:   parts.append(desc)
+        text = "  ".join(parts) if parts else "Brak informacji."
+        return text, "pl"
+    else:
+        title  = entry.get("title")
+        author = entry.get("author") or entry.get("artist")
+        year   = entry.get("year")
+        origin = entry.get("origin")
+        genre  = entry.get("genre")
+        themes = entry.get("themes")
+        desc   = entry.get("description")
 
-    return "  ".join(parts) if parts else "No information available."
+        if title:  parts.append(f"Title: {title}.")
+        if author: parts.append(f"By {author}.")
+        if year:   parts.append(f"Year: {year}.")
+        if origin: parts.append(f"Origin: {origin}.")
+        if genre:  parts.append(f"Genre: {genre}.")
+        if themes: parts.append(f"Themes: {', '.join(themes)}.")
+        if desc:   parts.append(desc)
+        text = "  ".join(parts) if parts else "No information available."
+        return text, "en"
 
 # ============================================================
 # ADAPTIVE QUEUE
@@ -434,24 +536,31 @@ class Mode:
 class FlashcardsMode(Mode):
     name = "FLASHCARDS"
 
-    # Stałe CTA po sesji — odsyłają do innych modułów
-    _SESSION_CTAS = [
+    _SESSION_CTAS_PL = [
+        "Świetna sesja! Teraz posłuchaj muzyki esperanto — otwórz menu i wybierz tryb Muzyka.",
+        "Dobra robota! Esperanto ma też prawdziwych poetów. Spróbuj trybu Poezja.",
+        "Niezłe! Chcesz użyć tych słów w rozmowie? Otwórz menu i wybierz Rozmowa.",
+        "Świetna sesja! Teraz posłuchaj muzyki esperanto — otwórz menu i wybierz tryb Muzyka.",
+    ]
+
+    _SESSION_CTAS_EN = [
         ("Great practice! Now listen to some real Esperanto music to hear the language in action. "
-         "Open the menu and try Music mode.", "en"),
-        ("Well done! Esperanto has real poets too. Try Poems mode to hear the language come alive.", "en"),
+         "Open the menu and try Music mode."),
+        "Well done! Esperanto has real poets too. Try Poems mode to hear the language come alive.",
         ("Nice session! Want to use these words in a real conversation? "
-         "Try Conversation mode — press and hold the left button to open the menu.", "en"),
-        ("Świetna sesja! Teraz posłuchaj muzyki esperanto — otwórz menu i wybierz tryb Muzyka.", "pl"),
+         "Try Conversation mode — press and hold the left button to open the menu."),
+        ("Keep it up! The more you practise, the faster Esperanto becomes natural. "
+         "See you next round!"),
     ]
 
     def __init__(self):
         self.words:   list = []
-        self._all_words: list = []          # pełna lista — nigdy nie nadpisywana
+        self._all_words: list = []
         self.current: dict = {}
         self.shown_definition = False
         self.session_correct: int = 0
         self.session_wrong:   int = 0
-        self.active_filter: str | None = None   # np. "Technology", None = wszystkie
+        self.active_filter: str | None = None
 
     def on_enter(self):
         with open(WORDS_FILE, encoding="utf-8") as f:
@@ -464,7 +573,6 @@ class FlashcardsMode(Mode):
         self._next()
 
     def _apply_filter(self):
-        """Filtruje self.words wg active_filter. None = wszystkie."""
         if self.active_filter:
             filtered = [w for w in self._all_words
                         if w.get("unit", "").lower() == self.active_filter.lower()]
@@ -477,54 +585,65 @@ class FlashcardsMode(Mode):
     def _announce_filter(self):
         if self.active_filter:
             count = len(self.words)
-            _speak(f"Flashcard filter: {self.active_filter}. {count} words.", lang="en")
+            _speak_ui(
+                f"Flashcard filter: {self.active_filter}. {count} words.",
+                f"Filtr fiszek: {self.active_filter}. {count} słów.",
+            )
         else:
-            _speak(f"Flashcards — {len(self.words)} words ready.", lang="en")
+            _speak_ui(
+                f"Flashcards — {len(self.words)} words ready.",
+                f"Fiszki — {len(self.words)} słów gotowych.",
+            )
 
     def set_filter(self, unit: str | None):
-        """Wywoływane przez ModeManager przy sygnale FILTER:Unit."""
         self.active_filter = unit
         print(f"[FC] Filter set to: {unit!r}")
 
     def _save(self):
-        # Zapisuj zawsze do pełnej listy, nie do przefiltrowanej
         with open(WORDS_FILE, "w", encoding="utf-8") as f:
             json.dump(self._all_words, f, ensure_ascii=False, indent=2)
 
     def _next(self):
         self.current = pick_next_word(self.words)
         self.shown_definition = False
-        word = self.current["word"]
-        unit = self.current.get("unit", "")
+        word         = self.current["word"]
+        unit         = self.current.get("unit", "")
         pronunciation = self.current.get("pronunciation", "")
         print(f"[FC] Word: {word}  [{pronunciation}]  ({unit})" if pronunciation
               else f"[FC] Word: {word}  ({unit})")
-        # Słowo esperanckie: dwa razy (przez PL TTS — najbliższe fonetyce eo)
-        _speak(word, lang="eo")
-        _speak(word, lang="eo")
-        # Wymowa fonetyczna po angielsku jako podpowiedź
-        if pronunciation:
-            _speak(f"Pronunciation: {pronunciation}", lang="en")
+        # Speak Esperanto word via phonetic PL TTS
+        _speak_eo_with_hint(word, pronunciation)
 
     def _speak_definition(self):
-        word        = self.current.get("word", "")
-        translation = self.current.get("translation", "")
-        definition  = self.current.get("definition", "")
+        word          = self.current.get("word", "")
+        pronunciation = self.current.get("pronunciation", "")
+        translation   = self.current.get("translation", "")
+        definition    = self.current.get("definition", "")
         parts = translation.split(" / ")
         en = parts[0].strip() if parts else definition
         pl = parts[1].strip() if len(parts) > 1 else ""
         print(f"[FC] Definition: {en} | {pl}")
-        # Powtórz słowo jeszcze raz przed definicją
+        # Speak word via phonetic PL TTS
         _speak(word, lang="eo")
-        if en: _speak(f"means: {en}", lang="en")
-        if pl: _speak(pl, lang="pl")
-        # Jeśli jest rozszerzona definicja — przeczytaj ją
-        if definition and definition.lower() not in (en.lower(), pl.lower()):
-            _speak(definition, lang="en")
+        # Definition in UI language
+        if UI_LANG == "pl":
+            if pl:
+                _speak(f"{word} znaczy: {pl}", lang="pl")
+            elif en:
+                _speak(f"{word} means: {en}", lang="en")
+            # Extended definition if it differs from the translation
+            if definition and definition.lower() not in (en.lower(), pl.lower()):
+                _speak(definition, lang="pl")
+        else:
+            if en:
+                _speak(f"{word} means: {en}", lang="en")
+            if pl:
+                _speak(pl, lang="pl")
+            if definition and definition.lower() not in (en.lower(), pl.lower()):
+                _speak(definition, lang="en")
 
     def on_yes(self):
         ACTIVITY.poke()
-        # Sync zmiana w _all_words (words jest widokiem do _all_words)
         sr_update(self.current, True)
         self._save()
         self.session_correct += 1
@@ -546,24 +665,32 @@ class FlashcardsMode(Mode):
         self._speak_definition()
 
     def _speak_session_summary(self):
-        """Podsumowanie sesji + ekosystemowe CTA do innego modułu."""
         total = self.session_correct + self.session_wrong
         if total == 0:
             return
-        # Najsłabsze słowo z całej listy (nie tylko filtrowanej)
         weak = max(self._all_words,
                    key=lambda w: w.get("wrong_count", 0), default=None)
-        summary = (
-            f"Session summary: {self.session_correct} correct, "
-            f"{self.session_wrong} wrong out of {total} cards."
-        )
-        if weak and weak.get("wrong_count", 0) > 0:
-            summary += f" Weakest word: {weak['word']}."
+        if UI_LANG == "pl":
+            summary = (
+                f"Podsumowanie sesji: {self.session_correct} dobrze, "
+                f"{self.session_wrong} źle z {total} fiszek."
+            )
+            if weak and weak.get("wrong_count", 0) > 0:
+                summary += f" Najtrudniejsze słowo: {weak['word']}."
+            cta = random.choice(self._SESSION_CTAS_PL)
+            cta_lang = "pl"
+        else:
+            summary = (
+                f"Session summary: {self.session_correct} correct, "
+                f"{self.session_wrong} wrong out of {total} cards."
+            )
+            if weak and weak.get("wrong_count", 0) > 0:
+                summary += f" Weakest word: {weak['word']}."
+            cta = random.choice(self._SESSION_CTAS_EN)
+            cta_lang = "en"
         print(f"[FC] {summary}")
-        _speak(summary, lang="en")
-        # Ekosystemowe CTA — zachęć do innego modułu
-        cta_text, cta_lang = random.choice(self._SESSION_CTAS)
-        _speak(cta_text, lang=cta_lang)
+        _speak(summary, lang=UI_LANG)
+        _speak(cta, lang=cta_lang)
         self.session_correct = 0
         self.session_wrong   = 0
 
@@ -668,16 +795,34 @@ class MediaMode(Mode):
 
     def on_action_hold(self):
         ACTIVITY.poke()
+        # Remember where we were in the music track before TTS stomps the channel
         was_playing = self.playing and not self.paused
-        if was_playing:
+        music_pos_ms: float = 0.0
+        if was_playing and pygame.mixer.get_init():
+            music_pos_ms = pygame.mixer.music.get_pos()  # ms since play() started
             pygame.mixer.music.pause()
+
         entry = self.entries[self.index] if self.entries else {}
-        info  = build_info_speech(entry)
-        print(f"[{self.name}] INFO: {info}")
-        _speak(info, lang="en")
+        info_text, info_lang = build_info_speech(entry)
+        print(f"[{self.name}] INFO: {info_text}")
+        _speak(info_text, lang=info_lang)
+
+        # Reload and resume music from approximately where we left off.
+        # pygame.mixer.music.get_pos() counts from the start of play(),
+        # not from the file start — and pause/unpause works fine here.
+        # However _speak() calls music.load() internally which discards the
+        # paused state, so we must reload the file and seek manually.
         if was_playing:
-            pygame.mixer.music.unpause()
-            self.paused = False
+            path = self._current_path()
+            if path:
+                try:
+                    _ensure_mixer()
+                    pygame.mixer.music.load(str(path))
+                    seek_s = max(0.0, music_pos_ms / 1000.0)
+                    pygame.mixer.music.play(start=seek_s)
+                    self.paused = False
+                except Exception as e:
+                    print(f"[{self.name}] Could not resume music after info: {e}")
 
     def on_sleep(self):
         if self.playing:
@@ -698,115 +843,187 @@ class MediaMode(Mode):
                 self._play_current()
 
 # ============================================================
-# A0 LESSON MODE — skryptowane lekcje, zero AI, zero tokenów
-# Aktywny nauczyciel: uczy podstaw, zachęca do innych modułów
+# A0 LESSON MODE
 # ============================================================
 
-_A0_LESSONS = [
+_A0_LESSONS_EN = [
     {
         "id": "greetings",
-        "title": "Greetings",
-        "intro": ("Welcome to your first Esperanto lesson! "
-                  "Esperanto has no irregular words — what you see is what you say. "
-                  "Let's learn greetings.", "en"),
+        "title_en": "Greetings",       "title_pl": "Powitania",
+        "intro": (
+            "Welcome to your first Esperanto lesson! "
+            "Esperanto has no irregular words — what you see is what you say. "
+            "Let's learn greetings.",
+            "Witaj na pierwszej lekcji esperanto! "
+            "Esperanto nie ma wyjątków — piszesz tak jak słyszysz. "
+            "Nauczymy się powitań.",
+        ),
         "steps": [
-            ("saluton", "SA-lu-ton", "Hello!", "en"),
-            ("saluton", "SA-lu-ton", "Saluton means: Hello.", "en"),
-            ("dankon",  "DAN-kon",   "Thank you!", "en"),
-            ("dankon",  "DAN-kon",   "Dankon means: Thank you.", "en"),
-            ("bonvolu", "bon-VO-lu", "Please!", "en"),
-            ("jes",     "yes",       "Yes!", "en"),
-            ("ne",      "ne",        "No!", "en"),
-            ("bonan matenon", "BO-nan ma-TE-non", "Good morning!", "en"),
-            ("bonan tagon",   "BO-nan TA-gon",    "Good day!", "en"),
-            ("ĝis revido",    "djis re-VI-do",    "Goodbye — see you again!", "en"),
+            ("saluton", "SA-lu-ton",
+             "Hello!", "Cześć!"),
+            ("saluton", "SA-lu-ton",
+             "Saluton means: Hello.", "Saluton znaczy: Cześć."),
+            ("dankon",  "DAN-kon",
+             "Thank you!", "Dziękuję!"),
+            ("dankon",  "DAN-kon",
+             "Dankon means: Thank you.", "Dankon znaczy: Dziękuję."),
+            ("bonvolu", "bon-VO-lu",
+             "Please!", "Proszę!"),
+            ("jes",     "yes",
+             "Yes!", "Tak!"),
+            ("ne",      "ne",
+             "No!", "Nie!"),
+            ("bonan matenon", "BO-nan ma-TE-non",
+             "Good morning!", "Dzień dobry!"),
+            ("bonan tagon",   "BO-nan TA-gon",
+             "Good day!", "Dobry dzień!"),
+            ("ĝis revido",    "djis re-VI-do",
+             "Goodbye — see you again!", "Do widzenia — do następnego razu!"),
         ],
-        "outro": ("You know the basics! "
-                  "Now go practice in Flashcards mode — press and hold the left button "
-                  "to open the menu.", "en"),
+        "outro": (
+            "You know the basics! "
+            "Now go practice in Flashcards mode — press and hold the left button "
+            "to open the menu.",
+            "Znasz już podstawy! "
+            "Ćwicz dalej w trybie Fiszki — przytrzymaj lewy przycisk żeby otworzyć menu.",
+        ),
         "filter_cta": None,
     },
     {
         "id": "numbers",
-        "title": "Numbers",
-        "intro": ("In Esperanto, numbers are completely regular. "
-                  "Learn one through ten and you can count to a million.", "en"),
+        "title_en": "Numbers",         "title_pl": "Liczby",
+        "intro": (
+            "In Esperanto, numbers are completely regular. "
+            "Learn one through ten and you can count to a million.",
+            "W esperanto liczby są całkowicie regularne. "
+            "Naucz się od jednego do dziesięciu i możesz liczyć do miliona.",
+        ),
         "steps": [
-            ("unu",  "U-nu",  "One.", "en"),
-            ("du",   "du",    "Two.", "en"),
-            ("tri",  "tri",   "Three.", "en"),
-            ("kvar", "kvar",  "Four.", "en"),
-            ("kvin", "kvin",  "Five.", "en"),
-            ("ses",  "ses",   "Six.", "en"),
-            ("sep",  "sep",   "Seven.", "en"),
-            ("ok",   "ok",    "Eight.", "en"),
-            ("naŭ",  "naw",   "Nine.", "en"),
-            ("dek",  "dek",   "Ten.", "en"),
-            ("dek unu", "dek U-nu", "Eleven. Just dek plus unu — no irregulars ever!", "en"),
+            ("unu",  "U-nu",  "One.",   "Jeden."),
+            ("du",   "du",    "Two.",   "Dwa."),
+            ("tri",  "tri",   "Three.", "Trzy."),
+            ("kvar", "kvar",  "Four.",  "Cztery."),
+            ("kvin", "kvin",  "Five.",  "Pięć."),
+            ("ses",  "ses",   "Six.",   "Sześć."),
+            ("sep",  "sep",   "Seven.", "Siedem."),
+            ("ok",   "ok",    "Eight.", "Osiem."),
+            ("naŭ",  "naw",   "Nine.",  "Dziewięć."),
+            ("dek",  "dek",   "Ten.",   "Dziesięć."),
+            ("dek unu", "dek U-nu",
+             "Eleven. Just dek plus unu — no irregulars ever!",
+             "Jedenaście. Po prostu dek plus unu — zero wyjątków!"),
         ],
-        "outro": ("Numbers done! The robot uses SM-2 to track which numbers you find hardest. "
-                  "Head to Flashcards — Numbers unit — to drill them.", "en"),
+        "outro": (
+            "Numbers done! The robot uses SM-2 to track which numbers you find hardest. "
+            "Head to Flashcards — Numbers unit — to drill them.",
+            "Liczby zaliczone! Robot używa SM-2 żeby śledzić najtrudniejsze słowa. "
+            "Przejdź do Fiszek — filtr Liczby — żeby je poćwiczyć.",
+        ),
         "filter_cta": "Numbers",
     },
     {
         "id": "culture",
-        "title": "Esperanto Culture",
-        "intro": ("Esperanto isn't just grammar — it has 130 years of poetry, music, and congresses. "
-                  "Let's learn the words that connect you to that culture.", "en"),
+        "title_en": "Esperanto Culture", "title_pl": "Kultura esperanto",
+        "intro": (
+            "Esperanto isn't just grammar — it has 130 years of poetry, music, and congresses. "
+            "Let's learn the words that connect you to that culture.",
+            "Esperanto to nie tylko gramatyka — ma 130 lat poezji, muzyki i kongresów. "
+            "Nauczymy się słów łączących z tą kulturą.",
+        ),
         "steps": [
-            ("espero",    "es-PE-ro",    "Hope. The word Esperanto itself means 'one who hopes'.", "en"),
-            ("paco",      "PA-tso",      "Peace.", "en"),
-            ("mondo",     "MON-do",      "World.", "en"),
-            ("lingvo",    "LING-vo",     "Language.", "en"),
-            ("kulturo",   "kul-TU-ro",   "Culture.", "en"),
-            ("muziko",    "mu-ZI-ko",    "Music.", "en"),
-            ("poemo",     "po-E-mo",     "Poem.", "en"),
-            ("verda stelo","VER-da STE-lo","The green star — symbol of the Esperanto movement.", "en"),
-            ("kongreso",  "kon-GRE-so",  "Congress — Esperanto speakers meet every year at the World Congress.", "en"),
-            ("zamenhof",  "za-MEN-hof",  "Zamenhof — Ludwig Lazarus Zamenhof, creator of Esperanto, 1887.", "en"),
+            ("espero",    "es-PE-ro",
+             "Hope. The word Esperanto itself means 'one who hopes'.",
+             "Nadzieja. Słowo Esperanto znaczy 'ten, który ma nadzieję'."),
+            ("paco",      "PA-tso",
+             "Peace.", "Pokój."),
+            ("mondo",     "MON-do",
+             "World.", "Świat."),
+            ("lingvo",    "LING-vo",
+             "Language.", "Język."),
+            ("kulturo",   "kul-TU-ro",
+             "Culture.", "Kultura."),
+            ("muziko",    "mu-ZI-ko",
+             "Music.", "Muzyka."),
+            ("poemo",     "po-E-mo",
+             "Poem.", "Wiersz."),
+            ("verda stelo","VER-da STE-lo",
+             "The green star — symbol of the Esperanto movement.",
+             "Zielona gwiazda — symbol ruchu esperanckiego."),
+            ("kongreso",  "kon-GRE-so",
+             "Congress — Esperanto speakers meet every year at the World Congress.",
+             "Kongres — esperantyści spotykają się co roku na Światowym Kongresie."),
+            ("zamenhof",  "za-MEN-hof",
+             "Zamenhof — Ludwig Lazarus Zamenhof, creator of Esperanto, 1887.",
+             "Zamenhof — Ludwig Łazarz Zamenhof, twórca esperanta, 1887."),
         ],
-        "outro": ("Beautiful! The robot has real Esperanto poetry and music in its archive. "
-                  "Try Poems mode or Music mode from the menu to hear this culture come alive.", "en"),
+        "outro": (
+            "Beautiful! The robot has real Esperanto poetry and music in its archive. "
+            "Try Poems mode or Music mode from the menu to hear this culture come alive.",
+            "Wspaniale! Robot ma prawdziwą poezję i muzykę esperanto w archiwum. "
+            "Wypróbuj tryb Poezja lub Muzyka z menu.",
+        ),
         "filter_cta": "Culture",
     },
     {
         "id": "technology",
-        "title": "Robots and Technology",
-        "intro": ("You're talking to a robot right now! "
-                  "Let's learn the Esperanto words for technology — perfect for this competition.", "en"),
+        "title_en": "Robots and Technology", "title_pl": "Roboty i technologia",
+        "intro": (
+            "You're talking to a robot right now! "
+            "Let's learn the Esperanto words for technology — perfect for this competition.",
+            "Właśnie rozmawiasz z robotem! "
+            "Nauczymy się esperanckich słów związanych z technologią — idealne na te zawody.",
+        ),
         "steps": [
-            ("roboto",      "ro-BO-to",      "Robot!", "en"),
-            ("komputilo",   "kom-pu-TI-lo",  "Computer.", "en"),
-            ("sensilo",     "sen-SI-lo",     "Sensor.", "en"),
-            ("ekrano",      "ek-RA-no",      "Screen, display.", "en"),
-            ("programi",    "pro-GRA-mi",    "To program — a verb! In Esperanto all verbs end in -i.", "en"),
-            ("datumoj",     "da-TU-moj",     "Data.", "en"),
-            ("aŭtomata",    "aw-to-MA-ta",   "Automatic, autonomous.", "en"),
-            ("inteligenta", "in-te-li-GEN-ta","Intelligent.", "en"),
+            ("roboto",      "ro-BO-to",
+             "Robot!", "Robot!"),
+            ("komputilo",   "kom-pu-TI-lo",
+             "Computer.", "Komputer."),
+            ("sensilo",     "sen-SI-lo",
+             "Sensor.", "Czujnik."),
+            ("ekrano",      "ek-RA-no",
+             "Screen, display.", "Ekran."),
+            ("programi",    "pro-GRA-mi",
+             "To program — a verb! In Esperanto all verbs end in -i.",
+             "Programować — czasownik! W esperanto wszystkie bezokoliczniki kończą się na -i."),
+            ("datumoj",     "da-TU-moy",
+             "Data.", "Dane."),
+            ("aŭtomata",    "aw-to-MA-ta",
+             "Automatic, autonomous.", "Automatyczny."),
+            ("inteligenta", "in-te-li-GEN-ta",
+             "Intelligent.", "Inteligentny."),
             ("artefarita inteligenteco",
              "ar-te-fa-RI-ta in-te-li-gen-TE-tso",
-             "Artificial intelligence — three words, completely regular.", "en"),
-            ("inventi",     "in-VEN-ti",     "To invent. Zamenhof invented Esperanto in 1887.", "en"),
+             "Artificial intelligence — three words, completely regular.",
+             "Sztuczna inteligencja — trzy słowa, całkowicie regularne."),
+            ("inventi",     "in-VEN-ti",
+             "To invent. Zamenhof invented Esperanto in 1887.",
+             "Wynaleźć. Zamenhof wynalazł esperanto w 1887 roku."),
         ],
-        "outro": ("Roboto, sensilo, programi — you speak robot Esperanto now! "
-                  "Drill these in Flashcards with the Technology filter. "
-                  "Or try the AI Conversation mode to use them in a real sentence.", "en"),
+        "outro": (
+            "Roboto, sensilo, programi — you speak robot Esperanto now! "
+            "Drill these in Flashcards with the Technology filter. "
+            "Or try the AI Conversation mode to use them in a real sentence.",
+            "Roboto, sensilo, programi — mówisz już po esperanto jak robot! "
+            "Ćwicz te słowa w Fiszkach z filtrem Technologia. "
+            "Albo wypróbuj tryb Rozmowy z AI.",
+        ),
         "filter_cta": "Technology",
     },
 ]
 
+# alias — rest of code uses _A0_LESSONS
+_A0_LESSONS = _A0_LESSONS_EN
+
 
 class A0LessonMode(Mode):
-    """Skryptowany tryb nauczania A0 — bez AI, bez tokenów.
-    
-    Struktura lekcji:
-      intro → kroki (słowo po esperanto + wymowa fonetyczna + tłumaczenie) → outro + CTA
-    
-    YES = następny krok
-    NO  = powtórz obecny krok
-    ACTION_HOLD = powtórz intro / tytuł lekcji
-    
-    Po każdej lekcji: głosowe CTA do innego modułu (flashcards z filtrem, muzyka, poezja).
+    """Scripted A0 teaching mode — no AI, no tokens.
+
+    Lesson structure:
+      intro → steps (word + phonetics + meaning) → outro + CTA
+
+    YES          = next step
+    NO           = repeat current step
+    ACTION_HOLD  = repeat current lesson title and intro
     """
     name = "A0_LESSON"
 
@@ -816,8 +1033,6 @@ class A0LessonMode(Mode):
         self._lesson:     dict = _A0_LESSONS[0]
         self._in_lesson:  bool = False
         self._done:       bool = False
-
-    # ---- wejście / wyjście ----
 
     def on_enter(self):
         self.lesson_idx = 0
@@ -830,11 +1045,17 @@ class A0LessonMode(Mode):
         self.step_idx   = 0
         self._in_lesson = True
         self._done      = False
-        title = self._lesson["title"]
+        title = self._lesson["title_pl"] if UI_LANG == "pl" else self._lesson["title_en"]
         print(f"[A0] Lesson: {title}")
-        _speak(f"Lesson {self.lesson_idx + 1}: {title}.", lang="en")
-        intro_text, intro_lang = self._lesson["intro"]
-        _speak(intro_text, lang=intro_lang)
+        _speak_ui(
+            f"Lesson {self.lesson_idx + 1}: {self._lesson['title_en']}.",
+            f"Lekcja {self.lesson_idx + 1}: {self._lesson['title_pl']}.",
+        )
+        intro_en, intro_pl = self._lesson["intro"]
+        _speak(intro_pl if UI_LANG == "pl" else intro_en,
+               lang=UI_LANG)
+        _speak_ui("Press YES for the next step, NO to repeat.",
+                  "Naciśnij TAK żeby przejść dalej, NIE żeby powtórzyć.")
         self._speak_step()
 
     def _speak_step(self):
@@ -842,53 +1063,46 @@ class A0LessonMode(Mode):
         if self.step_idx >= len(steps):
             self._finish_lesson()
             return
-        word, pronunciation, meaning, lang = steps[self.step_idx]
+        word, pronunciation, meaning_en, meaning_pl = steps[self.step_idx]
         print(f"[A0] Step {self.step_idx + 1}/{len(steps)}: {word}")
-        # Słowo esperanckie dwa razy (PL TTS ≈ fonetyka eo)
-        _speak(word, lang="eo")
-        _speak(word, lang="eo")
-        # Wymowa fonetyczna jako podpowiedź
-        if pronunciation:
-            _speak(f"Pronunciation: {pronunciation}", lang="en")
-        # Znaczenie
-        _speak(meaning, lang=lang)
-        _speak("Press YES to continue, NO to hear it again.", lang="en")
+        # Speak Esperanto word via phonetic PL TTS
+        _speak_eo_with_hint(word, pronunciation)
+        # Meaning in UI language
+        _speak(meaning_pl if UI_LANG == "pl" else meaning_en,
+               lang=UI_LANG)
 
     def _finish_lesson(self):
-        """Outro + ekosystemowe CTA."""
         self._in_lesson = False
-        outro_text, outro_lang = self._lesson["outro"]
-        _speak(outro_text, lang=outro_lang)
+        outro_en, outro_pl = self._lesson["outro"]
+        _speak(outro_pl if UI_LANG == "pl" else outro_en, lang=UI_LANG)
 
-        # Jeśli lekcja ma filtr — wyślij FILTER sygnał do ModeManagera
         filter_unit = self._lesson.get("filter_cta")
         if filter_unit:
             print(f"LESSON_FILTER:{filter_unit}")
 
-        # Następna lekcja dostępna?
         next_idx = self.lesson_idx + 1
         if next_idx < len(_A0_LESSONS):
-            next_title = _A0_LESSONS[next_idx]["title"]
-            _speak(
-                f"When you're ready, press YES to start the next lesson: {next_title}. "
-                f"Or press NO to go back to the main menu.",
-                lang="en"
+            next_lesson = _A0_LESSONS[next_idx]
+            next_title = next_lesson["title_pl"] if UI_LANG == "pl" else next_lesson["title_en"]
+            _speak_ui(
+                f"Press YES for the next lesson: {next_title}. "
+                f"Or press NO for the main menu.",
+                f"Naciśnij TAK żeby przejść do lekcji: {next_title}. "
+                f"Albo NIE żeby wrócić do menu.",
             )
             self._done = True
         else:
-            _speak(
+            _speak_ui(
                 "You've completed all A0 lessons! "
                 "You're ready to explore the full robot. Press NO for the menu.",
-                lang="en"
+                "Ukończyłeś wszystkie lekcje A0! "
+                "Możesz teraz eksplorować wszystkie tryby robota. Naciśnij NIE żeby otworzyć menu.",
             )
             self._done = True
-
-    # ---- przyciski ----
 
     def on_yes(self):
         ACTIVITY.poke()
         if self._done:
-            # Przejdź do następnej lekcji jeśli istnieje
             next_idx = self.lesson_idx + 1
             if next_idx < len(_A0_LESSONS):
                 self.lesson_idx = next_idx
@@ -896,7 +1110,10 @@ class A0LessonMode(Mode):
                 self._done      = False
                 self._start_lesson()
             else:
-                _speak("All lessons complete! Open the menu to explore other modes.", lang="en")
+                _speak_ui(
+                    "All lessons complete! Open the menu to explore other modes.",
+                    "Wszystkie lekcje ukończone! Otwórz menu żeby odkryć inne tryby.",
+                )
         elif self._in_lesson:
             self.step_idx += 1
             self._speak_step()
@@ -904,30 +1121,28 @@ class A0LessonMode(Mode):
     def on_no(self):
         ACTIVITY.poke()
         if self._done:
-            # Wróć do menu — sygnał MODE do ModeManagera (hub otworzy menu)
             _speak("Opening menu.", lang="en")
             print("LESSON_EXIT")
         elif self._in_lesson:
-            # Powtórz obecny krok
-            _speak("Let's hear that again.", lang="en")
             self._speak_step()
 
     def on_action_hold(self):
         ACTIVITY.poke()
-        # Powtórz tytuł i intro bieżącej lekcji
-        title = self._lesson["title"]
-        _speak(f"You're in lesson: {title}.", lang="en")
-        intro_text, intro_lang = self._lesson["intro"]
-        _speak(intro_text, lang=intro_lang)
+        title = self._lesson["title_pl"] if UI_LANG == "pl" else self._lesson["title_en"]
+        _speak_ui(f"You're in lesson: {title}.", f"Jesteś w lekcji: {title}.")
+        intro_en, intro_pl = self._lesson["intro"]
+        _speak(intro_pl if UI_LANG == "pl" else intro_en, lang=UI_LANG)
 
     def on_sleep(self):
-        pass  # Lekcja nie ma sesji do podsumowania
+        pass
 
     def tick(self):
         pass
 
 
-
+# ============================================================
+# CONVERSATION MODE
+# ============================================================
 
 _CONV_SYSTEM_PROMPTS = {
     "A1": (
@@ -955,7 +1170,6 @@ _DIFFICULTY_LABELS = ["A1", "B1", "C1"]
 
 
 def _groq_chat(history: list[dict], system: str, api_key: str, model: str) -> str:
-    """Call Groq via official SDK (avoids Cloudflare 1010 that blocks urllib)."""
     try:
         from groq import Groq
         client = Groq(api_key=api_key)
@@ -968,7 +1182,6 @@ def _groq_chat(history: list[dict], system: str, api_key: str, model: str) -> st
         return response.choices[0].message.content.strip()
     except Exception as e:
         print(f"[CONV] Groq error: {e}")
-        # Fallback: raw HTTPS with proper browser-like headers
         try:
             import urllib.request, urllib.error
             payload = json.dumps({
@@ -1014,7 +1227,7 @@ class ConversationMode(Mode):
         self._whisper_model       = None
         self._wav2vec2_model      = None
         self._wav2vec2_processor  = None
-        self._pending_media_offer: bool = False   # Punkt 2
+        self._pending_media_offer: bool = False
 
     @property
     def difficulty(self) -> str:
@@ -1045,12 +1258,11 @@ class ConversationMode(Mode):
         return self._whisper_model
 
     def _get_wav2vec2(self):
-        """Lazy-load wav2vec2 fine-tuned na esperanto (cpierse/wav2vec2-large-xlsr-53-esperanto)."""
         if self._wav2vec2_model is None:
             try:
                 from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
                 model_id = "cpierse/wav2vec2-large-xlsr-53-esperanto"
-                print(f"[CONV] Loading wav2vec2 esperanto model (first run: ~1GB download)...")
+                print(f"[CONV] Loading wav2vec2 Esperanto model (first run: ~1 GB download)...")
                 self._wav2vec2_processor = Wav2Vec2Processor.from_pretrained(model_id)
                 self._wav2vec2_model     = Wav2Vec2ForCTC.from_pretrained(model_id)
                 self._wav2vec2_model.eval()
@@ -1061,14 +1273,12 @@ class ConversationMode(Mode):
         return self._wav2vec2_model
 
     def _transcribe_wav2vec2(self, audio: np.ndarray) -> str:
-        """Transkrybuj audio używając wav2vec2 fine-tuned na esperanto."""
         import torch
         model     = self._get_wav2vec2()
         processor = self._wav2vec2_processor
         if model is None:
             return ""
         try:
-            # wav2vec2 oczekuje float32 w zakresie [-1, 1] przy 16kHz
             audio_float = audio.astype(np.float32) / 32768.0
             inputs = processor(
                 audio_float,
@@ -1099,17 +1309,15 @@ class ConversationMode(Mode):
             audio = _record_audio(maxsec, sr)
             ACTIVITY.poke()
 
-            # Próbuj wav2vec2 (fine-tuned na esperanto) — główny STT
             user_text = self._transcribe_wav2vec2(audio)
 
-            # Fallback: Whisper jeśli wav2vec2 niedostępny lub pusty
             if not user_text:
                 whisper = self._get_whisper()
                 if whisper is None:
                     _speak("Pardonu, mi ne povas aŭdi.", lang="eo")
                     return
                 audio_float = audio.astype(np.float32) / 32768.0
-                segments, info = whisper.transcribe(audio_float, language=None)  # H4: autodetekcja zamiast "it"
+                segments, info = whisper.transcribe(audio_float, language=None)
                 print(f"[CONV] Whisper fallback STT lang={info.language} conf={info.language_probability:.0%}")
                 user_text = " ".join(seg.text.strip() for seg in segments).strip()
 
@@ -1136,8 +1344,6 @@ class ConversationMode(Mode):
             print(f"[CONV] Robot: {reply!r}")
             self.history.append({"role": "assistant", "content": reply})
 
-            # Punkt 2: kontekstowe przejście do POEMS/MUSIC
-            # Jeśli odpowiedź LLM dotyczy kultury esperanto — zaproponuj media
             _CULTURE_KEYWORDS = [
                 "poezio", "kanto", "muziko", "poemo", "literaturo",
                 "kulturo", "zamenhof", "libro", "arte", "kanti", "muzik",
@@ -1159,30 +1365,28 @@ class ConversationMode(Mode):
 
     def on_enter(self):
         self.history = []
-        self._pending_media_offer = False   # Punkt 2: reset przy wejściu
+        self._pending_media_offer = False
         if not CFG.get("groq_api_key"):
             print("[CONV] WARNING: groq_api_key not set.")
         print(f"[CONV] Ready. Difficulty: {self.difficulty}. Press YES to speak.")
         _speak("Saluton! Mi estas via esperanto-konversaciisto. "
                "Premu la dekstran butonon por paroli.", lang="eo")
-        # Preload wav2vec2 w tle (pierwsze uruchomienie pobiera ~1GB)
         threading.Thread(target=self._get_wav2vec2, daemon=True).start()
-        threading.Thread(target=self._get_whisper, daemon=True).start()
+        threading.Thread(target=self._get_whisper,  daemon=True).start()
 
     def on_yes(self):
         ACTIVITY.poke()
-        # Punkt 2: jeśli była oferta mediów — przejdź do POEMS (1) lub MUSIC (2)
         if self._pending_media_offer:
             self._pending_media_offer = False
             target = random.choice([1, 2])
             print(f"[CONV] Media offer accepted → MODE:{target}")
-            print(f"MODE:{target}")   # sygnał do ModeManagera
+            print(f"MODE:{target}")
             return
         threading.Thread(target=self._listen_and_reply, daemon=True).start()
 
     def on_no(self):
         ACTIVITY.poke()
-        self._pending_media_offer = False   # Punkt 2: anuluj ofertę
+        self._pending_media_offer = False
         with self._lock:
             if self._recording:
                 print("[CONV] Cancelling current turn.")
@@ -1203,7 +1407,7 @@ class ConversationMode(Mode):
         _speak("Saluton denove!", lang="eo")
 
 # ============================================================
-# ATTRACT MODE  (Mode 4 — WRO Obszar 3)
+# ATTRACT MODE
 # ============================================================
 
 _ATTRACT_GREETINGS = [
@@ -1247,7 +1451,6 @@ _ATTRACT_TEASER_WORDS = [
     ("hejmo",     "home",           "dom"),
     ("lerni",     "to learn",       "uczyć się"),
     ("paroli",    "to speak",       "mówić"),
-    ("kanti",     "to sing",        "śpiewać"),
     ("ridi",      "to laugh",       "śmiać się"),
     ("frato",     "brother",        "brat"),
 ]
@@ -1306,15 +1509,13 @@ _ATTRACT_GOODBYES = [
     ("Adiaŭ — that means goodbye in Esperanto. Come back soon!", "en"),
 ]
 
-# Typy sekwencji attract — losowane żeby nie było powtórzeń
 _ATTRACT_SEQ_TYPES = ["word_quiz", "music_snippet", "poem_snippet", "fun_fact", "full"]
 
 
 class AttractMode(Mode):
     """
-    Mode 4 — Attract / Showcase (WRO Obszar 3).
-    Losuje jeden z 5 typów sekwencji: quiz słówka, muzyka, poezja, ciekawostka, pełna.
-    Nie przerywa sekwencji gdy ktoś odchodzi — kończy, potem gra pożegnanie.
+    Mode 4 — Attract / Showcase (WRO Area 3).
+    Picks one of 5 sequence types without immediate repeats.
     """
     name = "ATTRACT"
 
@@ -1323,7 +1524,7 @@ class AttractMode(Mode):
         self._poems          = poems_mode
         self._active         = False
         self._stop_flag      = False
-        self._speaking       = False   # True podczas sekwencji — hub nie śpi
+        self._speaking       = False
         self._last_greet_idx = -1
         self._last_seq_type  = ""
 
@@ -1336,14 +1537,12 @@ class AttractMode(Mode):
         return _ATTRACT_GREETINGS[idx]
 
     def _pick_seq_type(self) -> str:
-        """Losuj typ sekwencji bez powtórzenia z poprzedniej."""
         choices = [t for t in _ATTRACT_SEQ_TYPES if t != self._last_seq_type]
         t = random.choice(choices)
         self._last_seq_type = t
         return t
 
     def _sleep_check(self, seconds: float) -> bool:
-        """Czeka podaną liczbę sekund, sprawdzając stop_flag co 0.1s. Zwraca True jeśli przerwano."""
         steps = int(seconds / 0.1)
         for _ in range(steps):
             if self._stop_flag:
@@ -1352,7 +1551,6 @@ class AttractMode(Mode):
         return False
 
     def _play_snippet(self, entries: list, directory, duration_s: int = 10) -> dict | None:
-        """Gra losowy fragment z listy przez duration_s sekund. Zwraca entry lub None."""
         if not entries:
             return None
         entry = random.choice(entries)
@@ -1368,22 +1566,26 @@ class AttractMode(Mode):
         pygame.mixer.music.stop()
         return entry
 
-    # ---- typy sekwencji ----
+    def _speak_teaser_word(self, word: str, en_meaning: str, pl_meaning: str):
+        """Speak word via phonetic PL TTS, then its meanings."""
+        _speak(word, lang="eo")
+        _speak(f"It means: {en_meaning}!", lang="en")
+        _speak(f"Po polsku: {pl_meaning}!", lang="pl")
+
+    # ---- sequence types ----
 
     def _seq_word_quiz(self):
-        """Powitanie + quiz słówkowy z dramatyczną pauzą."""
         text, lang = self._pick_greeting()
         _speak(text, lang=lang)
         if self._stop_flag: return
 
         intro_text, intro_lang = random.choice(_ATTRACT_QUIZ_INTROS)
         word, en_meaning, pl_meaning = random.choice(_ATTRACT_TEASER_WORDS)
-        # Intro osobno, potem słowo przez PL TTS (≈ fonetyka esperanto)
         _speak(intro_text, lang=intro_lang)
-        _speak(word, lang="eo")
+        # Speak word via phonetic PL TTS
         _speak(word, lang="eo")
         if self._sleep_check(2.5): return
-
+        # Reveal answer
         _speak(f"It means: {en_meaning}!", lang="en")
         _speak(f"Po polsku: {pl_meaning}!", lang="pl")
         if self._stop_flag: return
@@ -1392,7 +1594,6 @@ class AttractMode(Mode):
         _speak(cta_text, lang=cta_lang)
 
     def _seq_music_snippet(self):
-        """Powitanie + 12s fragment muzyki + tytuł + CTA."""
         text, lang = self._pick_greeting()
         _speak(text, lang=lang)
         if self._stop_flag: return
@@ -1405,18 +1606,22 @@ class AttractMode(Mode):
         if entry:
             title  = entry.get("title") or entry["filename"]
             artist = entry.get("artist") or entry.get("author", "")
-            answer = f"To był: {title}" if random.random() < 0.5 else f"That was: {title}"
-            lang_a = "pl" if "był" in answer else "en"
-            if artist:
-                answer += f" — {artist}."
-            _speak(answer, lang=lang_a)
+            if UI_LANG == "pl":
+                answer = f"To był: {title}"
+                if artist:
+                    answer += f" — {artist}."
+                _speak(answer, lang="pl")
+            else:
+                answer = f"That was: {title}"
+                if artist:
+                    answer += f" — {artist}."
+                _speak(answer, lang="en")
         if self._stop_flag: return
 
         cta_text, cta_lang = random.choice(_ATTRACT_CTAS)
         _speak(cta_text, lang=cta_lang)
 
     def _seq_poem_snippet(self):
-        """Powitanie + 12s fragment poezji + tytuł + CTA."""
         text, lang = self._pick_greeting()
         _speak(text, lang=lang)
         if self._stop_flag: return
@@ -1429,18 +1634,22 @@ class AttractMode(Mode):
         if entry:
             title  = entry.get("title") or entry["filename"]
             author = entry.get("author") or entry.get("artist", "")
-            answer = f"To był: {title}" if random.random() < 0.5 else f"That was: {title}"
-            lang_a = "pl" if "był" in answer else "en"
-            if author:
-                answer += f" — {author}."
-            _speak(answer, lang=lang_a)
+            if UI_LANG == "pl":
+                answer = f"To był: {title}"
+                if author:
+                    answer += f" — {author}."
+                _speak(answer, lang="pl")
+            else:
+                answer = f"That was: {title}"
+                if author:
+                    answer += f" — {author}."
+                _speak(answer, lang="en")
         if self._stop_flag: return
 
         cta_text, cta_lang = random.choice(_ATTRACT_CTAS)
         _speak(cta_text, lang=cta_lang)
 
     def _seq_fun_fact(self):
-        """Ciekawostka o esperanto + quiz słówkowy + CTA."""
         text, lang = self._pick_greeting()
         _speak(text, lang=lang)
         if self._stop_flag: return
@@ -1449,18 +1658,22 @@ class AttractMode(Mode):
         _speak(fact_text, lang=fact_lang)
         if self._stop_flag: return
 
-        # bonus: jedno słówko — słowo przez PL TTS
+        # Bonus: one vocabulary word via phonetic PL TTS
         word, en_meaning, pl_meaning = random.choice(_ATTRACT_TEASER_WORDS)
-        _speak("A przy okazji — słowo", lang="pl")
-        _speak(word, lang="eo")
-        _speak(f"znaczy: {pl_meaning}!", lang="pl")
+        if UI_LANG == "pl":
+            _speak("A przy okazji — słowo", lang="pl")
+            _speak(word, lang="eo")
+            _speak(f"znaczy: {pl_meaning}!", lang="pl")
+        else:
+            _speak("And here's a bonus word:", lang="en")
+            _speak(word, lang="eo")
+            _speak(f"It means: {en_meaning}!", lang="en")
         if self._stop_flag: return
 
         cta_text, cta_lang = random.choice(_ATTRACT_CTAS)
         _speak(cta_text, lang=cta_lang)
 
     def _seq_full(self):
-        """Pełna sekwencja: powitanie + quiz + muzyka + ciekawostka + CTA."""
         text, lang = self._pick_greeting()
         _speak(text, lang=lang)
         if self._stop_flag: return
@@ -1470,13 +1683,16 @@ class AttractMode(Mode):
         word, en_meaning, pl_meaning = random.choice(_ATTRACT_TEASER_WORDS)
         _speak(intro_text, lang=intro_lang)
         _speak(word, lang="eo")
-        _speak(word, lang="eo")
         if self._sleep_check(2.5): return
-        _speak(f"It means: {en_meaning}!", lang="en")
-        _speak(f"Po polsku: {pl_meaning}!", lang="pl")
+        if UI_LANG == "pl":
+            _speak(f"To znaczy: {pl_meaning}!", lang="pl")
+            _speak(f"It means: {en_meaning}!", lang="en")
+        else:
+            _speak(f"It means: {en_meaning}!", lang="en")
+            _speak(f"Po polsku: {pl_meaning}!", lang="pl")
         if self._stop_flag: return
 
-        # muzyka lub poezja
+        # muzika or poetry
         if random.random() < 0.5:
             intro_text, intro_lang = random.choice(_ATTRACT_MUSIC_INTROS)
             _speak(intro_text, lang=intro_lang)
@@ -1489,7 +1705,7 @@ class AttractMode(Mode):
             self._play_snippet(self._poems.entries, self._poems.directory, duration_s=10)
         if self._stop_flag: return
 
-        # ciekawostka
+        # fun fact
         fact_text, fact_lang = random.choice(_ATTRACT_FACTS)
         _speak(fact_text, lang=fact_lang)
         if self._stop_flag: return
@@ -1499,7 +1715,7 @@ class AttractMode(Mode):
 
     def _run_sequence(self):
         self._speaking = True
-        print("ATTRACT_SPEAKING")   # hub: nie śpij
+        print("ATTRACT_SPEAKING")
         try:
             seq_type = self._pick_seq_type()
             print(f"[ATTRACT] Sequence: {seq_type}")
@@ -1512,12 +1728,11 @@ class AttractMode(Mode):
             print(f"[ATTRACT] Sequence error: {e}")
         finally:
             self._speaking = False
-            print("ATTRACT_IDLE")   # hub: możesz liczyć timeout
+            print("ATTRACT_IDLE")
 
     def _loop(self):
         while self._active and not self._stop_flag:
             self._run_sequence()
-            # Pauza 25s między sekwencjami
             for _ in range(250):
                 if not self._active or self._stop_flag:
                     return
@@ -1526,7 +1741,7 @@ class AttractMode(Mode):
     def on_enter(self):
         self._stop_flag = False
         self._active    = True
-        _tts_stop_event.clear()   # skasuj ewentualne poprzednie żądanie stopu
+        _tts_stop_event.clear()
         print("[ATTRACT] Active.")
         threading.Thread(target=self._loop, daemon=True).start()
 
@@ -1556,7 +1771,6 @@ class AttractMode(Mode):
     def on_yes(self):
         self._stop_sequence()
         ACTIVITY.poke()
-        # Poczekaj chwilę aż wątek _loop zakończy bieżącą sekwencję
         for _ in range(40):
             if not self._speaking:
                 break
@@ -1585,15 +1799,10 @@ class AttractMode(Mode):
             self.on_enter()
 
     def on_attract_lost(self):
-        """Ktoś odszedł — czekaj aż sekwencja się skończy, potem pożegnanie."""
-        # Nie przerywaj _stop_sequence — pozwól dokończyć bieżącą sekwencję
-        self._active = False   # pętla _loop nie zacznie nowej sekwencji
-        # Pożegnanie zostanie zagrane przez _loop po zakończeniu aktualnej sekwencji
+        self._active = False
         threading.Thread(target=self._goodbye_then_sleep, daemon=True).start()
 
     def _goodbye_then_sleep(self):
-        """Czeka aż _speaking=False, gra pożegnanie, idzie spać."""
-        # Czekaj max 60s aż bieżąca sekwencja dobiegnie końca
         for _ in range(600):
             if not self._speaking:
                 break
@@ -1605,7 +1814,6 @@ class AttractMode(Mode):
         print("[ATTRACT] Person left — going to sleep.")
 
     def on_attract_timeout(self):
-        """Hub zgłosił że nikogo nie ma — obsługuj jak on_attract_lost."""
         self.on_attract_lost()
 
     def tick(self):
@@ -1622,12 +1830,12 @@ class ModeManager:
         _fc_mode      = FlashcardsMode()
         _a0_mode      = A0LessonMode()
         self.modes: list[Mode] = [
-            _fc_mode,       # 0 — FLASHCARDS
-            _poems_mode,    # 1 — POEMS
-            _music_mode,    # 2 — MUSIC
+            _fc_mode,            # 0 — FLASHCARDS
+            _poems_mode,         # 1 — POEMS
+            _music_mode,         # 2 — MUSIC
             ConversationMode(),  # 3 — CONVERSATION
             AttractMode(_music_mode, _poems_mode),  # 4 — ATTRACT
-            _a0_mode,       # 5 — A0 LESSON
+            _a0_mode,            # 5 — A0 LESSON
         ]
         self._fc_mode = _fc_mode
         self._a0_mode = _a0_mode
@@ -1645,21 +1853,15 @@ class ModeManager:
             return
         old = self.current.name
         if self._started:
-            # H5: jeśli opuszczamy FlashcardsMode — najpierw powiedz podsumowanie
-            if isinstance(self.current, FlashcardsMode):
-                self.current._speak_session_summary()
             if hasattr(self.current, "_stop_sequence"):
                 self.current._stop_sequence()
             elif hasattr(self.current, "_stop"):
                 self.current._stop()
-            # Jeśli opuszczamy attract (lub cokolwiek) — upewnij się że TTS jest zatrzymany
-            # Poczekaj krótko aż wątek attract się zatrzyma
             if isinstance(self.current, AttractMode):
                 for _ in range(30):
                     if not self.current._speaking:
                         break
                     time.sleep(0.1)
-        # Skasuj stop-event przed wejściem w nowy tryb, żeby _speak działał normalnie
         _tts_stop_event.clear()
         self.current_idx = idx
         self._started    = True
@@ -1691,11 +1893,10 @@ class ModeManager:
             if isinstance(self.current, AttractMode):
                 self.current.on_attract_timeout()
         elif signal == "ATTRACT_EXIT":
-            # Hub otwiera menu sam, ale PC musi natychmiast zatrzymać attract
             if isinstance(self.current, AttractMode):
                 self.current._stop_sequence()
         elif signal in ("ATTRACT_SPEAKING", "ATTRACT_IDLE"):
-            pass  # sygnały dla huba — ignoruj na PC
+            pass
         elif signal.startswith("MODE:"):
             try:
                 self.switch_to(int(signal.split(":")[1].strip()))
@@ -1713,23 +1914,23 @@ class ModeManager:
                 self.current.paused = False
                 print("[MGR] Media resumed")
         elif signal.startswith("FILTER:"):
-            # Ustaw filtr w FlashcardsMode i przełącz na flashcards
             unit = signal.split(":", 1)[1].strip()
             self._fc_mode.set_filter(unit if unit.lower() != "none" else None)
             print(f"[MGR] Filter → {unit!r} — switching to FLASHCARDS")
             self.switch_to(0)
         elif signal == "LESSON_FILTER:Technology":
-            # A0 lekcja technologii → przejdź do flashcards z filtrem Technology
             self._fc_mode.set_filter("Technology")
-            _speak("Now drill those words in Flashcards! Switching to Technology filter.", lang="en")
+            _speak_ui(
+                "Now drill those words in Flashcards! Switching to Technology filter.",
+                "Teraz ćwicz te słowa w Fiszkach! Przełączam na filtr Technologia.",
+            )
             self.switch_to(0)
         elif signal.startswith("LESSON_FILTER:"):
             unit = signal.split(":", 1)[1].strip()
             self._fc_mode.set_filter(unit)
             self.switch_to(0)
         elif signal == "LESSON_EXIT":
-            # A0 prosi o powrót do menu — wyślij sygnał żeby hub otworzył menu
-            self.switch_to(0)   # wróć do flashcards (menu i tak się otworzy)
+            self.switch_to(0)
         elif signal.startswith("CONV_") or signal.startswith("["):
             pass
         else:
@@ -1751,14 +1952,28 @@ def _hub_reader(stdout, q: queue.Queue):
     q.put(None)
 
 
+def _preload_models(manager: "ModeManager"):
+    """Eagerly load Whisper and wav2vec2 in background threads at startup.
+
+    This avoids the multi-minute cold-start delay the first time Conversation
+    mode is entered.  Models are loaded into the ConversationMode instance that
+    already exists inside the manager, so on_enter() finds them ready.
+    """
+    conv: ConversationMode = manager.modes[3]  # type: ignore[assignment]
+    threading.Thread(target=conv._get_whisper,   daemon=True, name="preload-whisper").start()
+    threading.Thread(target=conv._get_wav2vec2,  daemon=True, name="preload-wav2vec2").start()
+    print("[BOOT] Model preload started in background (Whisper + wav2vec2).")
+
+
 def main():
     os.chdir(BASE_DIR)
     pygame.init()
     _start_mic_monitor()
 
     manager = ModeManager()
+    _preload_models(manager)
 
-    MAX_CONNECT_RETRIES = 3   # ile razy próbować READY przed wyjściem
+    MAX_CONNECT_RETRIES = 3
     connect_failures    = 0
 
     while True:
@@ -1781,7 +1996,6 @@ def main():
             daemon=True
         ).start()
 
-        # Czekaj na READY
         connected = False
         while True:
             try:
@@ -1811,7 +2025,6 @@ def main():
             time.sleep(3)
             continue
 
-        # Połączono — resetuj licznik
         connect_failures = 0
         print("[OK] Hub connected. Waiting for signals...")
 
@@ -1836,7 +2049,6 @@ def main():
 
         process.terminate()
         time.sleep(3)
-        # Po rozłączeniu podczas pracy — nie zliczaj do MAX_CONNECT_RETRIES
 
 
 if __name__ == "__main__":
