@@ -20,6 +20,7 @@ pybricksdev>=1.0.0a49          # PC-side CLI: uruchamia hub.py przez BLE
 gTTS>=2.5.1                    # Google Text-to-Speech → MP3
 pygame-ce>=2.4.0               # Odtwarzanie MP3 (TTS + archiwum muzyki/poezji)
                                # pygame-ce = Community Edition, aktywnie rozwijana fork
+edge_tts>=1.0.0                   # Microsoft Edge TTS (alternatywa do gTTS, wymaga Edge WebDriver)
 
 # ─── Audio input (mikrofon / STT) ────────────────────────────────────────────
 sounddevice>=0.4.7             # Nagrywanie z mikrofonu (InputStream)

@@ -22,7 +22,6 @@ NUM_MODES = 6  # FC, POEMS, MUSIC, CONVERSATION, ATTRACT, A0_LESSON
 INACTIVITY_TIMEOUT_MS = 180_000
 WAKE_DISTANCE_CM      = 200
 ATTRACT_LOST_MS       = 30_000
-SCAN_ANGLE_MAX        = 180
 SCAN_SPEED            = 300
 SCAN_STEP_MS          = 100
 
@@ -33,27 +32,17 @@ SCAN_OFFSET_DEG = 15
 DISTANCE_PORT   = Port.A
 SCAN_MOTOR_PORT = Port.B
 FLAG_MOTOR_PORT = Port.D
-BTN_LEFT_PORT   = Port.E   # External LEFT button  — NO / MENU
+BTN_LEFT_PORT   = Port.E   # External LEFT  button — NO / MENU
 BTN_RIGHT_PORT  = Port.F   # External RIGHT button — YES / ACTION_HOLD
 
 # ForceSensor press threshold [N]; ~1 = clear press, not accidental
 BTN_FORCE_THRESHOLD = 1
 
 # --- Flag ---
-# Pendulum motion: 0° → +FLAG_ANGLE_CW° → 0° → ...
-# Lower FLAG_SPEED or FLAG_ANGLE_CW if motor runs hot.
-FLAG_SPEED         = 25   # degrees/s
-FLAG_ANGLE_CW      = 10   # degrees clockwise (max swing)
-FLAG_SPEED_STOPPED = 5    # degrees/s — below this = "motor stopped"
+FLAG_SPEED = 100  # degrees/s
 
 # ============================================================
-# MODE ICONS — 5×5 pixel letters
-#
-# Each icon is written exactly as it appears on the display
-# (top row first, left column first). No rotation applied.
-#
-#   F = Flashcards    P = Poems      M = Music
-#   K = Conversation  ! = Attract    L = A0 Lesson
+# MODE ICONS — 5×5 pixel letters (top-row first, left-col first)
 # ============================================================
 
 O = False
@@ -87,15 +76,16 @@ MU_ICON = [
 ]
 
 # K — Conversation (Konversation)
+# Bardziej czytelne K: lewy pion + dwie przekątne
 CV_ICON = [
-    [O, O, O, O, O],
-    [O, O, O, O, O],
-    [I, I, I, I, I],
-    [O, I, O, I, O],
+    [I, O, O, O, I],
+    [I, O, O, I, O],
+    [I, I, I, O, O],
+    [I, O, O, I, O],
     [I, O, O, O, I],
 ]
 
-# ! — Attract (exclamation mark = "something's happening!")
+# ! — Attract
 AT_ICON = [
     [O, O, O, O, O],
     [O, O, O, O, O],
@@ -130,34 +120,10 @@ MIC_ICON = [
 ]
 
 ATTRACT_PULSE_FRAMES = [
-    [
-        [O, O, O, O, O],
-        [O, O, I, O, O],
-        [O, I, I, I, O],
-        [O, O, I, O, O],
-        [O, O, O, O, O],
-    ],
-    [
-        [O, O, I, O, O],
-        [O, I, O, I, O],
-        [I, O, I, O, I],
-        [O, I, O, I, O],
-        [O, O, I, O, O],
-    ],
-    [
-        [I, O, I, O, I],
-        [O, I, I, I, O],
-        [I, I, I, I, I],
-        [O, I, I, I, O],
-        [I, O, I, O, I],
-    ],
-    [
-        [O, O, I, O, O],
-        [O, I, O, I, O],
-        [I, O, I, O, I],
-        [O, I, O, I, O],
-        [O, O, I, O, O],
-    ],
+    [[O,O,O,O,O],[O,O,I,O,O],[O,I,I,I,O],[O,O,I,O,O],[O,O,O,O,O]],
+    [[O,O,I,O,O],[O,I,O,I,O],[I,O,I,O,I],[O,I,O,I,O],[O,O,I,O,O]],
+    [[I,O,I,O,I],[O,I,I,I,O],[I,I,I,I,I],[O,I,I,I,O],[I,O,I,O,I]],
+    [[O,O,I,O,O],[O,I,O,I,O],[I,O,I,O,I],[O,I,O,I,O],[O,O,I,O,O]],
 ]
 
 MODE_ICONS = [FC_ICON, PO_ICON, MU_ICON, CV_ICON, AT_ICON, A0_ICON]
@@ -194,54 +160,51 @@ POEMS_FRAMES = [
 ]
 
 def rotate_right(icon):
-    """Rotate 5x5 icon 90 degrees clockwise."""
-    return [
-        [icon[4 - c][r] for c in range(5)]
-        for r in range(5)
-    ]
+    """Rotate 5×5 icon 90 degrees clockwise."""
+    return [[icon[4 - c][r] for c in range(5)] for r in range(5)]
 
 # ============================================================
-# INIT
+# HARDWARE INIT
 # ============================================================
 
 hub = PrimeHub()
 hub.speaker.volume(SPEAKER_VOLUME)
 
 try:
-    _distance = UltrasonicSensor(DISTANCE_PORT)
+    _distance    = UltrasonicSensor(DISTANCE_PORT)
     _has_distance = True
 except Exception:
     _has_distance = False
-    print("distance sensor not found on port A — sleep/wake disabled")
+    print("WARN:NO_DISTANCE_SENSOR")
 
 try:
-    _btn_left  = ForceSensor(BTN_LEFT_PORT)
-    _btn_right = ForceSensor(BTN_RIGHT_PORT)
-    _has_force_btns = True
-    print("Force buttons on E/F ready")
+    _btn_left        = ForceSensor(BTN_LEFT_PORT)
+    _btn_right       = ForceSensor(BTN_RIGHT_PORT)
+    _has_force_btns  = True
+    print("INFO:FORCE_BTNS_OK")
 except Exception:
     _btn_left = _btn_right = None
-    _has_force_btns = False
-    print("Force buttons not found on E/F — using hub buttons only")
+    _has_force_btns        = False
+    print("WARN:NO_FORCE_BTNS")
 
 try:
     _scan_motor = Motor(SCAN_MOTOR_PORT, Direction.CLOCKWISE)
     _scan_motor.reset_angle(0)
     _scan_motor.run_target(SCAN_SPEED, 0, wait=True)
-    _has_motor = True
+    _has_motor  = True
 except Exception:
-    _has_motor = False
-    print("scan motor not found on port B — scanning disabled")
+    _has_motor  = False
+    print("WARN:NO_SCAN_MOTOR")
 
 try:
     _flag_motor = Motor(FLAG_MOTOR_PORT, Direction.CLOCKWISE)
     _flag_motor.reset_angle(0)
-    _has_flag = True
-    print("Flag motor on D ready")
+    _has_flag   = True
+    print("INFO:FLAG_MOTOR_OK")
 except Exception:
     _flag_motor = None
-    _has_flag = False
-    print("flag motor not found on port D — flag disabled")
+    _has_flag   = False
+    print("WARN:NO_FLAG_MOTOR")
 
 # ============================================================
 # STATE
@@ -257,35 +220,110 @@ sleeping         = False
 last_activity_ms = 0
 conv_listening   = False
 
-in_attract           = False
-attract_frame        = 0
-attract_anim_ms      = 0
-attract_lost_ms      = 0
-attract_speaking     = False
+in_attract            = False
+attract_frame         = 0
+attract_anim_ms       = 0
+attract_lost_ms       = 0
+attract_speaking      = False
 ATTRACT_ANIM_FRAME_MS = 400
 
-_flag_target = FLAG_ANGLE_CW
-_flag_moving = False
-
 # ============================================================
-# ACTIVITY TRACKER
+# TICK / ACTIVITY
 # ============================================================
 
-def poke_activity():
-    global last_activity_ms
-    last_activity_ms = _elapsed_ms()
+_tick_counter = 0
 
 def _elapsed_ms():
     return _tick_counter * ANIM_TICK_MS
-
-_tick_counter = 0
 
 def _inc_tick():
     global _tick_counter
     _tick_counter += 1
 
+def poke_activity():
+    global last_activity_ms
+    last_activity_ms = _elapsed_ms()
+
 # ============================================================
-# DRAWING — no rotation, icons written as they appear on screen
+# SERIAL OUTPUT — wszystkie print() przez tę funkcję
+# ============================================================
+
+def emit(event, value=None):
+    """Wysyła zdarzenie do PC w formacie EVENT lub EVENT:VALUE."""
+    if value is None:
+        print(event)
+    else:
+        print(f"{event}:{value}")
+
+# ============================================================
+# SERIAL INPUT — odczyt jednej linii (nieblokujący)
+# ============================================================
+
+_serial_buf = ""
+
+def poll_serial():
+    """
+    Próbuje odczytać jedną linię ze stdin bez blokowania.
+    Zwraca kompletną linię (bez \\n) lub None.
+    MicroPython na Prime Hub udostępnia sys.stdin z metodą read().
+    """
+    import sys
+    try:
+        ch = sys.stdin.read(1)
+        if ch is None or ch == "":
+            return None
+        global _serial_buf
+        if ch == "\n":
+            line = _serial_buf.strip()
+            _serial_buf = ""
+            return line if line else None
+        _serial_buf += ch
+    except Exception:
+        pass
+    return None
+
+def handle_pc_signal(line):
+    """Przetwarza polecenia przychodzące z PC."""
+    global conv_listening
+
+    if line == "CONV_LISTEN":
+        conv_listening = True
+        draw_conv_listening()
+
+    elif line == "CONV_DONE":
+        conv_listening = False
+        if current_mode == 3:
+            draw_conv_idle()
+
+    elif line == "ATTRACT_SPEAK_START":
+        # PC zaczął mówić w trybie attract — zatrzymaj licznik "lost"
+        global attract_speaking
+        attract_speaking = True
+
+    elif line == "ATTRACT_SPEAK_DONE":
+        global attract_speaking
+        attract_speaking = False
+
+    elif line.startswith("MODE:"):
+        # PC może wymusić zmianę trybu: MODE:2
+        try:
+            idx = int(line.split(":")[1])
+            enter_mode(idx)
+        except Exception:
+            pass
+
+    elif line == "SLEEP":
+        enter_sleep()
+
+    elif line == "WAKE":
+        if sleeping:
+            exit_sleep()
+
+    else:
+        emit("WARN", f"UNKNOWN_CMD:{line}")
+
+# ============================================================
+# DRAWING
 # ============================================================
 
 def draw_icon(icon):
@@ -296,22 +334,14 @@ def draw_icon(icon):
                 hub.display.pixel(r, c, 100)
 
 def draw_poems():
-    frame = POEMS_FRAMES[poems_frame % len(POEMS_FRAMES)]
-    draw_icon(rotate_right(frame))
+    draw_icon(rotate_right(POEMS_FRAMES[poems_frame % len(POEMS_FRAMES)]))
 
 def draw_music():
     hub.display.off()
-
     for col in range(5):
         h = music_heights[col]
-
         for row in range(5 - h, 5):
-
-            # rotate 90° right:
-            new_r = row
-            new_c = 4 - col
-
-            hub.display.pixel(new_r, new_c, 100)
+            hub.display.pixel(row, 4 - col, 100)   # rotate 90° right
 
 def draw_conv_idle():
     draw_icon(CV_ICON)
@@ -322,9 +352,6 @@ def draw_conv_listening():
 def draw_menu(sel):
     draw_icon(MODE_ICONS[sel % NUM_MODES])
 
-def draw_sleep_animation():
-    draw_icon(SLEEP_ICON)
-
 def draw_attract_frame():
     draw_icon(ATTRACT_PULSE_FRAMES[attract_frame % len(ATTRACT_PULSE_FRAMES)])
 
@@ -332,31 +359,24 @@ def draw_attract_frame():
 # SOUNDS
 # ============================================================
 
-def play_attract_sad():
-    for freq, dur in ATTRACT_SAD:
+def _play_tones(tones, gap_ms=20):
+    for freq, dur in tones:
         hub.speaker.beep(frequency=freq, duration=dur)
-        wait(20)
+        wait(gap_ms)
 
-def play_mode_sound(mode_idx):
-    for freq, dur in MODE_SOUNDS[mode_idx]:
-        hub.speaker.beep(frequency=freq, duration=dur)
-        wait(20)
-
-def play_sleep_sound():
-    for freq, dur in SLEEP_SOUND:
-        hub.speaker.beep(frequency=freq, duration=dur)
-        wait(30)
-
-def play_wake_sound():
-    for freq, dur in WAKE_SOUND:
-        hub.speaker.beep(frequency=freq, duration=dur)
-        wait(20)
+def play_mode_sound(mode_idx):  _play_tones(MODE_SOUNDS[mode_idx])
+def play_sleep_sound():         _play_tones(SLEEP_SOUND, gap_ms=30)
+def play_wake_sound():          _play_tones(WAKE_SOUND)
+def play_attract_sad():         _play_tones(ATTRACT_SAD)
 
 # ============================================================
 # SLEEP / WAKE
 # ============================================================
 
-_last_distance = None
+_last_distance  = None
+_SCAN_LOGICAL   = [45, -45]
+_scan_idx       = 0
+_scan_target    = None
 
 def _read_distance_cm():
     global _last_distance
@@ -370,23 +390,18 @@ def _read_distance_cm():
         pass
     return _last_distance
 
-_SCAN_LOGICAL = [45, -45]
-_scan_idx     = 0
-_scan_target  = None
-
 def _scan_step():
     global _scan_idx, _scan_target
     if not _has_motor:
         return
     try:
-        physical_target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
-        angle = _scan_motor.angle()
-        if abs(angle - physical_target) <= 8:
+        target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
+        if abs(_scan_motor.angle() - target) <= 8:
             _scan_idx = 1 - _scan_idx
-            physical_target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
-        if _scan_target != physical_target:
-            _scan_target = physical_target
-            _scan_motor.run_target(SCAN_SPEED, physical_target, wait=False)
+            target    = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
+        if _scan_target != target:
+            _scan_target = target
+            _scan_motor.run_target(SCAN_SPEED, target, wait=False)
     except Exception:
         pass
 
@@ -405,15 +420,15 @@ def enter_sleep():
     sleeping   = True
     in_attract = False
     _scan_idx  = 0
-    draw_sleep_animation()
+    draw_icon(SLEEP_ICON)
     play_sleep_sound()
-    print("SLEEP")
+    emit("SLEEP")
 
 def exit_sleep():
     global sleeping
     sleeping = False
     play_wake_sound()
-    print("WAKE")
+    emit("WAKE")
     _motor_home()
     enter_attract()
 
@@ -429,14 +444,14 @@ def check_wake():
 
 def enter_attract():
     global in_attract, attract_frame, attract_anim_ms, attract_lost_ms
-    in_attract       = True
-    attract_frame    = 0
-    attract_anim_ms  = 0
-    attract_lost_ms  = 0
+    in_attract      = True
+    attract_frame   = 0
+    attract_anim_ms = 0
+    attract_lost_ms = 0
     draw_attract_frame()
     play_mode_sound(4)
-    print("MODE:4")
-    print("ATTRACT_ENTER")
+    emit("MODE", 4)
+    emit("ATTRACT_ENTER")
     poke_activity()
 
 def tick_attract():
@@ -451,19 +466,18 @@ def tick_attract():
     dist = _read_distance_cm()
     if dist is not None and dist < WAKE_DISTANCE_CM:
         attract_lost_ms = 0
-    else:
-        if not attract_speaking:
-            attract_lost_ms += ANIM_TICK_MS
-            if attract_lost_ms >= ATTRACT_LOST_MS:
-                attract_lost_ms = 0
-                in_attract      = False
-                print("ATTRACT_LOST")
-                print("ATTRACT_TIMEOUT")
+    elif not attract_speaking:
+        attract_lost_ms += ANIM_TICK_MS
+        if attract_lost_ms >= ATTRACT_LOST_MS:
+            attract_lost_ms = 0
+            in_attract      = False
+            emit("ATTRACT_LOST")
+            emit("ATTRACT_TIMEOUT")
 
 def exit_attract_to_menu():
     global in_attract
     in_attract = False
-    print("ATTRACT_EXIT")
+    emit("ATTRACT_EXIT")
     open_menu()
 
 # ============================================================
@@ -474,7 +488,7 @@ def update_anim():
     global anim_counter, poems_frame, music_heights
     if in_menu or sleeping or in_attract:
         return
-    if current_mode in (0, 3):
+    if current_mode in (0, 3, 4, 5):
         return
     anim_counter += ANIM_TICK_MS
     if current_mode == 1 and anim_counter >= POEMS_FRAME_MS:
@@ -491,7 +505,9 @@ def update_anim():
 # ============================================================
 
 def enter_mode(mode_idx):
-    global current_mode, anim_counter, poems_frame, music_heights, conv_listening, in_attract
+    global current_mode, anim_counter, poems_frame, music_heights
+    global conv_listening, in_attract
+
     current_mode   = mode_idx % NUM_MODES
     anim_counter   = 0
     conv_listening = False
@@ -509,12 +525,12 @@ def enter_mode(mode_idx):
         draw_conv_idle()
     elif current_mode == 4:
         enter_attract()
-        return
+        return          # enter_attract() robi własny emit/poke
     elif current_mode == 5:
         draw_icon(A0_ICON)
 
     play_mode_sound(current_mode)
-    print(f"MODE:{current_mode}")
+    emit("MODE", current_mode)
     poke_activity()
 
 # ============================================================
@@ -527,7 +543,7 @@ def open_menu():
     menu_selection = current_mode
     draw_menu(menu_selection)
     if current_mode in (1, 2):
-        print("MEDIA_PAUSE")
+        emit("MEDIA_PAUSE")
     hub.speaker.beep(frequency=600, duration=100)
     wait(120)
     hub.speaker.beep(frequency=800, duration=100)
@@ -542,7 +558,7 @@ def menu_confirm():
     global in_menu
     in_menu = False
     if menu_selection in (1, 2):
-        print("MEDIA_RESUME")
+        emit("MEDIA_RESUME")
     enter_mode(menu_selection)
 
 # ============================================================
@@ -550,41 +566,28 @@ def menu_confirm():
 # ============================================================
 
 def _read_buttons():
-    """Return (left_pressed, right_pressed) as bool.
-
-    Checks force sensors E/F AND hub built-in buttons simultaneously.
-    Either source returning True counts as pressed.
-    BTN_FORCE_THRESHOLD [N] filters accidental touches on force sensors.
-    """
-    left  = False
-    right = False
-
+    """Zwraca (left, right) jako bool — sprawdza force sensory i hub buttons."""
+    left = right = False
     if _has_force_btns:
         try:
-            left  = left  or _btn_left.pressed(BTN_FORCE_THRESHOLD)
-            right = right or _btn_right.pressed(BTN_FORCE_THRESHOLD)
+            left  = _btn_left.pressed(BTN_FORCE_THRESHOLD)
+            right = _btn_right.pressed(BTN_FORCE_THRESHOLD)
         except Exception:
             pass
-
     try:
-        hub_pressed = hub.buttons.pressed()
-        left  = left  or (Button.LEFT  in hub_pressed)
-        right = right or (Button.RIGHT in hub_pressed)
+        pressed = hub.buttons.pressed()
+        left  = left  or (Button.LEFT  in pressed)
+        right = right or (Button.RIGHT in pressed)
     except Exception:
         pass
-
     return left, right
 
-
 def is_held(button, ms):
-    """Return True if the given button is held for at least ms milliseconds.
-    button: 'left' or 'right'. Checks both sources via _read_buttons().
-    """
+    """True jeśli przycisk przytrzymany przez co najmniej ms milisekund."""
     elapsed = 0
     while True:
         left, right = _read_buttons()
-        still_held = (left if button == 'left' else right)
-        if not still_held:
+        if not (left if button == 'left' else right):
             return False
         wait(ANIM_TICK_MS)
         elapsed += ANIM_TICK_MS
@@ -593,7 +596,7 @@ def is_held(button, ms):
             return True
 
 def wait_release_all():
-    """Wait until all buttons (force + hub) are released."""
+    """Czeka aż wszystkie przyciski zostaną zwolnione."""
     while True:
         left, right = _read_buttons()
         if not left and not right:
@@ -602,54 +605,14 @@ def wait_release_all():
         update_anim()
 
 # ============================================================
-# PC SIGNAL HANDLER
+# FLAG
 # ============================================================
 
-def handle_pc_signal(line):
-    global conv_listening
-    if line == "CONV_LISTEN":
-        conv_listening = True
-        draw_conv_listening()
-    elif line == "CONV_DONE":
-        conv_listening = False
-        if current_mode == 3:
-            draw_conv_idle()
-
-# ============================================================
-# FLAG — pendulum via speed detection
-#
-# Motor gets run_target() ONLY when the target changes (once per half-cycle).
-# Stop.COAST lets the motor coast to a stop — angle() is unreliable for
-# detecting arrival, so we use speed() < FLAG_SPEED_STOPPED instead.
-# When the motor stops we send a command to the opposite end.
-# ============================================================
-
-_flag_target = FLAG_ANGLE_CW
-_flag_moving = False
-
-def _flag_send(target):
-    """Send run_target() to the flag motor and remember the target."""
-    global _flag_target, _flag_moving
-    _flag_target = target
-    _flag_moving = True
-    try:
-        _flag_motor.run_target(FLAG_SPEED, target, then=Stop.COAST, wait=False)
-    except Exception:
-        _flag_moving = False
-
-def tick_flag():
-    """Call every tick. Bounces the flag when motor stops at target."""
-    global _flag_moving
+def init_flag():
     if not _has_flag:
         return
-    if not _flag_moving:
-        return
     try:
-        spd = abs(_flag_motor.speed())
-        if spd < FLAG_SPEED_STOPPED:
-            _flag_moving = False
-            next_target  = 0 if _flag_target != 0 else FLAG_ANGLE_CW
-            _flag_send(next_target)
+        _flag_motor.run(FLAG_SPEED)
     except Exception:
         pass
 
@@ -659,48 +622,52 @@ def tick_flag():
 
 open_menu()
 poke_activity()
-print("READY")
-
-if _has_flag:
-    _flag_send(FLAG_ANGLE_CW)
+emit("READY")
+init_flag()
 
 scan_tick = 0
 
 while True:
     _inc_tick()
 
+    # --- Odczyt poleceń z PC (każdy tick) ---
+    line = poll_serial()
+    if line:
+        handle_pc_signal(line)
+
+    # --- SLEEP ---
     if sleeping:
         scan_tick += ANIM_TICK_MS
         if scan_tick >= SCAN_STEP_MS:
             scan_tick = 0
             check_wake()
-        _sl, _sr = _read_buttons()
-        if _sl or _sr:
+        sl, sr = _read_buttons()
+        if sl or sr:
             poke_activity()
             exit_sleep()
-        tick_flag()
         wait(ANIM_TICK_MS)
         continue
 
+    # --- ATTRACT ---
     if in_attract:
-        _al, _ar = _read_buttons()
-        if _al or _ar:
+        al, ar = _read_buttons()
+        if al or ar:
             poke_activity()
             wait_release_all()
             wait(DEBOUNCE_MS)
             exit_attract_to_menu()
         else:
             tick_attract()
-        tick_flag()
         wait(ANIM_TICK_MS)
         continue
 
+    # --- INACTIVITY → SLEEP ---
     if _elapsed_ms() - last_activity_ms >= INACTIVITY_TIMEOUT_MS:
         enter_sleep()
-        tick_flag()
         wait(ANIM_TICK_MS)
         continue
 
+    # --- NORMAL OPERATION ---
     left_now, right_now = _read_buttons()
 
     if in_menu:
@@ -722,12 +689,13 @@ while True:
                 hub.speaker.beep(frequency=1000, duration=200)
                 wait_release_all()
                 wait(DEBOUNCE_MS)
-                print("ACTION_HOLD")
+                emit("ACTION_HOLD")
             else:
                 hub.speaker.beep(frequency=880, duration=100)
                 wait_release_all()
                 wait(DEBOUNCE_MS)
-                print("YES")
+                emit("YES")
+
         elif left_now:
             poke_activity()
             if is_held('left', HOLD_TIME_MS):
@@ -739,8 +707,7 @@ while True:
                 hub.speaker.beep(frequency=440, duration=100)
                 wait_release_all()
                 wait(DEBOUNCE_MS)
-                print("NO")
+                emit("NO")
 
     update_anim()
-    tick_flag()
     wait(ANIM_TICK_MS)

@@ -36,6 +36,7 @@ import queue
 import threading
 import time
 import math
+import re
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -189,6 +190,7 @@ def _ensure_mixer():
 
 _signal_queue: queue.Queue = queue.Queue()
 _speaking = False
+_speaking_lock = threading.Lock()
 
 _tts_stop_event = threading.Event()
 
@@ -259,7 +261,6 @@ def eo_to_pl_phonetic(text: str) -> str:
         result = result.replace(ph, dst)
 
     # Prevent nasal vowel rendering of final -on/-an/-en by Polish TTS
-    import re
     result = re.sub(r'on\b', 'onn', result)
     result = re.sub(r'an\b', 'ann', result)
     result = re.sub(r'en\b', 'enn', result)
@@ -289,8 +290,8 @@ def _speak(text: str, lang: str = "en"):
 
     # Map lang codes to edge-tts voice names
     _EDGE_VOICES = {
-        "pl": "pl-PL-ZofiaNeural",   # warm female Polish voice
-        "en": "en-GB-SoniaNeural",   # clear female British voice
+        "pl": "pl-PL-MarekNeural",
+        "en": "en-GB-RyanNeural",
     }
 
     tmp = None
@@ -321,7 +322,9 @@ def _speak(text: str, lang: str = "en"):
         _ensure_mixer()
         pygame.mixer.music.load(tmp)
         pygame.mixer.music.play()
-        _speaking = True
+        with _speaking_lock:
+            global _speaking
+            _speaking = True
         try:
             while pygame.mixer.music.get_busy():
                 pygame.time.wait(50)
@@ -329,7 +332,8 @@ def _speak(text: str, lang: str = "en"):
                     pygame.mixer.music.stop()
                     break
         finally:
-            _speaking = False
+            with _speaking_lock:
+                _speaking = False
             try:
                 pygame.mixer.music.unload()
             except Exception:
@@ -712,7 +716,8 @@ class MediaMode(Mode):
         self.playing:  bool = False
         self.paused:   bool = False
 
-    def on_enter(self):
+    def _load_entries(self) -> list:
+        """Scan disk and JSON, return merged valid entry list (does NOT start playback)."""
         raw_entries = load_metadata(self.json_path)
         meta_by_filename = {e["filename"]: e for e in raw_entries if "filename" in e}
         files   = sorted(self.directory.glob("*.mp3"))
@@ -734,8 +739,19 @@ class MediaMode(Mode):
             print(f"[{self.name}] '{f.name}' has no JSON entry — added without metadata.")
             valid.append({"id": None, "filename": f.name,
                           "play_count": 0, "last_played": None, "rating": None})
+        return valid
 
-        self.entries = valid
+    def preload_entries(self):
+        """Load entry list without starting playback — call at startup for Attract."""
+        if not self.entries:
+            self.entries = self._load_entries()
+            if self.entries:
+                print(f"[{self.name}] preloaded {len(self.entries)} track(s) for Attract.")
+            else:
+                print(f"[{self.name}] No playable files in {self.directory}.")
+
+    def on_enter(self):
+        self.entries = self._load_entries()
         self.index   = 0
         self.playing = False
         self.paused  = False
@@ -778,6 +794,15 @@ class MediaMode(Mode):
             pygame.mixer.music.stop()
         self.playing = False
         self.paused  = False
+
+    def jump_to(self, idx: int):
+        """Jump to track by index and start playing immediately (called from TUI thread)."""
+        if not self.entries:
+            print(f"[{self.name}] No entries loaded.")
+            return
+        self._stop()
+        self.index = idx % len(self.entries)
+        self._play_current()
 
     def on_yes(self):
         ACTIVITY.poke()
@@ -1567,10 +1592,12 @@ class AttractMode(Mode):
         return entry
 
     def _speak_teaser_word(self, word: str, en_meaning: str, pl_meaning: str):
-        """Speak word via phonetic PL TTS, then its meanings."""
+        """Speak word via phonetic PL TTS, then its meaning in UI language only."""
         _speak(word, lang="eo")
-        _speak(f"It means: {en_meaning}!", lang="en")
-        _speak(f"Po polsku: {pl_meaning}!", lang="pl")
+        if UI_LANG == "pl":
+            _speak(f"To znaczy: {pl_meaning}!", lang="pl")
+        else:
+            _speak(f"It means: {en_meaning}!", lang="en")
 
     # ---- sequence types ----
 
@@ -1585,9 +1612,11 @@ class AttractMode(Mode):
         # Speak word via phonetic PL TTS
         _speak(word, lang="eo")
         if self._sleep_check(2.5): return
-        # Reveal answer
-        _speak(f"It means: {en_meaning}!", lang="en")
-        _speak(f"Po polsku: {pl_meaning}!", lang="pl")
+        # Reveal answer in UI language only
+        if UI_LANG == "pl":
+            _speak(f"To znaczy: {pl_meaning}!", lang="pl")
+        else:
+            _speak(f"It means: {en_meaning}!", lang="en")
         if self._stop_flag: return
 
         cta_text, cta_lang = random.choice(_ATTRACT_CTAS)
@@ -1686,10 +1715,8 @@ class AttractMode(Mode):
         if self._sleep_check(2.5): return
         if UI_LANG == "pl":
             _speak(f"To znaczy: {pl_meaning}!", lang="pl")
-            _speak(f"It means: {en_meaning}!", lang="en")
         else:
             _speak(f"It means: {en_meaning}!", lang="en")
-            _speak(f"Po polsku: {pl_meaning}!", lang="pl")
         if self._stop_flag: return
 
         # muzika or poetry
@@ -1837,6 +1864,12 @@ class ModeManager:
             AttractMode(_music_mode, _poems_mode),  # 4 — ATTRACT
             _a0_mode,            # 5 — A0 LESSON
         ]
+        self._music_mode = _music_mode
+        self._poems_mode = _poems_mode
+        # Pre-load track lists so AttractMode can play snippets immediately,
+        # even before the user manually enters Music/Poems mode.
+        _music_mode.preload_entries()
+        _poems_mode.preload_entries()
         self._fc_mode = _fc_mode
         self._a0_mode = _a0_mode
         self.current_idx = 0
@@ -1965,6 +1998,276 @@ def _preload_models(manager: "ModeManager"):
     print("[BOOT] Model preload started in background (Whisper + wav2vec2).")
 
 
+def _fmt_entry(i: int, entry: dict, current_idx: int) -> str:
+    marker = "▶" if i == current_idx else " "
+    title  = entry.get("title") or entry.get("filename", "?")
+    artist = entry.get("artist") or entry.get("author", "")
+    plays  = entry.get("play_count", 0)
+    rating = ("★" * entry["rating"] if entry.get("rating") else "  ") if entry.get("rating") else ""
+    detail = f"  {artist}" if artist else ""
+    return f"  {marker} {i+1:>3}. {title}{detail}  [{plays}x]{('  ' + rating) if rating else ''}"
+
+
+def _show_media_list(mode: MediaMode) -> None:
+    """Print a numbered track list for a MediaMode."""
+    if not mode.entries:
+        print(f"[TUI] {mode.name}: no tracks loaded (folder empty or JSON missing).")
+        return
+    print(f"\n── {mode.name} ({len(mode.entries)} tracks) " + "─" * 30)
+    for i, e in enumerate(mode.entries):
+        print(_fmt_entry(i, e, mode.index))
+    print("─" * 50)
+    print("  Type a number to jump to that track.\n")
+
+
+def _tui_music(manager: "ModeManager"):
+    """
+    Sub-TUI for MUSIC mode (mode 2).
+
+    Commands:
+      list / l          — show track list
+      <number>          — jump to track N
+      s / stop          — stop playback
+      r / random        — random track
+      now               — currently playing
+      back / b          — return to main TUI
+    """
+    print("\n[MUSIC] Entering music control. 'list' to see tracks, 'back' to return.\n")
+    manager.switch_to(2)
+    mode = manager._music_mode
+
+    while True:
+        try:
+            raw = input("[music]> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not raw:
+            continue
+        cmd = raw.lower()
+
+        if cmd in ("list", "l"):
+            _show_media_list(mode)
+        elif cmd in ("s", "stop"):
+            if pygame.mixer.get_init():
+                pygame.mixer.music.stop()
+            print("[MUSIC] Stopped.")
+        elif cmd in ("r", "random"):
+            if mode.entries:
+                idx = random.randint(0, len(mode.entries) - 1)
+                mode.jump_to(idx)
+                print(f"[MUSIC] ▶ {mode.entries[idx].get('title') or mode.entries[idx]['filename']}")
+            else:
+                print("[MUSIC] No tracks loaded.")
+        elif cmd == "now":
+            if mode.playing and mode.entries:
+                e = mode.entries[mode.index]
+                title  = e.get("title") or e["filename"]
+                artist = e.get("artist") or e.get("author", "")
+                plays  = e.get("play_count", 0)
+                print(f"[MUSIC] ▶ {title}" + (f"  — {artist}" if artist else "") + f"  [{plays}x]")
+            else:
+                print("[MUSIC] Nothing playing.")
+        elif cmd in ("back", "b"):
+            print("[MUSIC] Back to main TUI.")
+            break
+        elif cmd.isdigit():
+            n = int(cmd)
+            if 1 <= n <= len(mode.entries):
+                mode.jump_to(n - 1)
+                print(f"[MUSIC] ▶ {mode.entries[n-1].get('title') or mode.entries[n-1]['filename']}")
+            else:
+                print(f"[MUSIC] Out of range (1–{len(mode.entries)}).")
+        else:
+            print(f"[MUSIC] Unknown: {raw!r}  (list | <n> | stop | random | now | back)")
+
+
+def _tui_poems(manager: "ModeManager"):
+    """
+    Sub-TUI for POEMS mode (mode 1).
+
+    Commands:
+      list / l          — show poem list
+      <number>          — jump to poem N
+      s / stop          — stop playback
+      r / random        — random poem
+      now               — currently playing
+      back / b          — return to main TUI
+    """
+    print("\n[POEMS] Entering poems control. 'list' to see poems, 'back' to return.\n")
+    manager.switch_to(1)
+    mode = manager._poems_mode
+
+    while True:
+        try:
+            raw = input("[poems]> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not raw:
+            continue
+        cmd = raw.lower()
+
+        if cmd in ("list", "l"):
+            _show_media_list(mode)
+        elif cmd in ("s", "stop"):
+            if pygame.mixer.get_init():
+                pygame.mixer.music.stop()
+            print("[POEMS] Stopped.")
+        elif cmd in ("r", "random"):
+            if mode.entries:
+                idx = random.randint(0, len(mode.entries) - 1)
+                mode.jump_to(idx)
+                e = mode.entries[idx]
+                title  = e.get("title") or e["filename"]
+                author = e.get("author") or e.get("artist", "")
+                print(f"[POEMS] ▶ {title}" + (f"  — {author}" if author else ""))
+            else:
+                print("[POEMS] No poems loaded.")
+        elif cmd == "now":
+            if mode.playing and mode.entries:
+                e = mode.entries[mode.index]
+                title  = e.get("title") or e["filename"]
+                author = e.get("author") or e.get("artist", "")
+                plays  = e.get("play_count", 0)
+                print(f"[POEMS] ▶ {title}" + (f"  — {author}" if author else "") + f"  [{plays}x]")
+            else:
+                print("[POEMS] Nothing playing.")
+        elif cmd in ("back", "b"):
+            print("[POEMS] Back to main TUI.")
+            break
+        elif cmd.isdigit():
+            n = int(cmd)
+            if 1 <= n <= len(mode.entries):
+                mode.jump_to(n - 1)
+                e = mode.entries[n - 1]
+                title  = e.get("title") or e["filename"]
+                author = e.get("author") or e.get("artist", "")
+                print(f"[POEMS] ▶ {title}" + (f"  — {author}" if author else ""))
+            else:
+                print(f"[POEMS] Out of range (1–{len(mode.entries)}).")
+        else:
+            print(f"[POEMS] Unknown: {raw!r}  (list | <n> | stop | random | now | back)")
+
+
+def _terminal_tui(manager: "ModeManager"):
+    """
+    Main interactive terminal — runs in a background thread.
+
+    Top-level commands:
+      music / m         — enter Music sub-TUI  (mode 2)
+      poems / p         — enter Poems sub-TUI  (mode 1)
+      fc / flashcards   — switch to Flashcards (mode 0)
+      conv / c          — switch to Conversation (mode 3)
+      attract / a       — switch to Attract demo (mode 4)
+      lesson / l        — switch to A0 Lesson (mode 5)
+      mode <n>          — switch to mode n directly
+      sleep             — send robot to sleep
+      filter <unit>     — set flashcard unit filter (e.g.  filter Technology)
+      filter clear      — clear flashcard filter
+      status            — show current mode and hub state
+      q / quit          — exit TUI (robot keeps running)
+      ? / help          — show this help
+    """
+    _HELP = (
+        "\n[TUI] Commands:\n"
+        "  music / m          — Music sub-TUI (track list, jump, stop, random)\n"
+        "  poems / p          — Poems sub-TUI (same controls, separate context)\n"
+        "  fc / flashcards    — switch to Flashcards mode\n"
+        "  conv / c           — switch to Conversation mode\n"
+        "  attract / a        — switch to Attract / showcase mode\n"
+        "  lesson / l         — switch to A0 Lesson mode\n"
+        "  mode <n>           — switch to mode n directly (0-5)\n"
+        "  sleep              — put robot to sleep\n"
+        "  filter <unit>      — set flashcard filter  (e.g. filter Technology)\n"
+        "  filter clear       — clear flashcard filter\n"
+        "  status             — show current mode and playback state\n"
+        "  q / quit           — exit TUI (robot keeps running)\n"
+        "  ? / help           — show this help\n"
+    )
+
+    print("\n[TUI] Terminal control active. Type 'help' for commands.\n")
+
+    while True:
+        try:
+            raw = input("[tui]> ").strip()
+        except (EOFError, KeyboardInterrupt):
+            break
+        if not raw:
+            continue
+        cmd = raw.lower()
+        parts = cmd.split()
+
+        if cmd in ("?", "help"):
+            print(_HELP)
+
+        # ── Media sub-TUIs ───────────────────────────────────────
+        elif parts[0] in ("music", "m"):
+            _tui_music(manager)
+
+        elif parts[0] in ("poems", "poem", "p"):
+            _tui_poems(manager)
+
+        # ── Direct mode switches ─────────────────────────────────
+        elif parts[0] in ("fc", "flashcards"):
+            manager.switch_to(0)
+            print("[TUI] → Flashcards mode.")
+
+        elif parts[0] in ("conv", "c", "conversation"):
+            manager.switch_to(3)
+            print("[TUI] → Conversation mode.")
+
+        elif parts[0] in ("attract", "a"):
+            manager.switch_to(4)
+            print("[TUI] → Attract mode.")
+
+        elif parts[0] in ("lesson", "a0"):
+            manager.switch_to(5)
+            print("[TUI] → A0 Lesson mode.")
+
+        elif parts[0] == "mode":
+            if len(parts) == 2 and parts[1].isdigit():
+                manager.switch_to(int(parts[1]))
+                print(f"[TUI] → mode {parts[1]}.")
+            else:
+                print("[TUI] Usage: mode <0-5>")
+
+        # ── Sleep ────────────────────────────────────────────────
+        elif cmd == "sleep":
+            manager.handle("SLEEP")
+            print("[TUI] Robot sent to sleep.")
+
+        # ── Flashcard filter ─────────────────────────────────────
+        elif parts[0] == "filter":
+            if len(parts) < 2:
+                current = manager._fc_mode.active_filter or "(none)"
+                print(f"[TUI] Current filter: {current}  — usage: filter <unit> | filter clear")
+            elif parts[1] == "clear":
+                manager._fc_mode.set_filter(None)
+                print("[TUI] Flashcard filter cleared.")
+            else:
+                unit = " ".join(raw.split()[1:])   # preserve original case
+                manager._fc_mode.set_filter(unit)
+                print(f"[TUI] Flashcard filter → {unit!r}")
+
+        # ── Status ───────────────────────────────────────────────
+        elif cmd == "status":
+            mode = manager.current
+            sleeping = manager._sleeping
+            print(f"[TUI] Mode: {mode.name}  |  Sleeping: {sleeping}")
+            for m in (manager._music_mode, manager._poems_mode):
+                if m.playing and m.entries:
+                    e = m.entries[m.index]
+                    title = e.get("title") or e["filename"]
+                    print(f"[TUI] Playing [{m.name}]: {title}")
+
+        # ── Quit ─────────────────────────────────────────────────
+        elif cmd in ("q", "quit"):
+            print("[TUI] Exiting terminal control.")
+            break
+
+        else:
+            print(f"[TUI] Unknown command: {raw!r}  (type 'help')")
+
+
 def main():
     os.chdir(BASE_DIR)
     pygame.init()
@@ -1972,6 +2275,11 @@ def main():
 
     manager = ModeManager()
     _preload_models(manager)
+
+    # Start interactive terminal TUI in background (non-blocking)
+    threading.Thread(
+        target=_terminal_tui, args=(manager,), daemon=True, name="terminal-tui"
+    ).start()
 
     MAX_CONNECT_RETRIES = 3
     connect_failures    = 0
@@ -2048,6 +2356,10 @@ def main():
             manager.tick()
 
         process.terminate()
+        try:
+            process.wait(timeout=3)
+        except subprocess.TimeoutExpired:
+            process.kill()
         time.sleep(3)
 
 

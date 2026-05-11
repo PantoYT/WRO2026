@@ -5,10 +5,9 @@ espero_env/
 .venv/
 *.7z
 
-tools/
-
 __pycache__/
 
 *.pyc
 *.json
 *.env
+*.tsv
