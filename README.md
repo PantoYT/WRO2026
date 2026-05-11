@@ -22,7 +22,7 @@ The project addresses all three challenge areas:
 
 | Area | How this robot responds |
 |---|---|
-| **Area 1 — Preserving cultural heritage** | `wordlist.json` is a growing digital dictionary of Esperanto. `poems.json` and `music.json` are structured archives of Esperanto poetry and music — a language with no state institution to preserve it. |
+| **Area 1 — Preserving cultural heritage** | `wordlist.json` is a growing digital dictionary of 500 Esperanto words across 15 thematic units. `poems.json` and `music.json` are structured archives of 50 Esperanto poetry recordings and 50 music tracks — a language with no state institution to preserve it. |
 | **Area 2 — Human–robot–AI co-creation** | `ConversationMode` is a real dialogue partner: the LLM adapts its language level to each speaker in real time. It also detects cultural keywords and proactively offers to play related media. |
 | **Area 3 — Experiencing culture through robots** | `AttractMode` actively approaches passersby with greetings, word quizzes, music snippets and poetry in Esperanto — the robot comes to people, not the other way around. |
 
@@ -55,7 +55,7 @@ The project addresses all three challenge areas:
 │  wav2vec2 (local)   → Esperanto STT     │
 │  faster-whisper     → fallback STT      │
 │  Groq LLM           → conversation AI   │
-│  gTTS + pygame-ce   → text-to-speech    │
+│  edge-tts + pygame  → text-to-speech    │
 │  eo_to_pl_phonetic  → Eo TTS workaround │
 │  MP3 archive        → poems & music     │
 └─────────────────────────────────────────┘
@@ -104,7 +104,7 @@ This is the core argument for the WRO "autonomous decisions" criterion:
 | Flag motor | D | Pendulum animation 0°→+10° waves the Esperanto flag |
 | ForceSensor LEFT | E | Short = NO / previous; Long (800 ms) = open mode menu |
 | ForceSensor RIGHT | F | Short = YES / next / push-to-talk; Long = repeat definition / metadata / change level |
-| PC / Steam Deck | BLE ↔ hub | wav2vec2 STT, gTTS, SM-2, adaptive queue, Groq API, pygame-ce |
+| PC / Steam Deck | BLE ↔ hub | wav2vec2 STT, edge-tts, SM-2, adaptive queue, Groq API, pygame-ce |
 
 ---
 
@@ -135,20 +135,25 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
 
 ```
 .
-├── hub.py                          # SPIKE Prime firmware (MicroPython/Pybricks)
 ├── computer.py                     # PC logic (Python 3.11+)
-├── requirements.txt                # Python dependencies (pip install -r requirements.txt)
-├── config.json                     # API keys & runtime config (not committed)
+├── hub.py                          # SPIKE Prime firmware (MicroPython/Pybricks)
+├── requirements.txt                # Python dependencies
+├── config.json                     # Runtime config & API keys (not committed)
+├── .env                            # GROQ_API_KEY (alternative to config.json)
 ├── tools/
-│   └── import_wordlist.py          # Digitisation tool: TSV/CSV → wordlist.json
+│   ├── download_assets.py          # Download poems/music via yt-dlp
+│   ├── import_wordlist.py          # TSV/CSV → wordlist.json digitisation tool
+│   ├── project_audit.py            # Project health check (wordlist, audio, deps)
+│   ├── check_tts.py                # TTS quality test for Esperanto words
+│   └── stats.py                    # Learning progress & SR statistics
 └── assets/
     ├── flashcards/
-    │   └── wordlist.json           # 122 words in 10 thematic units, with SM-2 state
+    │   └── wordlist.json           # 500 words, 15 thematic units, with SM-2 state
     ├── poems/
-    │   ├── poems.json              # Metadata: title, author, year, themes
+    │   ├── poems.json              # Metadata: title, author, year, themes (50 entries)
     │   └── *.mp3                   # Esperanto poetry audio files
     └── music/
-        ├── music.json              # Metadata: title, artist, genre, origin
+        ├── music.json              # Metadata: title, artist, genre, origin (50 entries)
         └── *.mp3                   # Esperanto music audio files
 ```
 
@@ -160,6 +165,7 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
   "pronunciation": "es-PE-ro",
   "unit": "Culture",
   "part_of_speech": "noun",
+  "definition": "hope, expectation",
   "sr_ease": 2.5,
   "sr_interval": 3,
   "sr_repetitions": 2,
@@ -172,14 +178,18 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
 ### poems.json / music.json — example entry
 ```json
 {
-  "id": "p001",
+  "id": "001",
+  "order": 1,
   "filename": "la_espero.mp3",
   "title": "La Espero",
   "author": "L. L. Zamenhof",
   "year": 1887,
   "origin": "Poland",
+  "language": "Esperanto",
+  "genre": "spoken word / hymn",
   "themes": ["hope", "unity", "language"],
   "description": "The anthem of the Esperanto movement.",
+  "source": "https://www.youtube.com/watch?v=...",
   "play_count": 0,
   "last_played": null,
   "rating": null
@@ -216,28 +226,44 @@ Create `config.json` in the project root:
   "whisper_model": "base",
   "whisper_device": "cpu",
   "audio_record_seconds": 6,
-  "audio_activity_db": -30
+  "audio_activity_db": -30,
+  "inactivity_timeout_s": 60,
+  "conv_history_turns": 8,
+  "speaker_volume": 20
 }
 ```
 
-Alternatively, set `GROQ_API_KEY` as an environment variable (or in a `.env` file — `python-dotenv` is included).
+Alternatively, set `GROQ_API_KEY` as an environment variable or in a `.env` file (`python-dotenv` is included).
 
 ### Run
 ```bash
 python computer.py
 ```
-The script connects to the hub over BLE automatically, retrying up to 3 times on failure.
+The script connects to the hub over BLE automatically, retrying up to 3 times on failure. A terminal TUI starts in the background — type `help` for commands.
 
-### Digitise a dictionary (digitisation tool)
+### Tools
 ```bash
-# Import from TSV (word<TAB>translation / pl)
+# Import words from TSV/CSV
 python tools/import_wordlist.py my_dictionary.tsv
-
-# Preview without writing anything
 python tools/import_wordlist.py my_dictionary.tsv --dry-run
 
-# Custom wordlist path
-python tools/import_wordlist.py source.csv --wordlist assets/flashcards/wordlist.json
+# Download missing audio files (requires yt-dlp)
+python tools/download_assets.py
+
+# Project health check
+python tools/project_audit.py
+python tools/project_audit.py --json    # save report to audit_report.json
+
+# Learning statistics & SR progress
+python tools/stats.py
+python tools/stats.py --unit Robotics
+python tools/stats.py --due            # words due for review today
+python tools/stats.py --weak 20        # 20 hardest words by accuracy
+
+# TTS quality test
+python tools/check_tts.py              # 10 random words
+python tools/check_tts.py -u Robotics  # words from a specific unit
+python tools/check_tts.py --dry        # transcription only, no audio
 ```
 
 Legal Esperanto music and poetry sources: [Jamendo](https://jamendo.com), [Vinilkosmo](https://vinilkosmo-mp3.com)
@@ -284,9 +310,13 @@ Legal Esperanto music and poetry sources: [Jamendo](https://jamendo.com), [Vinil
 | H5 | Session summary spoken on FlashcardsMode exit | ✅ done |
 | P2 | Context-aware CONV→MEDIA transition on cultural keywords in LLM reply | ✅ done |
 | P4 | `tools/import_wordlist.py` — TSV/CSV digitisation tool with dedup and dry-run | ✅ done |
+| P5 | `tools/download_assets.py` — yt-dlp download tool for poems/music | ✅ done |
+| P6 | `tools/project_audit.py` — project health check script | ✅ done |
+| P7 | `tools/stats.py` — SR progress statistics and weak word report | ✅ done |
+| P8 | `tools/check_tts.py` — TTS quality verification tool | ✅ done |
 | P3 | README narrative — SDG 17, slogan, cultural statement | ✅ this file |
-| **P6** | Test `lang="eo"` (Esperanto TTS) in gTTS — hook ready in `_speak()` | 🔄 pending |
-| **P7** | Populate `poems.json` and `music.json` with 2–3 real entries before competition | 🔄 pending |
+| **P9** | Test `lang="eo"` (Esperanto TTS) in gTTS — hook ready in `_speak()` | 🔄 pending |
+| **P10** | Download remaining 9 missing audio files (poems: 8, music: 1) | 🔄 pending |
 
 ---
 
@@ -312,7 +342,7 @@ Flashcards, poems, music, A0 lessons — fully offline. Conversation requires in
 | wav2vec2-large-xlsr-53-eo | Esperanto speech recognition (primary STT) | Local, offline, CC-BY 4.0 |
 | faster-whisper | Fallback STT (auto language detection) | Local, offline, MIT |
 | SM-2 algorithm | Flashcard scheduling | Local, public domain |
-| Claude (Anthropic) | Code debugging during development | Not in the robot itself |
+| Claude (Anthropic) | Code development, debugging, tooling (`project_audit`, `check_tts`, `stats`) | Not in the robot itself |
 | ChatGPT (OpenAI) | Subject matter support during development | Not in the robot itself |
 
 **"What would you improve with more time?"**
