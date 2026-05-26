@@ -3,12 +3,14 @@ from pybricks.parameters import Button, Direction, Port, Stop
 from pybricks.pupdevices import Motor, UltrasonicSensor, ForceSensor
 from pybricks.tools import wait
 import urandom
+from usys import stdin, stdout
+from uselect import poll as uselect_poll
 
 # ============================================================
 # CONFIG
 # ============================================================
 
-HOLD_TIME_MS   = 800
+HOLD_TIME_MS   = 1500
 DEBOUNCE_MS    = 500
 SPEAKER_VOLUME = 20
 
@@ -22,7 +24,7 @@ NUM_MODES = 6  # FC, POEMS, MUSIC, CONVERSATION, ATTRACT, A0_LESSON
 INACTIVITY_TIMEOUT_MS = 180_000
 WAKE_DISTANCE_CM      = 200
 ATTRACT_LOST_MS       = 30_000
-SCAN_SPEED            = 300
+SCAN_SPEED            = 200          # slower = smoother sweep
 SCAN_STEP_MS          = 100
 
 # Sensor mount offset correction (+= right, -= left)
@@ -76,12 +78,11 @@ MU_ICON = [
 ]
 
 # K — Conversation (Konversation)
-# Bardziej czytelne K: lewy pion + dwie przekątne
 CV_ICON = [
-    [I, O, O, O, I],
-    [I, O, O, I, O],
-    [I, I, I, O, O],
-    [I, O, O, I, O],
+    [O, O, O, O, O],
+    [I, I, I, I, I],
+    [O, O, I, O, O],
+    [O, I, O, I, O],
     [I, O, O, O, I],
 ]
 
@@ -162,6 +163,10 @@ POEMS_FRAMES = [
 def rotate_right(icon):
     """Rotate 5×5 icon 90 degrees clockwise."""
     return [[icon[4 - c][r] for c in range(5)] for r in range(5)]
+
+_serial_buf = ""
+_keyboard = uselect_poll()
+_keyboard.register(stdin)
 
 # ============================================================
 # HARDWARE INIT
@@ -245,34 +250,28 @@ def poke_activity():
     last_activity_ms = _elapsed_ms()
 
 # ============================================================
-# SERIAL OUTPUT — wszystkie print() przez tę funkcję
+# SERIAL OUTPUT
 # ============================================================
 
 def emit(event, value=None):
-    """Wysyła zdarzenie do PC w formacie EVENT lub EVENT:VALUE."""
     if value is None:
         print(event)
     else:
         print(f"{event}:{value}")
 
 # ============================================================
-# SERIAL INPUT — odczyt jednej linii (nieblokujący)
+# SERIAL INPUT — non-blocking
 # ============================================================
 
-_serial_buf = ""
-
 def poll_serial():
-    """
-    Próbuje odczytać jedną linię ze stdin bez blokowania.
-    Zwraca kompletną linię (bez \\n) lub None.
-    MicroPython na Prime Hub udostępnia sys.stdin z metodą read().
-    """
-    import sys
+    global _serial_buf
+    if not _keyboard.poll(0):
+        return None
     try:
-        ch = sys.stdin.read(1)
-        if ch is None or ch == "":
+        ch = stdin.buffer.read(1)
+        if not ch:
             return None
-        global _serial_buf
+        ch = ch.decode("utf-8", "ignore")
         if ch == "\n":
             line = _serial_buf.strip()
             _serial_buf = ""
@@ -283,8 +282,9 @@ def poll_serial():
     return None
 
 def handle_pc_signal(line):
-    """Przetwarza polecenia przychodzące z PC."""
     global conv_listening
+
+    emit("DEBUG", f"RX:{line}")
 
     if line == "CONV_LISTEN":
         conv_listening = True
@@ -296,7 +296,6 @@ def handle_pc_signal(line):
             draw_conv_idle()
 
     elif line == "ATTRACT_SPEAK_START":
-        # PC zaczął mówić w trybie attract — zatrzymaj licznik "lost"
         global attract_speaking
         attract_speaking = True
 
@@ -305,7 +304,6 @@ def handle_pc_signal(line):
         attract_speaking = False
 
     elif line.startswith("MODE:"):
-        # PC może wymusić zmianę trybu: MODE:2
         try:
             idx = int(line.split(":")[1])
             enter_mode(idx)
@@ -341,7 +339,7 @@ def draw_music():
     for col in range(5):
         h = music_heights[col]
         for row in range(5 - h, 5):
-            hub.display.pixel(row, 4 - col, 100)   # rotate 90° right
+            hub.display.pixel(row, 4 - col, 100)
 
 def draw_conv_idle():
     draw_icon(CV_ICON)
@@ -370,13 +368,20 @@ def play_wake_sound():          _play_tones(WAKE_SOUND)
 def play_attract_sad():         _play_tones(ATTRACT_SAD)
 
 # ============================================================
-# SLEEP / WAKE
+# SLEEP / WAKE  — smooth 60° pendulum scan, no centre pause
 # ============================================================
 
-_last_distance  = None
-_SCAN_LOGICAL   = [45, -45]
-_scan_idx       = 0
-_scan_target    = None
+_last_distance = None
+
+# Scan sequence: left extreme → right extreme → left extreme → ...
+# No centre waypoint = continuous smooth swing, no pause at 0°.
+_SCAN_LOGICAL       = [-60, 60]   # degrees: left, right
+_scan_idx           = 0
+_scan_target        = None
+_scan_wait_until_ms = 0           # pause only at the extremes
+
+# How long to dwell at each extreme before reversing (ms)
+SCAN_DWELL_MS = 400
 
 def _read_distance_cm():
     global _last_distance
@@ -391,14 +396,26 @@ def _read_distance_cm():
     return _last_distance
 
 def _scan_step():
-    global _scan_idx, _scan_target
+    """Called every SCAN_STEP_MS while sleeping.
+    Drives motor in a smooth left↔right pendulum at 60° each side.
+    No stop at centre — only a short dwell at each extreme."""
+    global _scan_idx, _scan_target, _scan_wait_until_ms
     if not _has_motor:
         return
     try:
+        # Still dwelling at the current extreme — do nothing
+        if _elapsed_ms() < _scan_wait_until_ms:
+            return
+
         target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
-        if abs(_scan_motor.angle() - target) <= 8:
-            _scan_idx = 1 - _scan_idx
-            target    = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
+        current_angle = _scan_motor.angle()
+
+        if abs(current_angle - target) <= 8:
+            # Reached the extreme — dwell briefly, then flip direction
+            _scan_wait_until_ms = _elapsed_ms() + SCAN_DWELL_MS
+            _scan_idx = (_scan_idx + 1) % len(_SCAN_LOGICAL)
+            target = _SCAN_LOGICAL[_scan_idx] + SCAN_OFFSET_DEG
+
         if _scan_target != target:
             _scan_target = target
             _scan_motor.run_target(SCAN_SPEED, target, wait=False)
@@ -416,10 +433,11 @@ def _motor_home():
         pass
 
 def enter_sleep():
-    global sleeping, _scan_idx, in_attract
-    sleeping   = True
-    in_attract = False
-    _scan_idx  = 0
+    global sleeping, _scan_idx, in_attract, _scan_wait_until_ms
+    sleeping            = True
+    in_attract          = False
+    _scan_idx           = 0
+    _scan_wait_until_ms = 0          # ← reset dwell timer
     draw_icon(SLEEP_ICON)
     play_sleep_sound()
     emit("SLEEP")
@@ -525,7 +543,7 @@ def enter_mode(mode_idx):
         draw_conv_idle()
     elif current_mode == 4:
         enter_attract()
-        return          # enter_attract() robi własny emit/poke
+        return
     elif current_mode == 5:
         draw_icon(A0_ICON)
 
@@ -566,7 +584,6 @@ def menu_confirm():
 # ============================================================
 
 def _read_buttons():
-    """Zwraca (left, right) jako bool — sprawdza force sensory i hub buttons."""
     left = right = False
     if _has_force_btns:
         try:
@@ -583,7 +600,6 @@ def _read_buttons():
     return left, right
 
 def is_held(button, ms):
-    """True jeśli przycisk przytrzymany przez co najmniej ms milisekund."""
     elapsed = 0
     while True:
         left, right = _read_buttons()
@@ -596,7 +612,6 @@ def is_held(button, ms):
             return True
 
 def wait_release_all():
-    """Czeka aż wszystkie przyciski zostaną zwolnione."""
     while True:
         left, right = _read_buttons()
         if not left and not right:
@@ -624,13 +639,11 @@ open_menu()
 poke_activity()
 emit("READY")
 init_flag()
-
 scan_tick = 0
 
 while True:
     _inc_tick()
 
-    # --- Odczyt poleceń z PC (każdy tick) ---
     line = poll_serial()
     if line:
         handle_pc_signal(line)
