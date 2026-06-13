@@ -1,0 +1,234 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/colorsensor.html
+Tytuł: Color Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Color Sensor
+============
+
+
+classColorSensor(port)
+    LEGO® SPIKE Color Sensor.Parameters:port(Port) – Port to which the sensor is connected.color sensorcolorawaitcolor(surface=True)→ColorScans the color of a surface or an external light source.You choose which colors are detected using thedetectable_colors()method. By default, it detectsColor.RED,Color.YELLOW,Color.GREEN,Color.BLUE,Color.WHITE, orColor.NONE.Parameters:surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.Returns:Detected color.`color sensorreflected lightawaitreflection()→int:%Measures how much a surface reflects the light emitted by the
+sensor.Returns:Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).color sensorambient lightawaitambient()→int:%Measures the ambient light intensity.Returns:Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).Advanced color sensingcolor sensorhsvawaithsv(surface=True)→ColorScans the color of a surface or an external light source.This method is similar tocolor(), but it gives the full range
+of hue, saturation and brightness values, instead of rounding it to the
+nearest detectable color.Parameters:surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.Returns:Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).detectable_colors(colors)detectable_colors()→Collection[Color]Configures which colors thecolor()method should detect.Specify only colors that you wish to detect in your application.
+This way, the full-color measurements are rounded to the nearest
+desired color, and other colors are ignored. This improves reliability.If you give no arguments, the currently chosen colors will be returned.When coding with blocks, this is configured in the sensor setup block.Parameters:colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.Built-in lightsThis sensor has 3 built-in lights. You can adjust the brightness of each
+light. If you use the sensor to measure something, the lights will
+be turned on or off as needed for the measurement.100%color sensorlightoncolor sensor100500list withlightonawaitlights.on(brightness)Turns on the lights at the specified brightness.Parameters:brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of three values to set the brightness
+of each light individually.color sensorlightoffawaitlights.off()Turns off all the lights.
+
+LEGO® SPIKE Color Sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.
+
+port(Port) – Port to which the sensor is connected.
+
+
+awaitcolor(surface=True)→Color
+    Scans the color of a surface or an external light source.You choose which colors are detected using thedetectable_colors()method. By default, it detectsColor.RED,Color.YELLOW,Color.GREEN,Color.BLUE,Color.WHITE, orColor.NONE.Parameters:surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.Returns:Detected color.`
+
+Scans the color of a surface or an external light source.
+
+You choose which colors are detected using thedetectable_colors()method. By default, it detectsColor.RED,Color.YELLOW,Color.GREEN,Color.BLUE,Color.WHITE, orColor.NONE.
+
+
+Parameters:
+    surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.
+
+surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.
+
+
+Returns:
+    Detected color.`
+
+Detected color.`
+
+
+awaitreflection()→int:%
+    Measures how much a surface reflects the light emitted by the
+sensor.Returns:Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+Measures how much a surface reflects the light emitted by the
+sensor.
+
+
+Returns:
+    Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+
+awaitambient()→int:%
+    Measures the ambient light intensity.Returns:Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).
+
+Measures the ambient light intensity.
+
+
+Returns:
+    Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).
+
+Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).
+
+Advanced color sensing
+
+
+awaithsv(surface=True)→Color
+    Scans the color of a surface or an external light source.This method is similar tocolor(), but it gives the full range
+of hue, saturation and brightness values, instead of rounding it to the
+nearest detectable color.Parameters:surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.Returns:Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).
+
+Scans the color of a surface or an external light source.
+
+This method is similar tocolor(), but it gives the full range
+of hue, saturation and brightness values, instead of rounding it to the
+nearest detectable color.
+
+
+Parameters:
+    surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.
+
+surface(bool) – Choosetrueto scan the color of objects
+and surfaces. Choosefalseto scan the color of
+screens and other external light sources.
+
+
+Returns:
+    Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).
+
+Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).
+
+
+detectable_colors(colors)
+
+detectable_colors()→Collection[Color]
+    Configures which colors thecolor()method should detect.Specify only colors that you wish to detect in your application.
+This way, the full-color measurements are rounded to the nearest
+desired color, and other colors are ignored. This improves reliability.If you give no arguments, the currently chosen colors will be returned.When coding with blocks, this is configured in the sensor setup block.Parameters:colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.
+
+Configures which colors thecolor()method should detect.
+
+Specify only colors that you wish to detect in your application.
+This way, the full-color measurements are rounded to the nearest
+desired color, and other colors are ignored. This improves reliability.
+
+If you give no arguments, the currently chosen colors will be returned.
+
+When coding with blocks, this is configured in the sensor setup block.
+
+
+Parameters:
+    colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.
+
+colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.
+
+Built-in lights
+
+This sensor has 3 built-in lights. You can adjust the brightness of each
+light. If you use the sensor to measure something, the lights will
+be turned on or off as needed for the measurement.
+
+
+awaitlights.on(brightness)
+    Turns on the lights at the specified brightness.Parameters:brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of three values to set the brightness
+of each light individually.
+
+Turns on the lights at the specified brightness.
+
+
+Parameters:
+    brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of three values to set the brightness
+of each light individually.
+
+brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of three values to set the brightness
+of each light individually.
+
+
+awaitlights.off()
+    Turns off all the lights.
+
+Turns off all the lights.
+
+
+Examples
+--------
+
+
+Measuring color and reflection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Waiting for a color
+~~~~~~~~~~~~~~~~~~~
+
+
+Readingreflectedhue, saturation, and value
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing the detectable colors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, the sensor is configured to detect red, yellow, green,
+blue, white, or no color, which suits many applications.
+
+For better results in your application, you can measure your desired
+colors in advance, and tell the sensor to look only for those colors.
+Be sure to measure them at thesame distance and light conditionsas in your final application. Then you’ll get very accurate results
+even for colors that are otherwise hard to detect.
+
+
+Readingambienthue, saturation, value, and color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Blinking the built-in lights
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Turning off the lights when the program ends
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

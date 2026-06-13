@@ -1,0 +1,742 @@
+URL: https://docs.pybricks.com/en/latest/robotics.html
+Tytuł: robotics – Robotics and drive bases — pybricks v4.0.0 documentation
+============================================================
+
+
+robotics– Robotics and drive bases
+==================================
+
+Robotics module for the Pybricks API.
+
+
+classDriveBase(left_motor,right_motor,wheel_diameter,axle_track)
+    A robotic vehicle with two powered wheels and an optional support
+wheel or caster.By specifying the dimensions of your robot, this class
+makes it easy to drive a given distance in millimeters or turn by a given
+number of degrees.Positivedistances, radii, or drive speeds mean
+drivingforward.Negativemeansbackward.Positiveangles and turn rates mean turningright.Negativemeansleft. So when viewed from the top,
+positive means clockwise and negative means counterclockwise.See themeasuringsection for tips to measure and adjust the diameter
+and axle track values.Parameters:left_motor(Motor) – The motor that drives the left wheel.right_motor(Motor) – The motor that drives the right wheel.wheel_diameter(Number,mm) – Diameter of the wheels.axle_track(Number,mm) – Distance between the points where
+both wheels touch the ground.Driving by a given distance or angleUse the following commands to drive a given distance, or turn by a
+given angle.This is measured using the internal rotation sensors. Because wheels may
+slip while moving, the traveled distance and angle are only estimates.250mmholddrive basedrivestraightforthenawaitstraight(distance,then=Stop.HOLD,wait=True)Drives straight for a given distance and then stops.Parameters:distance(Number,mm) – Distance to travelthen(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.90°holddrive basedriveturnbythen90°holddrive basedriveturntothenawaitturn(angle,then=Stop.HOLD,wait=True,absolute=False)Turns in place by a given angle and then stops.Parameters:angle(Number,deg) – Angle of the turn.then(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.absolute(bool) – IfFalse(default), the robot turns _by_ the
+given angle relative to its current heading. IfTrue,
+the robot turns to the given absolute heading angle.100mm90°holddrive basedrivecurveradiusbythen100mmholddrive base250mmdrivecurveradiusforthenawaitarc(radius,angle=None,distance=None,then=Stop.HOLD,wait=True)Drives an arc (a partial circle) with a given radius. You can specify
+how far to drive using either an angle or a distance.With a positive radius, the robot drives along a circle to its right.
+With a negative radius, the robot drives along a circle to its left.You can specify how far to travel along that circle as an angle
+(degrees) or distance (mm). A positive value means driving forward
+along the circle. Negative means driving in reverse.Parameters:radius(Number,mm) – Radius of the circle.angle(Number,deg) – Angle to drive along the circle.distance(Number,mm) – Distance to drive along the circle,
+measured at the center of the robot.then(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.Raises:ValueError– You must specifyangleordistance, but not both. The
+    radius cannot be zero. Useturn()for in-place turns.❌✅✅✅✅✅200mm100mmholddrive basedrivecoordinatesΔ xΔ ythenawaitmove_by(dx,dy,then=Stop.HOLD)Moves the robot by an amount given as X-and-Y coordinates on the robot
+drive area. The X-axis is what was forward when the program started.
+The Y-axis is 90° left of that. You can reset this by resetting the heading.The robot first turns to the required heading and then drives the
+straight-line distance. Because the heading target is absolute, the
+result is independent of the robot’s current heading.Parameters:dx(Number,mm) – X-distance on the drive area.dy(Number,mm) – Y-distance on the drive area.then(Stop) – What to do after coming to a standstill.Raises:ValueError– If one of the distances is more than 30 m.200mm/sdrive baseconfiguredrive speed750mm/s²drive baseconfiguredrive acceleration150°/sdrive baseconfigureturn speed750°/s²drive baseconfigureturn accelerationsettings(straight_speed,straight_acceleration,turn_rate,turn_acceleration)settings()→Tuple[int,int,int,int]settings()→Tuple[int,Tuple[int,int],int,Tuple[int,int]]Configures the drive base speed and acceleration.If you give no arguments, this returns the current values as a tuple.The initial values are automatically configured based on your wheel
+diameter and axle track. They are selected such that your robot
+drives at about 40% of its maximum speed.The speed values given here do not apply to thedrive()method,
+since you provide your own speed values as arguments in that method.Speed and rate values are treated as absolute; negative values are
+converted to positive automatically.Parameters:straight_speed(Number,mm/s) – Straight-line speed of the robot.straight_acceleration(NumberorTuple[Number,Number],mm/s²) – Straight-line acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.turn_rate(Number,deg/s) – Turn rate of the robot.turn_acceleration(NumberorTuple[Number,Number],deg/s²) – Angular acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.done()→boolChecks if an ongoing command or maneuver is done.Returns:Trueif the command is done,Falseif not.Drive foreverUsedrive()to begin driving at a desired speed and steering.It keeps going until you usestop()or change course by
+usingdrive()again. For example, you can drive until a
+sensor is triggered and then stop or turn around.drive base100mm/s0°/sstart atanddrive(speed,turn_rate)Starts driving at the specified speed and turn rate. Both values are
+measured at the center point between the wheels of the robot.Parameters:speed(Number,mm/s) – Speed of the robot.turn_rate(Number,deg/s) – Turn rate of the robot.drive basecoaststopstop()Stops the robot by letting the motors spin freely.drive basebrakestopbrake()Stops the robot by passively braking the motors.drive baseholdstophold()Stops the robot and actively holds it in place.Measuringdrive basegetdistancedistance()→int:mmGets the estimated driven distance.Returns:Driven distance since last reset.drive basegetangleangle()→float:degGets the estimated rotation angle of the drive base.When the gyro is used for this drive base, this gives the gyro angle.
+Otherwise, it gives the estimated angle estimated from the motor
+displacement.Returns:Accumulated angle since last reset.drive basegetspeeddrive basegetturn ratestate()→Tuple[int,int,int,int]Gets the state of the robot.As with theangle()methods, the reported angle and turn rate
+are those of the gyro if the gyro is used. Otherwise they are
+estimated from the motor displacement.Returns:Tuple of distance, drive speed, angle, and turn rate of the robot.Changed in version 3.6:Now stops the drive base. You can now use nonzero values.drive base0mm0°reset distanceanglereset(distance=0,angle=0)Resets the estimated driven distance and heading angle.This also callsstop()to stop ongoing movements.
+If your robot is controlled withuse_gyro()set toTrue,
+calling this method willalsoset the gyro to the given angle.Parameters:distance(Number,mm) – New value of the driven distance.angle(Number,deg) – New heading angle of the robot.stalled()→boolChecks if the drive base is currently stalled.It is stalled when it cannot reach the target speed or position, even
+with the maximum actuation signal.Returns:Trueif the drive base is stalled,Falseif not.❌❌✅✅✅✅Driving with the gyrodrive baseusegyrouse_gyro(use_gyro)ChooseTrueto use the gyro sensor for turning and driving
+straight. ChooseFalseto rely only on the motor’s built-in
+rotation sensors.This method will automatically callstop()to stop ongoing
+movements.Parameters:use_gyro(bool) –Trueto enable,Falseto disable.If your hub is not mounted flat in your robot, make sure to specify
+thetop_sideandfront_sideparameters when you initialize thePrimeHub(),InventorHub(),EssentialHub(), orTechnicHub(). This way your robot
+knows which rotation to measure when turning.The gyro in each hub is a bit different, which can cause it to be a few
+degrees off for big turns, or many small turns in the same
+direction. For example, you may need to useturn(357)orturn(362)on your robot to make a full turn.By default, this class tries to maintain the robot’s position after a move
+completes. This means the wheels will spin if you pick the robot up, in an
+effort to maintain its heading angle. To avoid this, you can choosethen=Stop.COASTin your laststraight,turn, orarccommand.Measuring and validating the robot dimensionsAs a first estimate, you can measure thewheel_diameterand theaxle_trackwith a ruler. Because it is hard to see where the wheels
+effectively touch the ground, you can estimate theaxle_trackas
+the distance between the midpoint of the wheels.If you don’t have a ruler, you can use a LEGO beam to measure. The
+center-to-center distance of the holes is 8 mm. For some tyres, the
+diameter is printed on the side. For example, 62.4 x 20 means that the
+diameter is 62.4mm and that the width is 20 mm.In practice, most wheels compress slightly under the weight of your robot.
+To verify, make your robot drive 1000 mm usingmy_robot.straight(1000)and measure how far it really traveled. Compensate as follows:If your robot drivesnot far enough,decreasethewheel_diametervalue slightly.If your robot drivestoo far,increasethewheel_diametervalue slightly.Motor shafts and axles bend slightly under the load of the
+robot, causing the ground contact point of the wheels to be closer to the
+midpoint of your robot. To verify, make your robot turn 360 degrees
+usingmy_robot.turn(360)and check that it is back in the same place:If your robot turnsnot far enough,increasetheaxle_trackvalue slightly.If your robot turnstoo far,decreasetheaxle_trackvalue slightly.When making these adjustments, always adjust thewheel_diameterfirst, as done above. Be sure to test both turning
+and driving straight after you are done.Using the DriveBase motors individuallyAfter creating aDriveBaseobject, you can still use its two
+motors individually. If you start one motor, the other motor will
+automatically stop. Likewise, if a motor is already running and you make
+the drive base move, the original maneuver is cancelled and the drive base
+will take over.Advanced settingsThesettings()method is used to adjust commonly used settings like
+the default speed and acceleration for straight maneuvers and turns.
+Use the following attributes to adjust more advanced control settings.distance_controlThe traveled distance and drive speed are controlled by a PID
+controller. You can use this attribute to change its settings.
+See themotor controlattribute for an overview of
+available methods. Thedistance_controlattribute has the same
+functionality, but the settings apply to every millimeter driven by the
+drive base, instead of degrees turned by one motor.heading_controlThe robot turn angle and turn rate are controlled by a PID
+controller. You can use this attribute to change its settings.
+See themotor controlattribute for an overview of
+available methods. Theheading_controlattribute has the same
+functionality, but the settings apply to every degree of rotation of the
+whole drive base (viewed from the top) instead of degrees turned by one
+motor.Changed in version 3.2:Thedone()andstalled()methods have been moved.
+
+A robotic vehicle with two powered wheels and an optional support
+wheel or caster.
+
+By specifying the dimensions of your robot, this class
+makes it easy to drive a given distance in millimeters or turn by a given
+number of degrees.
+
+Positivedistances, radii, or drive speeds mean
+drivingforward.Negativemeansbackward.
+
+Positiveangles and turn rates mean turningright.Negativemeansleft. So when viewed from the top,
+positive means clockwise and negative means counterclockwise.
+
+See themeasuringsection for tips to measure and adjust the diameter
+and axle track values.
+
+
+Parameters:
+    left_motor(Motor) – The motor that drives the left wheel.right_motor(Motor) – The motor that drives the right wheel.wheel_diameter(Number,mm) – Diameter of the wheels.axle_track(Number,mm) – Distance between the points where
+both wheels touch the ground.
+
+  - left_motor(Motor) – The motor that drives the left wheel.
+left_motor(Motor) – The motor that drives the left wheel.
+
+  - right_motor(Motor) – The motor that drives the right wheel.
+right_motor(Motor) – The motor that drives the right wheel.
+
+  - wheel_diameter(Number,mm) – Diameter of the wheels.
+wheel_diameter(Number,mm) – Diameter of the wheels.
+
+  - axle_track(Number,mm) – Distance between the points where
+both wheels touch the ground.
+axle_track(Number,mm) – Distance between the points where
+both wheels touch the ground.
+
+Driving by a given distance or angle
+
+Use the following commands to drive a given distance, or turn by a
+given angle.
+
+This is measured using the internal rotation sensors. Because wheels may
+slip while moving, the traveled distance and angle are only estimates.
+
+
+awaitstraight(distance,then=Stop.HOLD,wait=True)
+    Drives straight for a given distance and then stops.Parameters:distance(Number,mm) – Distance to travelthen(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+
+Drives straight for a given distance and then stops.
+
+
+Parameters:
+    distance(Number,mm) – Distance to travelthen(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+
+  - distance(Number,mm) – Distance to travel
+distance(Number,mm) – Distance to travel
+
+  - then(Stop) – What to do after coming to a standstill.
+then(Stop) – What to do after coming to a standstill.
+
+  - wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+
+
+awaitturn(angle,then=Stop.HOLD,wait=True,absolute=False)
+    Turns in place by a given angle and then stops.Parameters:angle(Number,deg) – Angle of the turn.then(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.absolute(bool) – IfFalse(default), the robot turns _by_ the
+given angle relative to its current heading. IfTrue,
+the robot turns to the given absolute heading angle.
+
+Turns in place by a given angle and then stops.
+
+
+Parameters:
+    angle(Number,deg) – Angle of the turn.then(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.absolute(bool) – IfFalse(default), the robot turns _by_ the
+given angle relative to its current heading. IfTrue,
+the robot turns to the given absolute heading angle.
+
+  - angle(Number,deg) – Angle of the turn.
+angle(Number,deg) – Angle of the turn.
+
+  - then(Stop) – What to do after coming to a standstill.
+then(Stop) – What to do after coming to a standstill.
+
+  - wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+
+  - absolute(bool) – IfFalse(default), the robot turns _by_ the
+given angle relative to its current heading. IfTrue,
+the robot turns to the given absolute heading angle.
+absolute(bool) – IfFalse(default), the robot turns _by_ the
+given angle relative to its current heading. IfTrue,
+the robot turns to the given absolute heading angle.
+
+
+awaitarc(radius,angle=None,distance=None,then=Stop.HOLD,wait=True)
+    Drives an arc (a partial circle) with a given radius. You can specify
+how far to drive using either an angle or a distance.With a positive radius, the robot drives along a circle to its right.
+With a negative radius, the robot drives along a circle to its left.You can specify how far to travel along that circle as an angle
+(degrees) or distance (mm). A positive value means driving forward
+along the circle. Negative means driving in reverse.Parameters:radius(Number,mm) – Radius of the circle.angle(Number,deg) – Angle to drive along the circle.distance(Number,mm) – Distance to drive along the circle,
+measured at the center of the robot.then(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.Raises:ValueError– You must specifyangleordistance, but not both. The
+    radius cannot be zero. Useturn()for in-place turns.
+
+Drives an arc (a partial circle) with a given radius. You can specify
+how far to drive using either an angle or a distance.
+
+With a positive radius, the robot drives along a circle to its right.
+With a negative radius, the robot drives along a circle to its left.
+
+You can specify how far to travel along that circle as an angle
+(degrees) or distance (mm). A positive value means driving forward
+along the circle. Negative means driving in reverse.
+
+
+Parameters:
+    radius(Number,mm) – Radius of the circle.angle(Number,deg) – Angle to drive along the circle.distance(Number,mm) – Distance to drive along the circle,
+measured at the center of the robot.then(Stop) – What to do after coming to a standstill.wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+
+  - radius(Number,mm) – Radius of the circle.
+radius(Number,mm) – Radius of the circle.
+
+  - angle(Number,deg) – Angle to drive along the circle.
+angle(Number,deg) – Angle to drive along the circle.
+
+  - distance(Number,mm) – Distance to drive along the circle,
+measured at the center of the robot.
+distance(Number,mm) – Distance to drive along the circle,
+measured at the center of the robot.
+
+  - then(Stop) – What to do after coming to a standstill.
+then(Stop) – What to do after coming to a standstill.
+
+  - wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+wait(bool) – Wait for the maneuver to complete before continuing
+with the rest of the program.
+
+
+Raises:
+    ValueError– You must specifyangleordistance, but not both. The
+    radius cannot be zero. Useturn()for in-place turns.
+
+ValueError– You must specifyangleordistance, but not both. The
+    radius cannot be zero. Useturn()for in-place turns.
+
+
+awaitmove_by(dx,dy,then=Stop.HOLD)
+    Moves the robot by an amount given as X-and-Y coordinates on the robot
+drive area. The X-axis is what was forward when the program started.
+The Y-axis is 90° left of that. You can reset this by resetting the heading.The robot first turns to the required heading and then drives the
+straight-line distance. Because the heading target is absolute, the
+result is independent of the robot’s current heading.Parameters:dx(Number,mm) – X-distance on the drive area.dy(Number,mm) – Y-distance on the drive area.then(Stop) – What to do after coming to a standstill.Raises:ValueError– If one of the distances is more than 30 m.
+
+Moves the robot by an amount given as X-and-Y coordinates on the robot
+drive area. The X-axis is what was forward when the program started.
+The Y-axis is 90° left of that. You can reset this by resetting the heading.
+
+The robot first turns to the required heading and then drives the
+straight-line distance. Because the heading target is absolute, the
+result is independent of the robot’s current heading.
+
+
+Parameters:
+    dx(Number,mm) – X-distance on the drive area.dy(Number,mm) – Y-distance on the drive area.then(Stop) – What to do after coming to a standstill.
+
+  - dx(Number,mm) – X-distance on the drive area.
+dx(Number,mm) – X-distance on the drive area.
+
+  - dy(Number,mm) – Y-distance on the drive area.
+dy(Number,mm) – Y-distance on the drive area.
+
+  - then(Stop) – What to do after coming to a standstill.
+then(Stop) – What to do after coming to a standstill.
+
+
+Raises:
+    ValueError– If one of the distances is more than 30 m.
+
+ValueError– If one of the distances is more than 30 m.
+
+
+settings(straight_speed,straight_acceleration,turn_rate,turn_acceleration)
+
+settings()→Tuple[int,int,int,int]
+
+settings()→Tuple[int,Tuple[int,int],int,Tuple[int,int]]
+    Configures the drive base speed and acceleration.If you give no arguments, this returns the current values as a tuple.The initial values are automatically configured based on your wheel
+diameter and axle track. They are selected such that your robot
+drives at about 40% of its maximum speed.The speed values given here do not apply to thedrive()method,
+since you provide your own speed values as arguments in that method.Speed and rate values are treated as absolute; negative values are
+converted to positive automatically.Parameters:straight_speed(Number,mm/s) – Straight-line speed of the robot.straight_acceleration(NumberorTuple[Number,Number],mm/s²) – Straight-line acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.turn_rate(Number,deg/s) – Turn rate of the robot.turn_acceleration(NumberorTuple[Number,Number],deg/s²) – Angular acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.
+
+Configures the drive base speed and acceleration.
+
+If you give no arguments, this returns the current values as a tuple.
+
+The initial values are automatically configured based on your wheel
+diameter and axle track. They are selected such that your robot
+drives at about 40% of its maximum speed.
+
+The speed values given here do not apply to thedrive()method,
+since you provide your own speed values as arguments in that method.
+
+Speed and rate values are treated as absolute; negative values are
+converted to positive automatically.
+
+
+Parameters:
+    straight_speed(Number,mm/s) – Straight-line speed of the robot.straight_acceleration(NumberorTuple[Number,Number],mm/s²) – Straight-line acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.turn_rate(Number,deg/s) – Turn rate of the robot.turn_acceleration(NumberorTuple[Number,Number],deg/s²) – Angular acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.
+
+  - straight_speed(Number,mm/s) – Straight-line speed of the robot.
+straight_speed(Number,mm/s) – Straight-line speed of the robot.
+
+  - straight_acceleration(NumberorTuple[Number,Number],mm/s²) – Straight-line acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.
+straight_acceleration(NumberorTuple[Number,Number],mm/s²) – Straight-line acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.
+
+  - turn_rate(Number,deg/s) – Turn rate of the robot.
+turn_rate(Number,deg/s) – Turn rate of the robot.
+
+  - turn_acceleration(NumberorTuple[Number,Number],deg/s²) – Angular acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.
+turn_acceleration(NumberorTuple[Number,Number],deg/s²) – Angular acceleration and deceleration of the robot.
+Provide a single value to use the same acceleration and
+deceleration. Provide a tuple with two values to set them
+separately.
+
+
+done()→bool
+    Checks if an ongoing command or maneuver is done.Returns:Trueif the command is done,Falseif not.
+
+Checks if an ongoing command or maneuver is done.
+
+
+Returns:
+    Trueif the command is done,Falseif not.
+
+Trueif the command is done,Falseif not.
+
+Drive forever
+
+Usedrive()to begin driving at a desired speed and steering.
+
+It keeps going until you usestop()or change course by
+usingdrive()again. For example, you can drive until a
+sensor is triggered and then stop or turn around.
+
+
+drive(speed,turn_rate)
+    Starts driving at the specified speed and turn rate. Both values are
+measured at the center point between the wheels of the robot.Parameters:speed(Number,mm/s) – Speed of the robot.turn_rate(Number,deg/s) – Turn rate of the robot.
+
+Starts driving at the specified speed and turn rate. Both values are
+measured at the center point between the wheels of the robot.
+
+
+Parameters:
+    speed(Number,mm/s) – Speed of the robot.turn_rate(Number,deg/s) – Turn rate of the robot.
+
+  - speed(Number,mm/s) – Speed of the robot.
+speed(Number,mm/s) – Speed of the robot.
+
+  - turn_rate(Number,deg/s) – Turn rate of the robot.
+turn_rate(Number,deg/s) – Turn rate of the robot.
+
+
+stop()
+    Stops the robot by letting the motors spin freely.
+
+Stops the robot by letting the motors spin freely.
+
+
+brake()
+    Stops the robot by passively braking the motors.
+
+Stops the robot by passively braking the motors.
+
+
+hold()
+    Stops the robot and actively holds it in place.
+
+Stops the robot and actively holds it in place.
+
+Measuring
+
+
+distance()→int:mm
+    Gets the estimated driven distance.Returns:Driven distance since last reset.
+
+Gets the estimated driven distance.
+
+
+Returns:
+    Driven distance since last reset.
+
+Driven distance since last reset.
+
+
+angle()→float:deg
+    Gets the estimated rotation angle of the drive base.When the gyro is used for this drive base, this gives the gyro angle.
+Otherwise, it gives the estimated angle estimated from the motor
+displacement.Returns:Accumulated angle since last reset.
+
+Gets the estimated rotation angle of the drive base.
+
+When the gyro is used for this drive base, this gives the gyro angle.
+Otherwise, it gives the estimated angle estimated from the motor
+displacement.
+
+
+Returns:
+    Accumulated angle since last reset.
+
+Accumulated angle since last reset.
+
+
+state()→Tuple[int,int,int,int]
+    Gets the state of the robot.As with theangle()methods, the reported angle and turn rate
+are those of the gyro if the gyro is used. Otherwise they are
+estimated from the motor displacement.Returns:Tuple of distance, drive speed, angle, and turn rate of the robot.
+
+Gets the state of the robot.
+
+As with theangle()methods, the reported angle and turn rate
+are those of the gyro if the gyro is used. Otherwise they are
+estimated from the motor displacement.
+
+
+Returns:
+    Tuple of distance, drive speed, angle, and turn rate of the robot.
+
+Tuple of distance, drive speed, angle, and turn rate of the robot.
+
+Changed in version 3.6:Now stops the drive base. You can now use nonzero values.
+
+
+reset(distance=0,angle=0)
+    Resets the estimated driven distance and heading angle.This also callsstop()to stop ongoing movements.
+If your robot is controlled withuse_gyro()set toTrue,
+calling this method willalsoset the gyro to the given angle.Parameters:distance(Number,mm) – New value of the driven distance.angle(Number,deg) – New heading angle of the robot.
+
+Resets the estimated driven distance and heading angle.
+
+This also callsstop()to stop ongoing movements.
+If your robot is controlled withuse_gyro()set toTrue,
+calling this method willalsoset the gyro to the given angle.
+
+
+Parameters:
+    distance(Number,mm) – New value of the driven distance.angle(Number,deg) – New heading angle of the robot.
+
+  - distance(Number,mm) – New value of the driven distance.
+distance(Number,mm) – New value of the driven distance.
+
+  - angle(Number,deg) – New heading angle of the robot.
+angle(Number,deg) – New heading angle of the robot.
+
+
+stalled()→bool
+    Checks if the drive base is currently stalled.It is stalled when it cannot reach the target speed or position, even
+with the maximum actuation signal.Returns:Trueif the drive base is stalled,Falseif not.
+
+Checks if the drive base is currently stalled.
+
+It is stalled when it cannot reach the target speed or position, even
+with the maximum actuation signal.
+
+
+Returns:
+    Trueif the drive base is stalled,Falseif not.
+
+Trueif the drive base is stalled,Falseif not.
+
+Driving with the gyro
+
+
+use_gyro(use_gyro)
+    ChooseTrueto use the gyro sensor for turning and driving
+straight. ChooseFalseto rely only on the motor’s built-in
+rotation sensors.This method will automatically callstop()to stop ongoing
+movements.Parameters:use_gyro(bool) –Trueto enable,Falseto disable.
+
+ChooseTrueto use the gyro sensor for turning and driving
+straight. ChooseFalseto rely only on the motor’s built-in
+rotation sensors.
+
+This method will automatically callstop()to stop ongoing
+movements.
+
+
+Parameters:
+    use_gyro(bool) –Trueto enable,Falseto disable.
+
+use_gyro(bool) –Trueto enable,Falseto disable.
+
+If your hub is not mounted flat in your robot, make sure to specify
+thetop_sideandfront_sideparameters when you initialize thePrimeHub(),InventorHub(),EssentialHub(), orTechnicHub(). This way your robot
+knows which rotation to measure when turning.
+
+The gyro in each hub is a bit different, which can cause it to be a few
+degrees off for big turns, or many small turns in the same
+direction. For example, you may need to useturn(357)orturn(362)on your robot to make a full turn.
+
+By default, this class tries to maintain the robot’s position after a move
+completes. This means the wheels will spin if you pick the robot up, in an
+effort to maintain its heading angle. To avoid this, you can choosethen=Stop.COASTin your laststraight,turn, orarccommand.
+
+Measuring and validating the robot dimensions
+
+As a first estimate, you can measure thewheel_diameterand theaxle_trackwith a ruler. Because it is hard to see where the wheels
+effectively touch the ground, you can estimate theaxle_trackas
+the distance between the midpoint of the wheels.
+
+If you don’t have a ruler, you can use a LEGO beam to measure. The
+center-to-center distance of the holes is 8 mm. For some tyres, the
+diameter is printed on the side. For example, 62.4 x 20 means that the
+diameter is 62.4mm and that the width is 20 mm.
+
+In practice, most wheels compress slightly under the weight of your robot.
+To verify, make your robot drive 1000 mm usingmy_robot.straight(1000)and measure how far it really traveled. Compensate as follows:
+
+  - If your robot drivesnot far enough,decreasethewheel_diametervalue slightly.
+If your robot drivesnot far enough,decreasethewheel_diametervalue slightly.
+
+  - If your robot drivestoo far,increasethewheel_diametervalue slightly.
+If your robot drivestoo far,increasethewheel_diametervalue slightly.
+
+Motor shafts and axles bend slightly under the load of the
+robot, causing the ground contact point of the wheels to be closer to the
+midpoint of your robot. To verify, make your robot turn 360 degrees
+usingmy_robot.turn(360)and check that it is back in the same place:
+
+  - If your robot turnsnot far enough,increasetheaxle_trackvalue slightly.
+If your robot turnsnot far enough,increasetheaxle_trackvalue slightly.
+
+  - If your robot turnstoo far,decreasetheaxle_trackvalue slightly.
+If your robot turnstoo far,decreasetheaxle_trackvalue slightly.
+
+When making these adjustments, always adjust thewheel_diameterfirst, as done above. Be sure to test both turning
+and driving straight after you are done.
+
+Using the DriveBase motors individually
+
+After creating aDriveBaseobject, you can still use its two
+motors individually. If you start one motor, the other motor will
+automatically stop. Likewise, if a motor is already running and you make
+the drive base move, the original maneuver is cancelled and the drive base
+will take over.
+
+Advanced settings
+
+Thesettings()method is used to adjust commonly used settings like
+the default speed and acceleration for straight maneuvers and turns.
+Use the following attributes to adjust more advanced control settings.
+
+
+distance_control
+    The traveled distance and drive speed are controlled by a PID
+controller. You can use this attribute to change its settings.
+See themotor controlattribute for an overview of
+available methods. Thedistance_controlattribute has the same
+functionality, but the settings apply to every millimeter driven by the
+drive base, instead of degrees turned by one motor.
+
+The traveled distance and drive speed are controlled by a PID
+controller. You can use this attribute to change its settings.
+See themotor controlattribute for an overview of
+available methods. Thedistance_controlattribute has the same
+functionality, but the settings apply to every millimeter driven by the
+drive base, instead of degrees turned by one motor.
+
+
+heading_control
+    The robot turn angle and turn rate are controlled by a PID
+controller. You can use this attribute to change its settings.
+See themotor controlattribute for an overview of
+available methods. Theheading_controlattribute has the same
+functionality, but the settings apply to every degree of rotation of the
+whole drive base (viewed from the top) instead of degrees turned by one
+motor.
+
+The robot turn angle and turn rate are controlled by a PID
+controller. You can use this attribute to change its settings.
+See themotor controlattribute for an overview of
+available methods. Theheading_controlattribute has the same
+functionality, but the settings apply to every degree of rotation of the
+whole drive base (viewed from the top) instead of degrees turned by one
+motor.
+
+Changed in version 3.2:Thedone()andstalled()methods have been moved.
+
+New in version 3.4.
+
+
+classCar(steer_motor,drive_motors,torque_limit=100)
+    A vehicle with one steering motor, and one or more motors for driving.When you use this class, the steering motor will automatically find the
+center position. This also determines which angle corresponds to 100%
+steering.Parameters:steer_motor(Motor) – The motor that steers the front wheels.drive_motors(Motor) – The motor that drives the wheels. Use a tuple
+for multiple motors.torque_limit(Number,%) – The maximum torque limit used to find the
+endpoints for the steering mechanism, as a percentage of the
+maximum torque of the steering motor.car0%steer bysteer(percentage)Steers the front wheels by a given amount. For 100% steering, it
+steers right by the angle that was determined on initialization.
+For -100% steering, it steers left and 0% means straight.Parameters:steering(Number,%) – Amount to steer the front wheels.50%cardrive atpowerdrive_power(power)Drives the car at a given power level. Positive values drive forward,
+negative values drive backward.Thepowervalue is used to set the motor voltage as a percentage of
+the battery voltage. Below 10%, the car will coast the wheels in order
+to roll out smoothly instead of braking abruptly.This command is useful for remote control applications where you want
+instant response to button presses or joystick movements.Parameters:speed(Number,%) – Speed of the car.500°/scardrive atspeeddrive_speed(speed)Drives the car at a given motor speed. Positive values drive forward,
+negative values drive backward.This command is useful for more precise driving with gentle
+acceleration and deceleration. This automatically increases the power
+to maintain speed as you drive across obstacles.Parameters:speed(Number,deg/s) – Angular velocity of the drive motors.
+
+A vehicle with one steering motor, and one or more motors for driving.
+
+When you use this class, the steering motor will automatically find the
+center position. This also determines which angle corresponds to 100%
+steering.
+
+
+Parameters:
+    steer_motor(Motor) – The motor that steers the front wheels.drive_motors(Motor) – The motor that drives the wheels. Use a tuple
+for multiple motors.torque_limit(Number,%) – The maximum torque limit used to find the
+endpoints for the steering mechanism, as a percentage of the
+maximum torque of the steering motor.
+
+  - steer_motor(Motor) – The motor that steers the front wheels.
+steer_motor(Motor) – The motor that steers the front wheels.
+
+  - drive_motors(Motor) – The motor that drives the wheels. Use a tuple
+for multiple motors.
+drive_motors(Motor) – The motor that drives the wheels. Use a tuple
+for multiple motors.
+
+  - torque_limit(Number,%) – The maximum torque limit used to find the
+endpoints for the steering mechanism, as a percentage of the
+maximum torque of the steering motor.
+torque_limit(Number,%) – The maximum torque limit used to find the
+endpoints for the steering mechanism, as a percentage of the
+maximum torque of the steering motor.
+
+
+steer(percentage)
+    Steers the front wheels by a given amount. For 100% steering, it
+steers right by the angle that was determined on initialization.
+For -100% steering, it steers left and 0% means straight.Parameters:steering(Number,%) – Amount to steer the front wheels.
+
+Steers the front wheels by a given amount. For 100% steering, it
+steers right by the angle that was determined on initialization.
+For -100% steering, it steers left and 0% means straight.
+
+
+Parameters:
+    steering(Number,%) – Amount to steer the front wheels.
+
+steering(Number,%) – Amount to steer the front wheels.
+
+
+drive_power(power)
+    Drives the car at a given power level. Positive values drive forward,
+negative values drive backward.Thepowervalue is used to set the motor voltage as a percentage of
+the battery voltage. Below 10%, the car will coast the wheels in order
+to roll out smoothly instead of braking abruptly.This command is useful for remote control applications where you want
+instant response to button presses or joystick movements.Parameters:speed(Number,%) – Speed of the car.
+
+Drives the car at a given power level. Positive values drive forward,
+negative values drive backward.
+
+Thepowervalue is used to set the motor voltage as a percentage of
+the battery voltage. Below 10%, the car will coast the wheels in order
+to roll out smoothly instead of braking abruptly.
+
+This command is useful for remote control applications where you want
+instant response to button presses or joystick movements.
+
+
+Parameters:
+    speed(Number,%) – Speed of the car.
+
+speed(Number,%) – Speed of the car.
+
+
+drive_speed(speed)
+    Drives the car at a given motor speed. Positive values drive forward,
+negative values drive backward.This command is useful for more precise driving with gentle
+acceleration and deceleration. This automatically increases the power
+to maintain speed as you drive across obstacles.Parameters:speed(Number,deg/s) – Angular velocity of the drive motors.
+
+Drives the car at a given motor speed. Positive values drive forward,
+negative values drive backward.
+
+This command is useful for more precise driving with gentle
+acceleration and deceleration. This automatically increases the power
+to maintain speed as you drive across obstacles.
+
+
+Parameters:
+    speed(Number,deg/s) – Angular velocity of the drive motors.
+
+speed(Number,deg/s) – Angular velocity of the drive motors.
+
+
+Examples
+--------
+
+
+Driving straight and turning in place with a drive base
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This program shows the basics of driving and turning.
+
+
+Remote controlling a car with front wheel steering
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This program shows how you can drive a car with front wheel steering
+using theremotecontrol.
+
+In this program, the ports match those of theLEGO Technic 42099 Off-Roader, but you can
+use any other car with front wheel steering. If your vehicle has only one
+drive motor, you can use a single motor instead of a tuple of the motors used
+below.

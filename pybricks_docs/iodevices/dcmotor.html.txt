@@ -1,0 +1,84 @@
+URL: https://docs.pybricks.com/en/latest/iodevices/dcmotor.html
+Tytuł: DC Motor — pybricks v4.0.0 documentation
+============================================================
+
+
+DC Motor
+========
+
+This class is specifically for EV3 and NXT. This lets you drive motors that
+are not automatically detected as motors. This includes RCX motors and Power
+Function motors that are connected via the official converter cables. Note:
+Applying motor power to custom electronics may damage the hub or the device.
+
+For Powered Up DC Motors, just use
+theDCMotorclass instead, which will
+automatically detect the motor and use the correct and safe settings.
+
+
+classDCMotor(port,positive_direction=Direction.CLOCKWISE)
+    DC Motor for LEGO® MINDSTORMS EV3.Parameters:port(Port) – Port to which the motor is connected.positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.dc(duty)Rotates the motor at a given duty cycle (also known as “power”).Parameters:duty(Number,%) – The duty cycle (-100.0 to 100).brake()Passively brakes the motor.The motor stops due to friction, plus the voltage that
+is generated while the motor is still moving.stop()Stops the motor and lets it spin freely.The motor gradually stops due to friction.settings(max_voltage)settings()→Tuple[int]Configures motor settings. If no arguments are given,
+this returns the current values.Parameters:max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+DC Motor for LEGO® MINDSTORMS EV3.
+
+
+Parameters:
+    port(Port) – Port to which the motor is connected.positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.
+
+  - port(Port) – Port to which the motor is connected.
+port(Port) – Port to which the motor is connected.
+
+  - positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.
+positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.
+
+
+dc(duty)
+    Rotates the motor at a given duty cycle (also known as “power”).Parameters:duty(Number,%) – The duty cycle (-100.0 to 100).
+
+Rotates the motor at a given duty cycle (also known as “power”).
+
+
+Parameters:
+    duty(Number,%) – The duty cycle (-100.0 to 100).
+
+duty(Number,%) – The duty cycle (-100.0 to 100).
+
+
+brake()
+    Passively brakes the motor.The motor stops due to friction, plus the voltage that
+is generated while the motor is still moving.
+
+Passively brakes the motor.
+
+The motor stops due to friction, plus the voltage that
+is generated while the motor is still moving.
+
+
+stop()
+    Stops the motor and lets it spin freely.The motor gradually stops due to friction.
+
+Stops the motor and lets it spin freely.
+
+The motor gradually stops due to friction.
+
+
+settings(max_voltage)
+
+settings()→Tuple[int]
+    Configures motor settings. If no arguments are given,
+this returns the current values.Parameters:max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+Configures motor settings. If no arguments are given,
+this returns the current values.
+
+
+Parameters:
+    max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.

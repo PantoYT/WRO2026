@@ -1,0 +1,32 @@
+URL: https://docs.pybricks.com/en/latest/index.html
+Tytuł: Pybricks Reference Manual — pybricks v4.0.0 documentation
+============================================================
+
+
+Pybricks Reference Manual
+=========================
+
+Pybricksis Python coding for smart LEGO® hubs.
+Run MicroPython scripts
+directly on the hub, and get full control of your motors and sensors.
+
+Pybricks runs on LEGO® BOOST, City, Technic, MINDSTORMS®, and SPIKE®. You
+can code using Windows, Mac, Linux, Chromebook, and Android.
+
+Note
+
+You are viewing the stand-alone version of the documentation. To
+learn more about Pybricks and to start coding, visit
+thePybricks website
+
+Note
+
+Are you using LEGO MINDSTORMS EV3? Check out theEV3 documentationinstead.
+
+Click on any device below to see its documentation. Use the menu on the left
+to find documentation for additional modules. You may need to click the ☰ icon
+above to reveal this menu.
+
+Programmable hubs
+
+Powered Up motors and sensors

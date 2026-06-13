@@ -1,0 +1,864 @@
+URL: https://docs.pybricks.com/en/latest/hubs/technichub.html
+Tytuł: Technic Hub — pybricks v4.0.0 documentation
+============================================================
+
+
+Technic Hub
+===========
+
+
+classTechnicHub(top_side=Axis.Z,front_side=Axis.X)
+    LEGO® Technic Hub.Initializes the hub. Optionally, specify how the hub isplaced in your designby saying in which
+direction the top side (with the button) and front side
+(with the light) are pointing.Parameters:top_side(Axis) – The axis that passes through thetop sideof
+the hub.front_side(Axis) – The axis that passes through thefront sideof
+the hub.Using the hub status lightredtechnic hublightonlight.on(color)Turns on the light at the specified color.Parameters:color(Color) – Color of the light.technic hublightofflight.off()Turns off the light.light.blink(color,durations)Blinks the light at a given color by turning it on and off for given
+durations.The light keeps blinking indefinitely while the rest of your
+program keeps running.This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.Parameters:color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].light.animate(colors,interval)Animates the light with a sequence of colors, shown one by
+one for the given interval.The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.Parameters:colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.Using the IMUChanged in version 3.6:The methods below now return calibrated data by default. Depending on
+the method used, this combines data from the accelerometer, gyroscope,
+with your calibration values. Usecalibrated=Falsewhere applicable
+to get the raw data you got before.technic hubisreadyimu.ready()→boolChecks if the device is calibrated and ready for use.This becomesTruewhen the robot has been sitting stationary for a
+few seconds, which allows the device to re-calibrate. It isFalseif the hub has just been started, or if it hasn’t had a chance to
+calibrate for more than 10 minutes.Returns:Trueif it is ready for use,Falseif not.technic hubisstationaryimu.stationary()→boolChecks if the device is currently stationary (not moving).Returns:Trueif stationary for at least a second,Falseif it is
+moving.technic hubtop sideis upimu.up(calibrated=True)→SideChecks which side of the hub currently faces upward.Parameters:calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine which way is up. ChooseFalseto use raw acceleration values.Returns:Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.technic hubgetpitchtechnic hubgetrollimu.tilt(calibrated=True)→Tuple[int,int]Gets the pitch and roll angles. This is relative to theuser-specified neutral orientation.The order of rotation is pitch-then-roll. This is equivalent to a
+positive rotation along the robot y-axis and then a positive rotation
+along the x-axis.Parameters:calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine the tilt. ChooseFalseto use raw acceleration values.Returns:Tuple of pitch and roll angles in degrees.technic hubxacceleration alongimu.acceleration(axis,calibrated=True)→float:mm/s²imu.acceleration(calibrated=True)→vector:mm/s²Gets the acceleration of the device along a given axis in therobot reference frame.Parameters:axis(Axis) – Axis along which the acceleration should be
+measured, orNoneto get a vector along all axes.calibrated(bool) – ChooseTrueto use calibrated acceleration
+values. ChooseFalseto use raw acceleration values.Returns:Acceleration along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.technic hubxgetangular velocityaroundimu.angular_velocity(axis,calibrated=True)→float:deg/simu.angular_velocity(calibrated=True)→vector:deg/sGets the angular velocity of the device along a given axis in
+therobot reference frame.Parameters:axis(Axis) – Axis along which the angular velocity should be
+measured, orNoneto get a vector along all axes.calibrated(bool) – ChooseTrueto compensate for the estimated
+bias and configured scale of the gyroscope. ChooseFalseto get raw angular velocity values.Returns:Angular velocity along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.technic hubget headingimu.heading()→float:degGets the heading angle of your robot. A positive value means a
+clockwise turn.The heading is 0 when your program starts. The value continues to grow
+even as the robot turns more than 180 degrees. It does not wrap around
+to -180 like it does in some apps.Returns:Heading angle relative to starting orientation.technic hub0°reset heading toimu.reset_heading(angle)Resets the accumulated heading angle of the robot.This cannot be called while a drive base is using the gyro to drive or
+hold position.
+UseDriveBase.reset()instead, which will stop the robot and then set the new heading value.Changed in version 3.6:Resetting the angle while driving is not allowed. Stop first.Parameters:angle(Number,deg) – Value to which the heading should be reset.Raises:OSError– There is a drive base that is currently using the gyro.technic hubxgetrotationaroundimu.rotation(axis,calibrated=True)→float:degGets the rotation of the device along a given axis in
+therobot reference frame.This value is useful if your robotonlyrotates along the requested
+axis. For general three-dimensional motion, use theorientation()method instead.Parameters:axis(Axis) – Axis along which the rotation should be measured.calibrated(bool) – ChooseTrueto compensate for configured
+scale of the gyroscope. ChooseFalseto get unscaled values.Returns:The rotation angle.imu.orientation()→MatrixGets the three-dimensional orientation of the robot in
+therobot reference frame.It returns a rotation matrix whose columns represent theX,Y,
+andZaxis of the robot.Returns:The 3x3 rotation matrix.360°technic hubconfigureheading correction2°/stechnic hubconfigureangular velocity threshold2500mm/s²technic hubconfigureacceleration thresholdimu.settings(*,angular_velocity_threshold,acceleration_threshold,heading_correction,angular_velocity_bias,angular_velocity_scale,acceleration_correction)imu.settings()→TupleConfigures the IMU settings. If no arguments are given,
+this returns the current values. Use keyword arguments for each value
+to ensure correct behavior because settings may be added or changed in
+future releases.These IMU settings are saved on the hub. They will keep their values
+until you change them again. The values will be reset to default values
+if you update the hub to a different firmware version or call thehub.system.reset_storagemethod.Theangular_velocity_thresholdandacceleration_thresholddefine when the hub is considered stationary. If all
+measurements stay below these thresholds for one second, the IMU
+will recalibrate itself. In a noisy room with high ambient vibrations (such as a
+competition hall), you can increase the thresholds
+slightly to give your robot the chance to calibrate.
+To verify that your settings are working as expected, test that
+thestationary()method givesFalseif your robot is moving,
+andTrueif it is sitting still.The gyroscope measures how fast the hub rotates to estimate the total
+angle. Due to variations in the production process, each
+hub consistently reports a different value for a full rotation. For
+example, your hub might consistently report357degrees for every360degree turn. You can measure this value
+withhub.imu.rotation(-Axis.Z,calibrated=False)and enter it as
+theheading_correctionsetting. Then, thehub.imu.heading()method will take it into account going forward, correctly scaling it
+to 360 degrees for a full rotation.Parameters:angular_velocity_threshold(Number,deg/s) – The threshold for
+variations in the angular velocity below which the hub is
+considered stationary enough to calibrate.
+After a reset the value is 2 deg/s.acceleration_threshold(Number,mm/s²) – The threshold for
+variations in acceleration below which the hub is considered
+stationary enough to calibrate. After a reset the value
+is 2500 mm/s².heading_correction(Number,deg) – Number of degrees
+reported by for one full rotation of your robot.
+After a reset the value is 360 degrees. This is applied on top
+of any scaling that is done by theangular_velocity_scalesetting.angular_velocity_bias(tuple,deg/s) – Initial bias for angular
+velocity measurements along x, y, and z immediately after boot.
+After a reset the value is (0, 0, 0) deg/s.angular_velocity_scale(tuple,deg) – Scale adjustment for x, y, and
+z rotation to account for manufacturing differences. After a
+reset the value is (360, 360, 360) deg/s. The correct values
+can be obtained usinghub.imu.rotation(Axis.X, calibrated=False)and repeating it for each axis.acceleration_correction(tuple,mm/s²) – Scale adjustment for x, y,
+and z gravity magnitude in both directions to account for
+manufacturing differences. After a reset the
+value is (9806.65, -9806.65, 9806.65, -9806.65, 9806.65, -9806.65) mm/s².
+The correct values can be
+obtained usinghub.imu.acceleration(Axis.X, calibrated=False)and repeating it for all axes in both directions.Using the batterytechnic hubbatteryvoltagebattery.voltage()→int:mVGets the voltage of the battery.Returns:Battery voltage.technic hubbatterycurrentbattery.current()→int:mAGets the current supplied by the battery.Returns:Battery current.Button and system controltechnic hubcenteris pressedbuttons.pressed()→Set[Button]Checks which buttons are currently pressed.Returns:Set of pressed buttons.system.info()→dictGets information about the hub as a dictionary with the following keys:"name": The hub name. This is the name you see when connecting
+via Bluetooth."reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue."host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise."host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise."program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.“program_id”: Program (slot) number of the currently running program.Returns:A dictionary with system info.Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.technic hubcenterstop button istechnic hubnonestop button issystem.set_stop_button(button)Sets the button or button combination that stops a running script.Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.Parameters:button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.system.storage(offset,write=)system.storage(offset,read=)→bytesReads or writes binary data to persistent storage.This lets you store data that can be used the next time you run the
+program.The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.Once saved, the data will remain available even after you remove the
+batteries.Parameters:offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.Returns:The bytes read if reading, otherwiseNone.Raises:ValueError– If you try to read or write data outside of the allowed range.You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.system.reset_storage()Resets all user settings to default values and erases user programs.technic hubshut downsystem.shutdown()Stops your program and shuts the hub down.
+
+LEGO® Technic Hub.
+
+Initializes the hub. Optionally, specify how the hub isplaced in your designby saying in which
+direction the top side (with the button) and front side
+(with the light) are pointing.
+
+
+Parameters:
+    top_side(Axis) – The axis that passes through thetop sideof
+the hub.front_side(Axis) – The axis that passes through thefront sideof
+the hub.
+
+  - top_side(Axis) – The axis that passes through thetop sideof
+the hub.
+top_side(Axis) – The axis that passes through thetop sideof
+the hub.
+
+  - front_side(Axis) – The axis that passes through thefront sideof
+the hub.
+front_side(Axis) – The axis that passes through thefront sideof
+the hub.
+
+Using the hub status light
+
+
+light.on(color)
+    Turns on the light at the specified color.Parameters:color(Color) – Color of the light.
+
+Turns on the light at the specified color.
+
+
+Parameters:
+    color(Color) – Color of the light.
+
+color(Color) – Color of the light.
+
+
+light.off()
+    Turns off the light.
+
+Turns off the light.
+
+
+light.blink(color,durations)
+    Blinks the light at a given color by turning it on and off for given
+durations.The light keeps blinking indefinitely while the rest of your
+program keeps running.This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.Parameters:color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+Blinks the light at a given color by turning it on and off for given
+durations.
+
+The light keeps blinking indefinitely while the rest of your
+program keeps running.
+
+This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.
+
+
+Parameters:
+    color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+  - color(Color) – Color of the light.
+color(Color) – Color of the light.
+
+  - durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+
+light.animate(colors,interval)
+    Animates the light with a sequence of colors, shown one by
+one for the given interval.The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.Parameters:colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.
+
+Animates the light with a sequence of colors, shown one by
+one for the given interval.
+
+The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.
+
+
+Parameters:
+    colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.
+
+  - colors(list) – Sequence ofColorvalues.
+colors(list) – Sequence ofColorvalues.
+
+  - interval(Number,ms) – Time between color updates.
+interval(Number,ms) – Time between color updates.
+
+Using the IMU
+
+Changed in version 3.6:The methods below now return calibrated data by default. Depending on
+the method used, this combines data from the accelerometer, gyroscope,
+with your calibration values. Usecalibrated=Falsewhere applicable
+to get the raw data you got before.
+
+
+imu.ready()→bool
+    Checks if the device is calibrated and ready for use.This becomesTruewhen the robot has been sitting stationary for a
+few seconds, which allows the device to re-calibrate. It isFalseif the hub has just been started, or if it hasn’t had a chance to
+calibrate for more than 10 minutes.Returns:Trueif it is ready for use,Falseif not.
+
+Checks if the device is calibrated and ready for use.
+
+This becomesTruewhen the robot has been sitting stationary for a
+few seconds, which allows the device to re-calibrate. It isFalseif the hub has just been started, or if it hasn’t had a chance to
+calibrate for more than 10 minutes.
+
+
+Returns:
+    Trueif it is ready for use,Falseif not.
+
+Trueif it is ready for use,Falseif not.
+
+
+imu.stationary()→bool
+    Checks if the device is currently stationary (not moving).Returns:Trueif stationary for at least a second,Falseif it is
+moving.
+
+Checks if the device is currently stationary (not moving).
+
+
+Returns:
+    Trueif stationary for at least a second,Falseif it is
+moving.
+
+Trueif stationary for at least a second,Falseif it is
+moving.
+
+
+imu.up(calibrated=True)→Side
+    Checks which side of the hub currently faces upward.Parameters:calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine which way is up. ChooseFalseto use raw acceleration values.Returns:Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.
+
+Checks which side of the hub currently faces upward.
+
+
+Parameters:
+    calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine which way is up. ChooseFalseto use raw acceleration values.
+
+calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine which way is up. ChooseFalseto use raw acceleration values.
+
+
+Returns:
+    Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.
+
+Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.
+
+
+imu.tilt(calibrated=True)→Tuple[int,int]
+    Gets the pitch and roll angles. This is relative to theuser-specified neutral orientation.The order of rotation is pitch-then-roll. This is equivalent to a
+positive rotation along the robot y-axis and then a positive rotation
+along the x-axis.Parameters:calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine the tilt. ChooseFalseto use raw acceleration values.Returns:Tuple of pitch and roll angles in degrees.
+
+Gets the pitch and roll angles. This is relative to theuser-specified neutral orientation.
+
+The order of rotation is pitch-then-roll. This is equivalent to a
+positive rotation along the robot y-axis and then a positive rotation
+along the x-axis.
+
+
+Parameters:
+    calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine the tilt. ChooseFalseto use raw acceleration values.
+
+calibrated(bool) – ChooseTrueto use calibrated gyroscope and
+accelerometer data to determine the tilt. ChooseFalseto use raw acceleration values.
+
+
+Returns:
+    Tuple of pitch and roll angles in degrees.
+
+Tuple of pitch and roll angles in degrees.
+
+
+imu.acceleration(axis,calibrated=True)→float:mm/s²
+
+imu.acceleration(calibrated=True)→vector:mm/s²
+    Gets the acceleration of the device along a given axis in therobot reference frame.Parameters:axis(Axis) – Axis along which the acceleration should be
+measured, orNoneto get a vector along all axes.calibrated(bool) – ChooseTrueto use calibrated acceleration
+values. ChooseFalseto use raw acceleration values.Returns:Acceleration along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.
+
+Gets the acceleration of the device along a given axis in therobot reference frame.
+
+
+Parameters:
+    axis(Axis) – Axis along which the acceleration should be
+measured, orNoneto get a vector along all axes.calibrated(bool) – ChooseTrueto use calibrated acceleration
+values. ChooseFalseto use raw acceleration values.
+
+  - axis(Axis) – Axis along which the acceleration should be
+measured, orNoneto get a vector along all axes.
+axis(Axis) – Axis along which the acceleration should be
+measured, orNoneto get a vector along all axes.
+
+  - calibrated(bool) – ChooseTrueto use calibrated acceleration
+values. ChooseFalseto use raw acceleration values.
+calibrated(bool) – ChooseTrueto use calibrated acceleration
+values. ChooseFalseto use raw acceleration values.
+
+
+Returns:
+    Acceleration along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.
+
+Acceleration along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.
+
+
+imu.angular_velocity(axis,calibrated=True)→float:deg/s
+
+imu.angular_velocity(calibrated=True)→vector:deg/s
+    Gets the angular velocity of the device along a given axis in
+therobot reference frame.Parameters:axis(Axis) – Axis along which the angular velocity should be
+measured, orNoneto get a vector along all axes.calibrated(bool) – ChooseTrueto compensate for the estimated
+bias and configured scale of the gyroscope. ChooseFalseto get raw angular velocity values.Returns:Angular velocity along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.
+
+Gets the angular velocity of the device along a given axis in
+therobot reference frame.
+
+
+Parameters:
+    axis(Axis) – Axis along which the angular velocity should be
+measured, orNoneto get a vector along all axes.calibrated(bool) – ChooseTrueto compensate for the estimated
+bias and configured scale of the gyroscope. ChooseFalseto get raw angular velocity values.
+
+  - axis(Axis) – Axis along which the angular velocity should be
+measured, orNoneto get a vector along all axes.
+axis(Axis) – Axis along which the angular velocity should be
+measured, orNoneto get a vector along all axes.
+
+  - calibrated(bool) – ChooseTrueto compensate for the estimated
+bias and configured scale of the gyroscope. ChooseFalseto get raw angular velocity values.
+calibrated(bool) – ChooseTrueto compensate for the estimated
+bias and configured scale of the gyroscope. ChooseFalseto get raw angular velocity values.
+
+
+Returns:
+    Angular velocity along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.
+
+Angular velocity along the specified axis. If you specify no axis,
+this returns a vector of accelerations along all axes.
+
+
+imu.heading()→float:deg
+    Gets the heading angle of your robot. A positive value means a
+clockwise turn.The heading is 0 when your program starts. The value continues to grow
+even as the robot turns more than 180 degrees. It does not wrap around
+to -180 like it does in some apps.Returns:Heading angle relative to starting orientation.
+
+Gets the heading angle of your robot. A positive value means a
+clockwise turn.
+
+The heading is 0 when your program starts. The value continues to grow
+even as the robot turns more than 180 degrees. It does not wrap around
+to -180 like it does in some apps.
+
+
+Returns:
+    Heading angle relative to starting orientation.
+
+Heading angle relative to starting orientation.
+
+
+imu.reset_heading(angle)
+    Resets the accumulated heading angle of the robot.This cannot be called while a drive base is using the gyro to drive or
+hold position.
+UseDriveBase.reset()instead, which will stop the robot and then set the new heading value.Changed in version 3.6:Resetting the angle while driving is not allowed. Stop first.Parameters:angle(Number,deg) – Value to which the heading should be reset.Raises:OSError– There is a drive base that is currently using the gyro.
+
+Resets the accumulated heading angle of the robot.
+
+This cannot be called while a drive base is using the gyro to drive or
+hold position.
+UseDriveBase.reset()instead, which will stop the robot and then set the new heading value.
+
+Changed in version 3.6:Resetting the angle while driving is not allowed. Stop first.
+
+
+Parameters:
+    angle(Number,deg) – Value to which the heading should be reset.
+
+angle(Number,deg) – Value to which the heading should be reset.
+
+
+Raises:
+    OSError– There is a drive base that is currently using the gyro.
+
+OSError– There is a drive base that is currently using the gyro.
+
+
+imu.rotation(axis,calibrated=True)→float:deg
+    Gets the rotation of the device along a given axis in
+therobot reference frame.This value is useful if your robotonlyrotates along the requested
+axis. For general three-dimensional motion, use theorientation()method instead.Parameters:axis(Axis) – Axis along which the rotation should be measured.calibrated(bool) – ChooseTrueto compensate for configured
+scale of the gyroscope. ChooseFalseto get unscaled values.Returns:The rotation angle.
+
+Gets the rotation of the device along a given axis in
+therobot reference frame.
+
+This value is useful if your robotonlyrotates along the requested
+axis. For general three-dimensional motion, use theorientation()method instead.
+
+
+Parameters:
+    axis(Axis) – Axis along which the rotation should be measured.calibrated(bool) – ChooseTrueto compensate for configured
+scale of the gyroscope. ChooseFalseto get unscaled values.
+
+  - axis(Axis) – Axis along which the rotation should be measured.
+axis(Axis) – Axis along which the rotation should be measured.
+
+  - calibrated(bool) – ChooseTrueto compensate for configured
+scale of the gyroscope. ChooseFalseto get unscaled values.
+calibrated(bool) – ChooseTrueto compensate for configured
+scale of the gyroscope. ChooseFalseto get unscaled values.
+
+
+Returns:
+    The rotation angle.
+
+The rotation angle.
+
+
+imu.orientation()→Matrix
+    Gets the three-dimensional orientation of the robot in
+therobot reference frame.It returns a rotation matrix whose columns represent theX,Y,
+andZaxis of the robot.Returns:The 3x3 rotation matrix.
+
+Gets the three-dimensional orientation of the robot in
+therobot reference frame.
+
+It returns a rotation matrix whose columns represent theX,Y,
+andZaxis of the robot.
+
+
+Returns:
+    The 3x3 rotation matrix.
+
+The 3x3 rotation matrix.
+
+
+imu.settings(*,angular_velocity_threshold,acceleration_threshold,heading_correction,angular_velocity_bias,angular_velocity_scale,acceleration_correction)
+
+imu.settings()→Tuple
+    Configures the IMU settings. If no arguments are given,
+this returns the current values. Use keyword arguments for each value
+to ensure correct behavior because settings may be added or changed in
+future releases.These IMU settings are saved on the hub. They will keep their values
+until you change them again. The values will be reset to default values
+if you update the hub to a different firmware version or call thehub.system.reset_storagemethod.Theangular_velocity_thresholdandacceleration_thresholddefine when the hub is considered stationary. If all
+measurements stay below these thresholds for one second, the IMU
+will recalibrate itself. In a noisy room with high ambient vibrations (such as a
+competition hall), you can increase the thresholds
+slightly to give your robot the chance to calibrate.
+To verify that your settings are working as expected, test that
+thestationary()method givesFalseif your robot is moving,
+andTrueif it is sitting still.The gyroscope measures how fast the hub rotates to estimate the total
+angle. Due to variations in the production process, each
+hub consistently reports a different value for a full rotation. For
+example, your hub might consistently report357degrees for every360degree turn. You can measure this value
+withhub.imu.rotation(-Axis.Z,calibrated=False)and enter it as
+theheading_correctionsetting. Then, thehub.imu.heading()method will take it into account going forward, correctly scaling it
+to 360 degrees for a full rotation.Parameters:angular_velocity_threshold(Number,deg/s) – The threshold for
+variations in the angular velocity below which the hub is
+considered stationary enough to calibrate.
+After a reset the value is 2 deg/s.acceleration_threshold(Number,mm/s²) – The threshold for
+variations in acceleration below which the hub is considered
+stationary enough to calibrate. After a reset the value
+is 2500 mm/s².heading_correction(Number,deg) – Number of degrees
+reported by for one full rotation of your robot.
+After a reset the value is 360 degrees. This is applied on top
+of any scaling that is done by theangular_velocity_scalesetting.angular_velocity_bias(tuple,deg/s) – Initial bias for angular
+velocity measurements along x, y, and z immediately after boot.
+After a reset the value is (0, 0, 0) deg/s.angular_velocity_scale(tuple,deg) – Scale adjustment for x, y, and
+z rotation to account for manufacturing differences. After a
+reset the value is (360, 360, 360) deg/s. The correct values
+can be obtained usinghub.imu.rotation(Axis.X, calibrated=False)and repeating it for each axis.acceleration_correction(tuple,mm/s²) – Scale adjustment for x, y,
+and z gravity magnitude in both directions to account for
+manufacturing differences. After a reset the
+value is (9806.65, -9806.65, 9806.65, -9806.65, 9806.65, -9806.65) mm/s².
+The correct values can be
+obtained usinghub.imu.acceleration(Axis.X, calibrated=False)and repeating it for all axes in both directions.
+
+Configures the IMU settings. If no arguments are given,
+this returns the current values. Use keyword arguments for each value
+to ensure correct behavior because settings may be added or changed in
+future releases.
+
+These IMU settings are saved on the hub. They will keep their values
+until you change them again. The values will be reset to default values
+if you update the hub to a different firmware version or call thehub.system.reset_storagemethod.
+
+Theangular_velocity_thresholdandacceleration_thresholddefine when the hub is considered stationary. If all
+measurements stay below these thresholds for one second, the IMU
+will recalibrate itself. In a noisy room with high ambient vibrations (such as a
+competition hall), you can increase the thresholds
+slightly to give your robot the chance to calibrate.
+To verify that your settings are working as expected, test that
+thestationary()method givesFalseif your robot is moving,
+andTrueif it is sitting still.
+
+The gyroscope measures how fast the hub rotates to estimate the total
+angle. Due to variations in the production process, each
+hub consistently reports a different value for a full rotation. For
+example, your hub might consistently report357degrees for every360degree turn. You can measure this value
+withhub.imu.rotation(-Axis.Z,calibrated=False)and enter it as
+theheading_correctionsetting. Then, thehub.imu.heading()method will take it into account going forward, correctly scaling it
+to 360 degrees for a full rotation.
+
+
+Parameters:
+    angular_velocity_threshold(Number,deg/s) – The threshold for
+variations in the angular velocity below which the hub is
+considered stationary enough to calibrate.
+After a reset the value is 2 deg/s.acceleration_threshold(Number,mm/s²) – The threshold for
+variations in acceleration below which the hub is considered
+stationary enough to calibrate. After a reset the value
+is 2500 mm/s².heading_correction(Number,deg) – Number of degrees
+reported by for one full rotation of your robot.
+After a reset the value is 360 degrees. This is applied on top
+of any scaling that is done by theangular_velocity_scalesetting.angular_velocity_bias(tuple,deg/s) – Initial bias for angular
+velocity measurements along x, y, and z immediately after boot.
+After a reset the value is (0, 0, 0) deg/s.angular_velocity_scale(tuple,deg) – Scale adjustment for x, y, and
+z rotation to account for manufacturing differences. After a
+reset the value is (360, 360, 360) deg/s. The correct values
+can be obtained usinghub.imu.rotation(Axis.X, calibrated=False)and repeating it for each axis.acceleration_correction(tuple,mm/s²) – Scale adjustment for x, y,
+and z gravity magnitude in both directions to account for
+manufacturing differences. After a reset the
+value is (9806.65, -9806.65, 9806.65, -9806.65, 9806.65, -9806.65) mm/s².
+The correct values can be
+obtained usinghub.imu.acceleration(Axis.X, calibrated=False)and repeating it for all axes in both directions.
+
+  - angular_velocity_threshold(Number,deg/s) – The threshold for
+variations in the angular velocity below which the hub is
+considered stationary enough to calibrate.
+After a reset the value is 2 deg/s.
+angular_velocity_threshold(Number,deg/s) – The threshold for
+variations in the angular velocity below which the hub is
+considered stationary enough to calibrate.
+After a reset the value is 2 deg/s.
+
+  - acceleration_threshold(Number,mm/s²) – The threshold for
+variations in acceleration below which the hub is considered
+stationary enough to calibrate. After a reset the value
+is 2500 mm/s².
+acceleration_threshold(Number,mm/s²) – The threshold for
+variations in acceleration below which the hub is considered
+stationary enough to calibrate. After a reset the value
+is 2500 mm/s².
+
+  - heading_correction(Number,deg) – Number of degrees
+reported by for one full rotation of your robot.
+After a reset the value is 360 degrees. This is applied on top
+of any scaling that is done by theangular_velocity_scalesetting.
+heading_correction(Number,deg) – Number of degrees
+reported by for one full rotation of your robot.
+After a reset the value is 360 degrees. This is applied on top
+of any scaling that is done by theangular_velocity_scalesetting.
+
+  - angular_velocity_bias(tuple,deg/s) – Initial bias for angular
+velocity measurements along x, y, and z immediately after boot.
+After a reset the value is (0, 0, 0) deg/s.
+angular_velocity_bias(tuple,deg/s) – Initial bias for angular
+velocity measurements along x, y, and z immediately after boot.
+After a reset the value is (0, 0, 0) deg/s.
+
+  - angular_velocity_scale(tuple,deg) – Scale adjustment for x, y, and
+z rotation to account for manufacturing differences. After a
+reset the value is (360, 360, 360) deg/s. The correct values
+can be obtained usinghub.imu.rotation(Axis.X, calibrated=False)and repeating it for each axis.
+angular_velocity_scale(tuple,deg) – Scale adjustment for x, y, and
+z rotation to account for manufacturing differences. After a
+reset the value is (360, 360, 360) deg/s. The correct values
+can be obtained usinghub.imu.rotation(Axis.X, calibrated=False)and repeating it for each axis.
+
+  - acceleration_correction(tuple,mm/s²) – Scale adjustment for x, y,
+and z gravity magnitude in both directions to account for
+manufacturing differences. After a reset the
+value is (9806.65, -9806.65, 9806.65, -9806.65, 9806.65, -9806.65) mm/s².
+The correct values can be
+obtained usinghub.imu.acceleration(Axis.X, calibrated=False)and repeating it for all axes in both directions.
+acceleration_correction(tuple,mm/s²) – Scale adjustment for x, y,
+and z gravity magnitude in both directions to account for
+manufacturing differences. After a reset the
+value is (9806.65, -9806.65, 9806.65, -9806.65, 9806.65, -9806.65) mm/s².
+The correct values can be
+obtained usinghub.imu.acceleration(Axis.X, calibrated=False)and repeating it for all axes in both directions.
+
+Using the battery
+
+
+battery.voltage()→int:mV
+    Gets the voltage of the battery.Returns:Battery voltage.
+
+Gets the voltage of the battery.
+
+
+Returns:
+    Battery voltage.
+
+Battery voltage.
+
+
+battery.current()→int:mA
+    Gets the current supplied by the battery.Returns:Battery current.
+
+Gets the current supplied by the battery.
+
+
+Returns:
+    Battery current.
+
+Battery current.
+
+Button and system control
+
+
+buttons.pressed()→Set[Button]
+    Checks which buttons are currently pressed.Returns:Set of pressed buttons.
+
+Checks which buttons are currently pressed.
+
+
+Returns:
+    Set of pressed buttons.
+
+Set of pressed buttons.
+
+
+system.info()→dict
+    Gets information about the hub as a dictionary with the following keys:"name": The hub name. This is the name you see when connecting
+via Bluetooth."reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue."host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise."host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise."program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.“program_id”: Program (slot) number of the currently running program.Returns:A dictionary with system info.Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.
+
+Gets information about the hub as a dictionary with the following keys:
+
+  - "name": The hub name. This is the name you see when connecting
+via Bluetooth.
+"name": The hub name. This is the name you see when connecting
+via Bluetooth.
+
+  - "reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue.
+"reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue.
+
+  - "host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise.
+"host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise.
+
+  - "host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise.
+"host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise.
+
+  - "program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.
+"program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.
+
+  - “program_id”: Program (slot) number of the currently running program.
+“program_id”: Program (slot) number of the currently running program.
+
+
+Returns:
+    A dictionary with system info.
+
+A dictionary with system info.
+
+Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.
+
+
+system.set_stop_button(button)
+    Sets the button or button combination that stops a running script.Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.Parameters:button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+Sets the button or button combination that stops a running script.
+
+Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.
+
+
+Parameters:
+    button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+
+system.storage(offset,write=)
+
+system.storage(offset,read=)→bytes
+    Reads or writes binary data to persistent storage.This lets you store data that can be used the next time you run the
+program.The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.Once saved, the data will remain available even after you remove the
+batteries.Parameters:offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.Returns:The bytes read if reading, otherwiseNone.Raises:ValueError– If you try to read or write data outside of the allowed range.You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.
+
+Reads or writes binary data to persistent storage.
+
+This lets you store data that can be used the next time you run the
+program.
+
+The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.
+
+Once saved, the data will remain available even after you remove the
+batteries.
+
+
+Parameters:
+    offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.
+
+  - offset(int) – The offset from the start of the user storage memory, in bytes.
+offset(int) – The offset from the start of the user storage memory, in bytes.
+
+  - read(int) – The number of bytes to read. Omit this argument when writing.
+read(int) – The number of bytes to read. Omit this argument when writing.
+
+  - write(bytes) – The bytes to write. Omit this argument when reading.
+write(bytes) – The bytes to write. Omit this argument when reading.
+
+
+Returns:
+    The bytes read if reading, otherwiseNone.
+
+The bytes read if reading, otherwiseNone.
+
+
+Raises:
+    ValueError– If you try to read or write data outside of the allowed range.
+
+ValueError– If you try to read or write data outside of the allowed range.
+
+You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.
+
+
+system.reset_storage()
+    Resets all user settings to default values and erases user programs.
+
+Resets all user settings to default values and erases user programs.
+
+
+system.shutdown()
+    Stops your program and shuts the hub down.
+
+Stops your program and shuts the hub down.
+
+
+Status light examples
+---------------------
+
+
+Turning the light on and off
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing brightness and using custom colors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Making the light blink
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+Creating light animations
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+IMU examples
+------------
+
+
+Testing which way is up
+~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Reading the tilt value
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+Using a custom hub orientation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Reading acceleration and angular velocity vectors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Reading acceleration and angular velocity on one axis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Button and system examples
+--------------------------
+
+
+Using the stop button during your program
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Turning the hub off
+~~~~~~~~~~~~~~~~~~~

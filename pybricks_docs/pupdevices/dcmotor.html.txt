@@ -1,0 +1,98 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/dcmotor.html
+Tytuł: Motors without rotation sensors — pybricks v4.0.0 documentation
+============================================================
+
+
+Motors without rotation sensors
+===============================
+
+Figure 1Powered Up motors without rotation sensors. The arrows indicate the default
+positive direction.
+
+
+classDCMotor(port,positive_direction=Direction.CLOCKWISE)
+    LEGO® Powered Up motor without rotation sensors.Parameters:port(Port) – Port to which the motor is connected.positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.simple motor50%power atduty cycledc(duty)Rotates the motor at a given duty cycle (also known as “power”).Parameters:duty(Number,%) – The duty cycle (-100.0 to 100).simple motorcoaststopstop()Stops the motor and lets it spin freely.The motor gradually stops due to friction.simple motorbrakestopbrake()Passively brakes the motor.The motor stops due to friction, plus the voltage that
+is generated while the motor is still moving.settings(max_voltage)settings()→Tuple[int]Configures motor settings. If no arguments are given,
+this returns the current values.Parameters:max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+LEGO® Powered Up motor without rotation sensors.
+
+
+Parameters:
+    port(Port) – Port to which the motor is connected.positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.
+
+  - port(Port) – Port to which the motor is connected.
+port(Port) – Port to which the motor is connected.
+
+  - positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.
+positive_direction(Direction) – Which direction the motor should
+turn when you give a positive duty cycle value.
+
+
+dc(duty)
+    Rotates the motor at a given duty cycle (also known as “power”).Parameters:duty(Number,%) – The duty cycle (-100.0 to 100).
+
+Rotates the motor at a given duty cycle (also known as “power”).
+
+
+Parameters:
+    duty(Number,%) – The duty cycle (-100.0 to 100).
+
+duty(Number,%) – The duty cycle (-100.0 to 100).
+
+
+stop()
+    Stops the motor and lets it spin freely.The motor gradually stops due to friction.
+
+Stops the motor and lets it spin freely.
+
+The motor gradually stops due to friction.
+
+
+brake()
+    Passively brakes the motor.The motor stops due to friction, plus the voltage that
+is generated while the motor is still moving.
+
+Passively brakes the motor.
+
+The motor stops due to friction, plus the voltage that
+is generated while the motor is still moving.
+
+
+settings(max_voltage)
+
+settings()→Tuple[int]
+    Configures motor settings. If no arguments are given,
+this returns the current values.Parameters:max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+Configures motor settings. If no arguments are given,
+this returns the current values.
+
+
+Parameters:
+    max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+max_voltage(Number,mV) – Maximum voltage applied to the motor during all motor commands.
+
+
+Examples
+--------
+
+
+Making a train drive forever
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Making the motor move back and forth
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing the positive direction
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Starting and stopping
+~~~~~~~~~~~~~~~~~~~~~

@@ -1,0 +1,522 @@
+URL: https://docs.pybricks.com/en/latest/micropython/umath.html
+Tytuł: umath – Math functions — pybricks v4.0.0 documentation
+============================================================
+
+
+umath– Math functions
+=====================
+
+This MicroPython module is similar to themath modulein Python.
+
+See also thebuilt-in math functionsthat can be used
+without importing anything.
+
+
+Rounding and sign
+-----------------
+
+
+ceil(x)→int
+    Rounds up.Parameters:x(float) – The value to be rounded.Returns:Value rounded towards positive infinity.
+
+Rounds up.
+
+
+Parameters:
+    x(float) – The value to be rounded.
+
+x(float) – The value to be rounded.
+
+
+Returns:
+    Value rounded towards positive infinity.
+
+Value rounded towards positive infinity.
+
+
+floor(x)→int
+    Rounds down.Parameters:x(float) – The value to be rounded.Returns:Value rounded towards negative infinity.
+
+Rounds down.
+
+
+Parameters:
+    x(float) – The value to be rounded.
+
+x(float) – The value to be rounded.
+
+
+Returns:
+    Value rounded towards negative infinity.
+
+Value rounded towards negative infinity.
+
+
+trunc(x)→int
+    Truncates decimals to get the integer part of a value.This is the same as rounding towards0.Parameters:x(float) – The value to be truncated.Returns:Integer part of the value.
+
+Truncates decimals to get the integer part of a value.
+
+This is the same as rounding towards0.
+
+
+Parameters:
+    x(float) – The value to be truncated.
+
+x(float) – The value to be truncated.
+
+
+Returns:
+    Integer part of the value.
+
+Integer part of the value.
+
+
+fmod(x,y)→float
+    Gets the remainder ofx/y.Not to be confused withmodf().Parameters:x(float) – The numerator.y(float) – The denominator.Returns:Remainder after division
+
+Gets the remainder ofx/y.
+
+Not to be confused withmodf().
+
+
+Parameters:
+    x(float) – The numerator.y(float) – The denominator.
+
+  - x(float) – The numerator.
+x(float) – The numerator.
+
+  - y(float) – The denominator.
+y(float) – The denominator.
+
+
+Returns:
+    Remainder after division
+
+Remainder after division
+
+
+fabs(x)→float
+    Gets the absolute value.Parameters:x(float) – The value.Returns:Absolute value ofx.
+
+Gets the absolute value.
+
+
+Parameters:
+    x(float) – The value.
+
+x(float) – The value.
+
+
+Returns:
+    Absolute value ofx.
+
+Absolute value ofx.
+
+
+copysign(x,y)→float
+    Getsxwith the sign ofy.Parameters:x(float) – Determines the magnitude of the return value.y(float) – Determines the sign of the return value.Returns:xwith the sign ofy.
+
+Getsxwith the sign ofy.
+
+
+Parameters:
+    x(float) – Determines the magnitude of the return value.y(float) – Determines the sign of the return value.
+
+  - x(float) – Determines the magnitude of the return value.
+x(float) – Determines the magnitude of the return value.
+
+  - y(float) – Determines the sign of the return value.
+y(float) – Determines the sign of the return value.
+
+
+Returns:
+    xwith the sign ofy.
+
+xwith the sign ofy.
+
+
+Powers and logarithms
+---------------------
+
+
+e=2.718282
+    The mathematical constant e.
+
+The mathematical constant e.
+
+
+exp(x)→float
+    Getseraised to the power ofx.Parameters:x(float) – The exponent.Returns:eraised to the power ofx.
+
+Getseraised to the power ofx.
+
+
+Parameters:
+    x(float) – The exponent.
+
+x(float) – The exponent.
+
+
+Returns:
+    eraised to the power ofx.
+
+eraised to the power ofx.
+
+
+pow(x,y)→float
+    Getsxraised to the power ofy.Parameters:x(float) – The base number.y(float) – The exponent.Returns:xraised to the power ofy.
+
+Getsxraised to the power ofy.
+
+
+Parameters:
+    x(float) – The base number.y(float) – The exponent.
+
+  - x(float) – The base number.
+x(float) – The base number.
+
+  - y(float) – The exponent.
+y(float) – The exponent.
+
+
+Returns:
+    xraised to the power ofy.
+
+xraised to the power ofy.
+
+
+log(x)→float
+    Gets the natural logarithm.Parameters:x(float) – The value.Returns:The natural logarithm ofx.
+
+Gets the natural logarithm.
+
+
+Parameters:
+    x(float) – The value.
+
+x(float) – The value.
+
+
+Returns:
+    The natural logarithm ofx.
+
+The natural logarithm ofx.
+
+
+sqrt(x)→float
+    Gets the square root.Parameters:x(float) – The valuex.Returns:The square root ofx.
+
+Gets the square root.
+
+
+Parameters:
+    x(float) – The valuex.
+
+x(float) – The valuex.
+
+
+Returns:
+    The square root ofx.
+
+The square root ofx.
+
+
+Trigonometry
+------------
+
+
+pi=3.141593
+    The mathematical constant π.
+
+The mathematical constant π.
+
+
+degrees(x)→float
+    Converts an angle from radians to degrees.Parameters:x(float) – Angle in radians.Returns:Angle in degrees.
+
+Converts an angle from radians to degrees.
+
+
+Parameters:
+    x(float) – Angle in radians.
+
+x(float) – Angle in radians.
+
+
+Returns:
+    Angle in degrees.
+
+Angle in degrees.
+
+
+radians(x)→float
+    Converts an angle from degrees to radians.Parameters:x(float) – Angle in degrees.Returns:Angle in radians.
+
+Converts an angle from degrees to radians.
+
+
+Parameters:
+    x(float) – Angle in degrees.
+
+x(float) – Angle in degrees.
+
+
+Returns:
+    Angle in radians.
+
+Angle in radians.
+
+
+sin(x)→float
+    Gets the sine of an angle.Parameters:x(float) – Angle in radians.Returns:Sine ofx.
+
+Gets the sine of an angle.
+
+
+Parameters:
+    x(float) – Angle in radians.
+
+x(float) – Angle in radians.
+
+
+Returns:
+    Sine ofx.
+
+Sine ofx.
+
+
+asin(x)→float
+    Applies the inverse sine operation.Parameters:x(float) – Opposite / hypotenuse.Returns:Arcsine ofx, in radians.
+
+Applies the inverse sine operation.
+
+
+Parameters:
+    x(float) – Opposite / hypotenuse.
+
+x(float) – Opposite / hypotenuse.
+
+
+Returns:
+    Arcsine ofx, in radians.
+
+Arcsine ofx, in radians.
+
+
+cos(x)→float
+    Gets the cosine of an angle.Parameters:x(float) – Angle in radians.Returns:Cosine ofx.
+
+Gets the cosine of an angle.
+
+
+Parameters:
+    x(float) – Angle in radians.
+
+x(float) – Angle in radians.
+
+
+Returns:
+    Cosine ofx.
+
+Cosine ofx.
+
+
+acos(x)→float
+    Applies the inverse cosine operation.Parameters:x(float) – Adjacent / hypotenuse.Returns:Arccosine ofx, in radians.
+
+Applies the inverse cosine operation.
+
+
+Parameters:
+    x(float) – Adjacent / hypotenuse.
+
+x(float) – Adjacent / hypotenuse.
+
+
+Returns:
+    Arccosine ofx, in radians.
+
+Arccosine ofx, in radians.
+
+
+tan(x)→float
+    Gets the tangent of an angle.Parameters:x(float) – Angle in radians.Returns:Tangent ofx.
+
+Gets the tangent of an angle.
+
+
+Parameters:
+    x(float) – Angle in radians.
+
+x(float) – Angle in radians.
+
+
+Returns:
+    Tangent ofx.
+
+Tangent ofx.
+
+
+atan(x)→float
+    Applies the inverse tangent operation.Parameters:x(float) – Opposite / adjacent.Returns:Arctangent ofx, in radians.
+
+Applies the inverse tangent operation.
+
+
+Parameters:
+    x(float) – Opposite / adjacent.
+
+x(float) – Opposite / adjacent.
+
+
+Returns:
+    Arctangent ofx, in radians.
+
+Arctangent ofx, in radians.
+
+
+atan2(b,a)→float
+    Applies the inverse tangent operation onb/a, and accounts for
+the signs ofbandato produce the expected angle.Parameters:b(float) – Opposite side of the triangle.a(float) – Adjacent side of the triangle.Returns:Arctangent ofb/a, in radians.
+
+Applies the inverse tangent operation onb/a, and accounts for
+the signs ofbandato produce the expected angle.
+
+
+Parameters:
+    b(float) – Opposite side of the triangle.a(float) – Adjacent side of the triangle.
+
+  - b(float) – Opposite side of the triangle.
+b(float) – Opposite side of the triangle.
+
+  - a(float) – Adjacent side of the triangle.
+a(float) – Adjacent side of the triangle.
+
+
+Returns:
+    Arctangent ofb/a, in radians.
+
+Arctangent ofb/a, in radians.
+
+
+Other math functions
+--------------------
+
+
+isfinite(x)→bool
+    Checks if a value is finite.Parameters:x(float) – The value to be checked.Returns:Trueifxis finite, elseFalse.
+
+Checks if a value is finite.
+
+
+Parameters:
+    x(float) – The value to be checked.
+
+x(float) – The value to be checked.
+
+
+Returns:
+    Trueifxis finite, elseFalse.
+
+Trueifxis finite, elseFalse.
+
+
+isinfinite(x)→bool
+    Checks if a value is infinite.Parameters:x(float) – The value to be checked.Returns:Trueifxis infinite, elseFalse.
+
+Checks if a value is infinite.
+
+
+Parameters:
+    x(float) – The value to be checked.
+
+x(float) – The value to be checked.
+
+
+Returns:
+    Trueifxis infinite, elseFalse.
+
+Trueifxis infinite, elseFalse.
+
+
+isnan(x)→bool
+    Checks if a value is not-a-number.Parameters:x(float) – The value to be checked.Returns:Trueifxis not-a-number, elseFalse.
+
+Checks if a value is not-a-number.
+
+
+Parameters:
+    x(float) – The value to be checked.
+
+x(float) – The value to be checked.
+
+
+Returns:
+    Trueifxis not-a-number, elseFalse.
+
+Trueifxis not-a-number, elseFalse.
+
+
+modf(x)→Tuple[float,float]
+    Gets the fractional and integral parts ofx, both with the same sign
+asx.Not to be confused withfmod().Parameters:x(float) – The value to be decomposed.Returns:Tuple of fractional and integral parts.
+
+Gets the fractional and integral parts ofx, both with the same sign
+asx.
+
+Not to be confused withfmod().
+
+
+Parameters:
+    x(float) – The value to be decomposed.
+
+x(float) – The value to be decomposed.
+
+
+Returns:
+    Tuple of fractional and integral parts.
+
+Tuple of fractional and integral parts.
+
+
+frexp(x)→Tuple[float,float]
+    Decomposes a valuexinto a
+tuple(m,p), such thatx==m*(2**p).Parameters:x(float) – The value to be decomposed.Returns:Tuple ofmandp.
+
+Decomposes a valuexinto a
+tuple(m,p), such thatx==m*(2**p).
+
+
+Parameters:
+    x(float) – The value to be decomposed.
+
+x(float) – The value to be decomposed.
+
+
+Returns:
+    Tuple ofmandp.
+
+Tuple ofmandp.
+
+
+ldexp(m,p)→float
+    Computesm*(2**p).Parameters:m(float) – The value.p(float) – The exponent.Returns:Result ofm*(2**p).
+
+Computesm*(2**p).
+
+
+Parameters:
+    m(float) – The value.p(float) – The exponent.
+
+  - m(float) – The value.
+m(float) – The value.
+
+  - p(float) – The exponent.
+p(float) – The exponent.
+
+
+Returns:
+    Result ofm*(2**p).
+
+Result ofm*(2**p).

@@ -1,0 +1,429 @@
+URL: https://docs.pybricks.com/en/latest/hubs/movehub.html
+Tytuł: Move Hub — pybricks v4.0.0 documentation
+============================================================
+
+
+Move Hub
+========
+
+
+classMoveHub(top_side=Axis.Z,front_side=Axis.X)
+    LEGO® BOOST Move Hub.Parameters:top_side(Axis) – The axis that passes through thetop sideof
+the hub.front_side(Axis) – The axis that passes through thefront sideof
+the hub.Using the hub status lightredmove hublightonlight.on(color)Turns on the light at the specified color.Parameters:color(Color) – Color of the light.move hublightofflight.off()Turns off the light.light.blink(color,durations)Blinks the light at a given color by turning it on and off for given
+durations.The light keeps blinking indefinitely while the rest of your
+program keeps running.This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.Parameters:color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].light.animate(colors,interval)Animates the light with a sequence of colors, shown one by
+one for the given interval.The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.Parameters:colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.Using the IMUmove hubtop sideis upimu.up()→SideChecks which side of the hub currently faces upward.Returns:Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.move hubgetpitchmove hubgetrollimu.tilt()→Tuple[int,int]Gets the pitch and roll angles. This is relative to theuser-specified neutral orientation.The order of rotation is pitch-then-roll. This is equivalent to a
+positive rotation along the robot y-axis and then a positive rotation
+along the x-axis.Returns:Tuple of pitch and roll angles in degrees.move hubxacceleration alongimu.acceleration()→Tuple[int,int,int]:mm/s²Gets the acceleration of the device.Returns:Acceleration along all three axes.Changed in version 3.2:Changed acceleration units from m/s² to mm/s².Using the batterymove hubbatteryvoltagebattery.voltage()→int:mVGets the voltage of the battery.Returns:Battery voltage.move hubbatterycurrentbattery.current()→int:mAGets the current supplied by the battery.Returns:Battery current.Button and system controlprime hubcenteris pressedbuttons.pressed()→Set[Button]Checks which buttons are currently pressed.Returns:Set of pressed buttons.system.info()→dictGets information about the hub as a dictionary with the following keys:"name": The hub name. This is the name you see when connecting
+via Bluetooth."reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue."host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise."host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise."program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.“program_id”: Program (slot) number of the currently running program.Returns:A dictionary with system info.Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.move hubcenterstop button ismove hubnonestop button issystem.set_stop_button(button)Sets the button or button combination that stops a running script.Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.Parameters:button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.system.storage(offset,write=)system.storage(offset,read=)→bytesReads or writes binary data to persistent storage.This lets you store data that can be used the next time you run the
+program.The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.Once saved, the data will remain available even after you remove the
+batteries.Parameters:offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.Returns:The bytes read if reading, otherwiseNone.Raises:ValueError– If you try to read or write data outside of the allowed range.You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.system.reset_storage()Resets all user settings to default values and erases user programs.move hubshut downsystem.shutdown()Stops your program and shuts the hub down.
+
+LEGO® BOOST Move Hub.
+
+
+Parameters:
+    top_side(Axis) – The axis that passes through thetop sideof
+the hub.front_side(Axis) – The axis that passes through thefront sideof
+the hub.
+
+  - top_side(Axis) – The axis that passes through thetop sideof
+the hub.
+top_side(Axis) – The axis that passes through thetop sideof
+the hub.
+
+  - front_side(Axis) – The axis that passes through thefront sideof
+the hub.
+front_side(Axis) – The axis that passes through thefront sideof
+the hub.
+
+Using the hub status light
+
+
+light.on(color)
+    Turns on the light at the specified color.Parameters:color(Color) – Color of the light.
+
+Turns on the light at the specified color.
+
+
+Parameters:
+    color(Color) – Color of the light.
+
+color(Color) – Color of the light.
+
+
+light.off()
+    Turns off the light.
+
+Turns off the light.
+
+
+light.blink(color,durations)
+    Blinks the light at a given color by turning it on and off for given
+durations.The light keeps blinking indefinitely while the rest of your
+program keeps running.This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.Parameters:color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+Blinks the light at a given color by turning it on and off for given
+durations.
+
+The light keeps blinking indefinitely while the rest of your
+program keeps running.
+
+This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.
+
+
+Parameters:
+    color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+  - color(Color) – Color of the light.
+color(Color) – Color of the light.
+
+  - durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+
+light.animate(colors,interval)
+    Animates the light with a sequence of colors, shown one by
+one for the given interval.The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.Parameters:colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.
+
+Animates the light with a sequence of colors, shown one by
+one for the given interval.
+
+The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.
+
+
+Parameters:
+    colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.
+
+  - colors(list) – Sequence ofColorvalues.
+colors(list) – Sequence ofColorvalues.
+
+  - interval(Number,ms) – Time between color updates.
+interval(Number,ms) – Time between color updates.
+
+Using the IMU
+
+
+imu.up()→Side
+    Checks which side of the hub currently faces upward.Returns:Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.
+
+Checks which side of the hub currently faces upward.
+
+
+Returns:
+    Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.
+
+Side.TOP,Side.BOTTOM,Side.LEFT,Side.RIGHT,Side.FRONTorSide.BACK.
+
+
+imu.tilt()→Tuple[int,int]
+    Gets the pitch and roll angles. This is relative to theuser-specified neutral orientation.The order of rotation is pitch-then-roll. This is equivalent to a
+positive rotation along the robot y-axis and then a positive rotation
+along the x-axis.Returns:Tuple of pitch and roll angles in degrees.
+
+Gets the pitch and roll angles. This is relative to theuser-specified neutral orientation.
+
+The order of rotation is pitch-then-roll. This is equivalent to a
+positive rotation along the robot y-axis and then a positive rotation
+along the x-axis.
+
+
+Returns:
+    Tuple of pitch and roll angles in degrees.
+
+Tuple of pitch and roll angles in degrees.
+
+
+imu.acceleration()→Tuple[int,int,int]:mm/s²
+    Gets the acceleration of the device.Returns:Acceleration along all three axes.Changed in version 3.2:Changed acceleration units from m/s² to mm/s².
+
+Gets the acceleration of the device.
+
+
+Returns:
+    Acceleration along all three axes.
+
+Acceleration along all three axes.
+
+Changed in version 3.2:Changed acceleration units from m/s² to mm/s².
+
+Using the battery
+
+
+battery.voltage()→int:mV
+    Gets the voltage of the battery.Returns:Battery voltage.
+
+Gets the voltage of the battery.
+
+
+Returns:
+    Battery voltage.
+
+Battery voltage.
+
+
+battery.current()→int:mA
+    Gets the current supplied by the battery.Returns:Battery current.
+
+Gets the current supplied by the battery.
+
+
+Returns:
+    Battery current.
+
+Battery current.
+
+Button and system control
+
+
+buttons.pressed()→Set[Button]
+    Checks which buttons are currently pressed.Returns:Set of pressed buttons.
+
+Checks which buttons are currently pressed.
+
+
+Returns:
+    Set of pressed buttons.
+
+Set of pressed buttons.
+
+
+system.info()→dict
+    Gets information about the hub as a dictionary with the following keys:"name": The hub name. This is the name you see when connecting
+via Bluetooth."reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue."host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise."host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise."program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.“program_id”: Program (slot) number of the currently running program.Returns:A dictionary with system info.Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.
+
+Gets information about the hub as a dictionary with the following keys:
+
+  - "name": The hub name. This is the name you see when connecting
+via Bluetooth.
+"name": The hub name. This is the name you see when connecting
+via Bluetooth.
+
+  - "reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue.
+"reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue.
+
+  - "host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise.
+"host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise.
+
+  - "host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise.
+"host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise.
+
+  - "program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.
+"program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.
+
+  - “program_id”: Program (slot) number of the currently running program.
+“program_id”: Program (slot) number of the currently running program.
+
+
+Returns:
+    A dictionary with system info.
+
+A dictionary with system info.
+
+Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.
+
+
+system.set_stop_button(button)
+    Sets the button or button combination that stops a running script.Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.Parameters:button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+Sets the button or button combination that stops a running script.
+
+Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.
+
+
+Parameters:
+    button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+
+system.storage(offset,write=)
+
+system.storage(offset,read=)→bytes
+    Reads or writes binary data to persistent storage.This lets you store data that can be used the next time you run the
+program.The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.Once saved, the data will remain available even after you remove the
+batteries.Parameters:offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.Returns:The bytes read if reading, otherwiseNone.Raises:ValueError– If you try to read or write data outside of the allowed range.You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.
+
+Reads or writes binary data to persistent storage.
+
+This lets you store data that can be used the next time you run the
+program.
+
+The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.
+
+Once saved, the data will remain available even after you remove the
+batteries.
+
+
+Parameters:
+    offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.
+
+  - offset(int) – The offset from the start of the user storage memory, in bytes.
+offset(int) – The offset from the start of the user storage memory, in bytes.
+
+  - read(int) – The number of bytes to read. Omit this argument when writing.
+read(int) – The number of bytes to read. Omit this argument when writing.
+
+  - write(bytes) – The bytes to write. Omit this argument when reading.
+write(bytes) – The bytes to write. Omit this argument when reading.
+
+
+Returns:
+    The bytes read if reading, otherwiseNone.
+
+The bytes read if reading, otherwiseNone.
+
+
+Raises:
+    ValueError– If you try to read or write data outside of the allowed range.
+
+ValueError– If you try to read or write data outside of the allowed range.
+
+You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.
+
+
+system.reset_storage()
+    Resets all user settings to default values and erases user programs.
+
+Resets all user settings to default values and erases user programs.
+
+
+system.shutdown()
+    Stops your program and shuts the hub down.
+
+Stops your program and shuts the hub down.
+
+
+Status light examples
+---------------------
+
+
+Turning the light on and off
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Making the light blink
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+IMU examples
+------------
+
+
+Testing which way is up
+~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Reading acceleration
+~~~~~~~~~~~~~~~~~~~~
+
+
+Button and system examples
+--------------------------
+
+
+Using the stop button during your program
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Turning the hub off
+~~~~~~~~~~~~~~~~~~~
+
+
+Making random numbers
+~~~~~~~~~~~~~~~~~~~~~
+
+The Move Hub does not include theurandommodule. If you need random
+numbers in your application, you can try a variation of the following example.
+
+To make it work better, change the initial value of_randto something
+that is truly random in your application. You could use the IMU acceleration
+or a sensor value, for example.

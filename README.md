@@ -205,9 +205,35 @@ Most educational robots teach *about* a subject. This robot *is* the subject —
 - LEGO SPIKE Prime with [Pybricks firmware](https://code.pybricks.com)
 - Bluetooth LE enabled on PC (BlueZ on Linux / built-in on Steam Deck)
 
-### Install
+### Install & run — one command (recommended)
+
+```powershell
+.\run.ps1            # Windows (or double-click run.bat)
+```
 ```bash
-# Recommended: virtual environment
+./run.sh             # Linux / Steam Deck / macOS
+```
+
+The script does everything: finds Python 3.10–3.13, creates the venv,
+**rebuilds the venv automatically if the project was moved or copied to a
+new machine** (venvs hardcode absolute paths and break otherwise), installs
+dependencies only when `requirements.txt` changed, and starts the robot.
+
+Useful variants:
+
+```powershell
+.\run.ps1 -Test        # BLE two-way link test instead of the full app
+.\run.ps1 -SetupOnly   # prepare the environment only (e.g. night before a competition)
+.\run.ps1 -Reinstall   # force dependency reinstall
+# run.sh: --test / --setup-only / --reinstall
+```
+
+> Moving to another computer: copy the project **without** `espero_env/`
+> (or just `git clone`), copy `assets/` and `config.json`/`.env` separately
+> (they are gitignored), then run `.\run.ps1 -SetupOnly`. That's the whole setup.
+
+### Install — manual (if you prefer)
+```bash
 python3 -m venv espero_env
 source espero_env/bin/activate        # Linux / macOS / Steam Deck
 # .\espero_env\Scripts\activate       # Windows
@@ -281,7 +307,15 @@ Legal Esperanto music and poetry sources: [Jamendo](https://jamendo.com), [Vinil
 
 ---
 
-## BLE Signal Protocol (hub → PC)
+## BLE Signal Protocol
+
+Two-way link over the Pybricks command/event GATT characteristic
+(`c5f50002-…`): hub→PC lines arrive as `WRITE_STDOUT` events (`0x01`),
+PC→hub lines are written with the `WRITE_STDIN` command (`0x06`) into the
+hub's `usys.stdin`. Full details: [BLE_PROTOCOL.md](BLE_PROTOCOL.md).
+Quick link test (no heavy deps): `python tools/ble_link_test.py --auto`.
+
+### hub → PC
 
 | Signal | Meaning |
 |---|---|
@@ -296,6 +330,16 @@ Legal Esperanto music and poetry sources: [Jamendo](https://jamendo.com), [Vinil
 | `ATTRACT_EXIT` | Button pressed in attract → stop immediately, open menu |
 | `FILTER:<unit>` | Set flashcard filter (e.g. `FILTER:Technology`) → switch to FLASHCARDS |
 | `LESSON_FILTER:<unit>` | After A0 lesson → switch flashcards to given unit filter |
+| `DEBUG:RX:<cmd>` | ACK — hub confirms it received command `<cmd>` from the PC |
+
+### PC → hub
+
+| Signal | Meaning |
+|---|---|
+| `MODE:<n>` | Switch hub to mode n (wakes the hub if sleeping) |
+| `CONV_LISTEN` / `CONV_DONE` | Show/hide the MIC icon while the PC records speech |
+| `ATTRACT_SPEAK_START` / `ATTRACT_SPEAK_DONE` | Pause the attract-lost timer while the PC is speaking |
+| `SLEEP` / `WAKE` | Put the hub to sleep / wake it up |
 
 ---
 

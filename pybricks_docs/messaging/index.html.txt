@@ -1,0 +1,323 @@
+URL: https://docs.pybricks.com/en/latest/messaging/index.html
+Tytuł: messaging – Send and receive messages — pybricks v4.0.0 documentation
+============================================================
+
+
+messaging– Send and receive messages
+====================================
+
+Classes to send and receive messages from another device.
+
+
+classBLERadio(broadcast_channel=None,observe_channels=[])
+    Send and receive messages without a connection using Bluetooth Low Energy.New in version 4.0:This used to be part of each hub class.Parameters:broadcast_channel– Channel number (0 to 255) used to broadcast data.
+ChooseNonewhen not using broadcasting.observe_channels– A list of channels to listen to whenhub.ble.observe()is
+called. Listening to more channels requires more memory.
+Default is an empty list (no channels).radio000list withbroadcastawaitbroadcast(data)Starts broadcasting the given data on the previously selectedbroadcast_channel.Data may be of typeint,float,str,bytes,True, orFalse. It can also be a list or tuple of these.ChooseNoneto stop broadcasting. This helps improve performance
+when you don’t need the broadcast feature, especially when observing
+at the same time.The total data size is quite limited (26 bytes).TrueandFalsetake 1 byte each.floattakes 5 bytes.inttakes 2 to
+5 bytes depending on how big the number is.strandbytestake
+the number of bytes in the object plus one extra byte.When multitasking, only one task can broadcast at a time. To broadcast
+information from multiple tasks (or block stacks), you could use a
+dedicated separate task that broadcast new values when one or more
+variables change.Parameters:data– The value or values to be broadcast.Raises:RuntimeError– If nobroadcast_channelwas configured.ValueError– If the encoded data exceeds 26 bytes.TypeError– Ifdatacontains a value that is notbool,int,float,str, orbytes.radioobserve0observe(channel)→bool|int|float|str|bytes|tuple|NoneRetrieves the last observed data for a given channel.Receiving data is more reliable when the hub is not connected
+to a computer or other devices at the same time.Parameters:channel(int) – The channel to observe. Must be one of the channels
+given toobserve_channelswhen creating this object.Returns:The received data in the same format as it was sent, orNoneif no data has been received within the last second.Raises:ValueError– Ifchannelwas not inobserve_channels.signal_strength(channel)→int:dBmGets the average signal strength in dBm for the given channel.This indicates how near the broadcasting device is. Nearby devices
+may have a signal strength around -40 dBm, while far away devices
+might have a signal strength around -70 dBm.Parameters:channel(int) – The channel number. Must be one of the channels
+given toobserve_channelswhen creating this object.Returns:The signal strength, or-128if no data has been received
+within the last second.Raises:ValueError– Ifchannelwas not inobserve_channels.version()→strGets the firmware version from the Bluetooth chip.redsmartcolor tracker0zj3KVdmjsmartclassificationmodelsmartobject detectiondetectpersonpotted plantnothingnothingsmartline followerdark line0bbbbsmartcustommodeformat
+
+Send and receive messages without a connection using Bluetooth Low Energy.
+
+New in version 4.0:This used to be part of each hub class.
+
+
+Parameters:
+    broadcast_channel– Channel number (0 to 255) used to broadcast data.
+ChooseNonewhen not using broadcasting.observe_channels– A list of channels to listen to whenhub.ble.observe()is
+called. Listening to more channels requires more memory.
+Default is an empty list (no channels).
+
+  - broadcast_channel– Channel number (0 to 255) used to broadcast data.
+ChooseNonewhen not using broadcasting.
+broadcast_channel– Channel number (0 to 255) used to broadcast data.
+ChooseNonewhen not using broadcasting.
+
+  - observe_channels– A list of channels to listen to whenhub.ble.observe()is
+called. Listening to more channels requires more memory.
+Default is an empty list (no channels).
+observe_channels– A list of channels to listen to whenhub.ble.observe()is
+called. Listening to more channels requires more memory.
+Default is an empty list (no channels).
+
+
+awaitbroadcast(data)
+    Starts broadcasting the given data on the previously selectedbroadcast_channel.Data may be of typeint,float,str,bytes,True, orFalse. It can also be a list or tuple of these.ChooseNoneto stop broadcasting. This helps improve performance
+when you don’t need the broadcast feature, especially when observing
+at the same time.The total data size is quite limited (26 bytes).TrueandFalsetake 1 byte each.floattakes 5 bytes.inttakes 2 to
+5 bytes depending on how big the number is.strandbytestake
+the number of bytes in the object plus one extra byte.When multitasking, only one task can broadcast at a time. To broadcast
+information from multiple tasks (or block stacks), you could use a
+dedicated separate task that broadcast new values when one or more
+variables change.Parameters:data– The value or values to be broadcast.Raises:RuntimeError– If nobroadcast_channelwas configured.ValueError– If the encoded data exceeds 26 bytes.TypeError– Ifdatacontains a value that is notbool,int,float,str, orbytes.
+
+Starts broadcasting the given data on the previously selectedbroadcast_channel.
+
+Data may be of typeint,float,str,bytes,True, orFalse. It can also be a list or tuple of these.
+
+ChooseNoneto stop broadcasting. This helps improve performance
+when you don’t need the broadcast feature, especially when observing
+at the same time.
+
+The total data size is quite limited (26 bytes).TrueandFalsetake 1 byte each.floattakes 5 bytes.inttakes 2 to
+5 bytes depending on how big the number is.strandbytestake
+the number of bytes in the object plus one extra byte.
+
+When multitasking, only one task can broadcast at a time. To broadcast
+information from multiple tasks (or block stacks), you could use a
+dedicated separate task that broadcast new values when one or more
+variables change.
+
+
+Parameters:
+    data– The value or values to be broadcast.
+
+data– The value or values to be broadcast.
+
+
+Raises:
+    RuntimeError– If nobroadcast_channelwas configured.ValueError– If the encoded data exceeds 26 bytes.TypeError– Ifdatacontains a value that is notbool,int,float,str, orbytes.
+
+  - RuntimeError– If nobroadcast_channelwas configured.
+RuntimeError– If nobroadcast_channelwas configured.
+
+  - ValueError– If the encoded data exceeds 26 bytes.
+ValueError– If the encoded data exceeds 26 bytes.
+
+  - TypeError– Ifdatacontains a value that is notbool,int,float,str, orbytes.
+TypeError– Ifdatacontains a value that is notbool,int,float,str, orbytes.
+
+
+observe(channel)→bool|int|float|str|bytes|tuple|None
+    Retrieves the last observed data for a given channel.Receiving data is more reliable when the hub is not connected
+to a computer or other devices at the same time.Parameters:channel(int) – The channel to observe. Must be one of the channels
+given toobserve_channelswhen creating this object.Returns:The received data in the same format as it was sent, orNoneif no data has been received within the last second.Raises:ValueError– Ifchannelwas not inobserve_channels.
+
+Retrieves the last observed data for a given channel.
+
+Receiving data is more reliable when the hub is not connected
+to a computer or other devices at the same time.
+
+
+Parameters:
+    channel(int) – The channel to observe. Must be one of the channels
+given toobserve_channelswhen creating this object.
+
+channel(int) – The channel to observe. Must be one of the channels
+given toobserve_channelswhen creating this object.
+
+
+Returns:
+    The received data in the same format as it was sent, orNoneif no data has been received within the last second.
+
+The received data in the same format as it was sent, orNoneif no data has been received within the last second.
+
+
+Raises:
+    ValueError– Ifchannelwas not inobserve_channels.
+
+ValueError– Ifchannelwas not inobserve_channels.
+
+
+signal_strength(channel)→int:dBm
+    Gets the average signal strength in dBm for the given channel.This indicates how near the broadcasting device is. Nearby devices
+may have a signal strength around -40 dBm, while far away devices
+might have a signal strength around -70 dBm.Parameters:channel(int) – The channel number. Must be one of the channels
+given toobserve_channelswhen creating this object.Returns:The signal strength, or-128if no data has been received
+within the last second.Raises:ValueError– Ifchannelwas not inobserve_channels.
+
+Gets the average signal strength in dBm for the given channel.
+
+This indicates how near the broadcasting device is. Nearby devices
+may have a signal strength around -40 dBm, while far away devices
+might have a signal strength around -70 dBm.
+
+
+Parameters:
+    channel(int) – The channel number. Must be one of the channels
+given toobserve_channelswhen creating this object.
+
+channel(int) – The channel number. Must be one of the channels
+given toobserve_channelswhen creating this object.
+
+
+Returns:
+    The signal strength, or-128if no data has been received
+within the last second.
+
+The signal strength, or-128if no data has been received
+within the last second.
+
+
+Raises:
+    ValueError– Ifchannelwas not inobserve_channels.
+
+ValueError– Ifchannelwas not inobserve_channels.
+
+
+version()→str
+    Gets the firmware version from the Bluetooth chip.
+
+Gets the firmware version from the Bluetooth chip.
+
+
+classAppData(modes)
+    Exchange raw data with the Pybricks Code host application over USB or
+Bluetooth. This is used by the smart sensor features like the vision
+processors.Each processor has on emode and produces a fixed amount of data. These are
+continuously sent to the hub as they change. The user code can read these
+buffered values at any time without blocking. All values are initially zero.From the hub’s perspective, writing back to the host is an awaitable operation.
+Can be used to configure modes and mode settings.Only one instance may exist at a time. Must be created during program
+initialization. After that, all methods may be used while multi-tasking.Parameters:modes– A list of(mode,size)tuples, wheremodeis a mode
+number (0 to 255) andsizeis the number of bytes to
+allocate for that mode’s receive buffer. Mode numbers must be
+unique. The list is sorted by mode number automatically.Raises:RuntimeError– If anAppDatainstance already exists.TypeError– Ifmodesis not a list, or if any element is not a(mode,size)tuple with a mode value of 0 to 255.ValueError– If any mode number appears more than once.get_bytes(mode,index=None)→bytes|intGets data received from the host for the given mode.Parameters:mode(int) – The mode number to read.index(int) – If given, returns the single byte at this position
+within the mode’s buffer as an integer. Otherwise returns
+the entire mode buffer asbytes.Returns:All received bytes for the mode, or a single byte as an integer
+ifindexis given.Raises:ValueError– Ifmodewas not configured, or ifindexis
+    out of range.0smartvalueawaitwrite_bytes(data)Sends raw bytes to the host application.Parameters:data(bytes) – The data to send.awaitconfigure(mode,parameter,value)Sends a configuration command to the host for the given mode.This is a wrapper aroundwrite_bytes(). It prepends a[0x01,mode,parameter]header to configure mode settings.Parameters:mode(int) – The mode number to configure.parameter(int) – The parameter identifier within the mode.value(bytes) – The configuration value to send.close()Deactivates the data callback and releases the receive buffer.This is also called automatically when the object is garbage collected.
+
+Exchange raw data with the Pybricks Code host application over USB or
+Bluetooth. This is used by the smart sensor features like the vision
+processors.
+
+Each processor has on emode and produces a fixed amount of data. These are
+continuously sent to the hub as they change. The user code can read these
+buffered values at any time without blocking. All values are initially zero.
+
+From the hub’s perspective, writing back to the host is an awaitable operation.
+Can be used to configure modes and mode settings.
+
+Only one instance may exist at a time. Must be created during program
+initialization. After that, all methods may be used while multi-tasking.
+
+
+Parameters:
+    modes– A list of(mode,size)tuples, wheremodeis a mode
+number (0 to 255) andsizeis the number of bytes to
+allocate for that mode’s receive buffer. Mode numbers must be
+unique. The list is sorted by mode number automatically.
+
+modes– A list of(mode,size)tuples, wheremodeis a mode
+number (0 to 255) andsizeis the number of bytes to
+allocate for that mode’s receive buffer. Mode numbers must be
+unique. The list is sorted by mode number automatically.
+
+
+Raises:
+    RuntimeError– If anAppDatainstance already exists.TypeError– Ifmodesis not a list, or if any element is not a(mode,size)tuple with a mode value of 0 to 255.ValueError– If any mode number appears more than once.
+
+  - RuntimeError– If anAppDatainstance already exists.
+RuntimeError– If anAppDatainstance already exists.
+
+  - TypeError– Ifmodesis not a list, or if any element is not a(mode,size)tuple with a mode value of 0 to 255.
+TypeError– Ifmodesis not a list, or if any element is not a(mode,size)tuple with a mode value of 0 to 255.
+
+  - ValueError– If any mode number appears more than once.
+ValueError– If any mode number appears more than once.
+
+
+get_bytes(mode,index=None)→bytes|int
+    Gets data received from the host for the given mode.Parameters:mode(int) – The mode number to read.index(int) – If given, returns the single byte at this position
+within the mode’s buffer as an integer. Otherwise returns
+the entire mode buffer asbytes.Returns:All received bytes for the mode, or a single byte as an integer
+ifindexis given.Raises:ValueError– Ifmodewas not configured, or ifindexis
+    out of range.
+
+Gets data received from the host for the given mode.
+
+
+Parameters:
+    mode(int) – The mode number to read.index(int) – If given, returns the single byte at this position
+within the mode’s buffer as an integer. Otherwise returns
+the entire mode buffer asbytes.
+
+  - mode(int) – The mode number to read.
+mode(int) – The mode number to read.
+
+  - index(int) – If given, returns the single byte at this position
+within the mode’s buffer as an integer. Otherwise returns
+the entire mode buffer asbytes.
+index(int) – If given, returns the single byte at this position
+within the mode’s buffer as an integer. Otherwise returns
+the entire mode buffer asbytes.
+
+
+Returns:
+    All received bytes for the mode, or a single byte as an integer
+ifindexis given.
+
+All received bytes for the mode, or a single byte as an integer
+ifindexis given.
+
+
+Raises:
+    ValueError– Ifmodewas not configured, or ifindexis
+    out of range.
+
+ValueError– Ifmodewas not configured, or ifindexis
+    out of range.
+
+
+awaitwrite_bytes(data)
+    Sends raw bytes to the host application.Parameters:data(bytes) – The data to send.
+
+Sends raw bytes to the host application.
+
+
+Parameters:
+    data(bytes) – The data to send.
+
+data(bytes) – The data to send.
+
+
+awaitconfigure(mode,parameter,value)
+    Sends a configuration command to the host for the given mode.This is a wrapper aroundwrite_bytes(). It prepends a[0x01,mode,parameter]header to configure mode settings.Parameters:mode(int) – The mode number to configure.parameter(int) – The parameter identifier within the mode.value(bytes) – The configuration value to send.
+
+Sends a configuration command to the host for the given mode.
+
+This is a wrapper aroundwrite_bytes(). It prepends a[0x01,mode,parameter]header to configure mode settings.
+
+
+Parameters:
+    mode(int) – The mode number to configure.parameter(int) – The parameter identifier within the mode.value(bytes) – The configuration value to send.
+
+  - mode(int) – The mode number to configure.
+mode(int) – The mode number to configure.
+
+  - parameter(int) – The parameter identifier within the mode.
+parameter(int) – The parameter identifier within the mode.
+
+  - value(bytes) – The configuration value to send.
+value(bytes) – The configuration value to send.
+
+
+close()
+    Deactivates the data callback and releases the receive buffer.This is also called automatically when the object is garbage collected.
+
+Deactivates the data callback and releases the receive buffer.
+
+This is also called automatically when the object is garbage collected.
+
+
+BLERadio examples
+-----------------
+
+
+Broadcasting data to other hubs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Observing data from other hubs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

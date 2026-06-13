@@ -1,0 +1,22 @@
+URL: https://docs.pybricks.com/en/latest/parameters/axis.html
+Tytuł: Axis — pybricks v4.0.0 documentation
+============================================================
+
+
+Axis
+====
+
+
+classAxis
+    Unit axes of a coordinate system.X=vector(1,0,0)Y=vector(0,1,0)Z=vector(0,0,1)
+
+Unit axes of a coordinate system.
+
+
+X=vector(1,0,0)
+
+Y=vector(0,1,0)
+
+Z=vector(0,0,1)
+On Move Hub, doing math with these vectors is not supported. The axes can still
+be used to set up the hub orientation.

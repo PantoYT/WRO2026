@@ -1,0 +1,157 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/remote.html
+Tytuł: Remote Control — pybricks v4.0.0 documentation
+============================================================
+
+
+Remote Control
+==============
+
+
+classRemote(name=None,timeout=10000,connect=True)
+    LEGO® Powered Up Bluetooth Remote Control.Parameters:name(str) – Bluetooth name of the remote. If no name is given,
+the hub connects to the first remote that it finds.timeout(Number,ms) – How long to search for the remote.
+ChooseNoneto wait indefinitely.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.Raises:OSError– If the connection attempt fails or times out.awaitconnect()Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.name(name)name()→strSets or gets the Bluetooth name of the device.Parameters:name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.Raises:OSError– If the device is not connected.redremotelightonawaitlight.on(color)Turns on the light at the specified color.Parameters:color(Color) – Color of the light.redremotelightonawaitlight.off()Turns off the light.remotecenteris pressedbuttons.pressed()→Set[Button]Checks which buttons are currently pressed.Returns:Set of pressed buttons.awaitdisconnect()Disconnects the device.Raises:OSError– If disconnecting fails.
+
+LEGO® Powered Up Bluetooth Remote Control.
+
+
+Parameters:
+    name(str) – Bluetooth name of the remote. If no name is given,
+the hub connects to the first remote that it finds.timeout(Number,ms) – How long to search for the remote.
+ChooseNoneto wait indefinitely.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+  - name(str) – Bluetooth name of the remote. If no name is given,
+the hub connects to the first remote that it finds.
+name(str) – Bluetooth name of the remote. If no name is given,
+the hub connects to the first remote that it finds.
+
+  - timeout(Number,ms) – How long to search for the remote.
+ChooseNoneto wait indefinitely.
+timeout(Number,ms) – How long to search for the remote.
+ChooseNoneto wait indefinitely.
+
+  - connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+awaitconnect()
+    Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.
+
+Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+name(name)
+
+name()→str
+    Sets or gets the Bluetooth name of the device.Parameters:name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.Raises:OSError– If the device is not connected.
+
+Sets or gets the Bluetooth name of the device.
+
+
+Parameters:
+    name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.
+
+name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.
+
+
+Raises:
+    OSError– If the device is not connected.
+
+OSError– If the device is not connected.
+
+
+awaitlight.on(color)
+    Turns on the light at the specified color.Parameters:color(Color) – Color of the light.
+
+Turns on the light at the specified color.
+
+
+Parameters:
+    color(Color) – Color of the light.
+
+color(Color) – Color of the light.
+
+
+awaitlight.off()
+    Turns off the light.
+
+Turns off the light.
+
+
+buttons.pressed()→Set[Button]
+    Checks which buttons are currently pressed.Returns:Set of pressed buttons.
+
+Checks which buttons are currently pressed.
+
+
+Returns:
+    Set of pressed buttons.
+
+Set of pressed buttons.
+
+
+awaitdisconnect()
+    Disconnects the device.Raises:OSError– If disconnecting fails.
+
+Disconnects the device.
+
+
+Raises:
+    OSError– If disconnecting fails.
+
+OSError– If disconnecting fails.
+
+
+Examples
+--------
+
+
+Checking which buttons are pressed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing the remote light color
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing the light color using the buttons
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Using the timeout setting
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can use thetimeoutargument to change for how long the hub searches
+for the remote. If you chooseNone, it will search forever.
+
+If the remote was not found within the specifiedtimeout,
+anOSErroris raised. You can catch this exception to run
+other code if the remote is not available.
+
+
+Changing the name of the remote
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can change the Bluetooth name of the remote. The factory default name isHandset.
+
+You can specify this name when connecting to the remote.
+This lets you pick the right one if multiple remotes are nearby.

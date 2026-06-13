@@ -1,0 +1,26 @@
+URL: https://docs.pybricks.com/en/latest/parameters/index.html
+Tytuł: parameters – Parameters and constants — pybricks v4.0.0 documentation
+============================================================
+
+
+parameters– Parameters and constants
+====================================
+
+Constant parameters/arguments for the Pybricks API.
+
+
+classAxis
+
+classButton
+
+classColor
+
+classDirection
+
+classIcon
+
+classPort
+
+classSide
+
+classStop

@@ -1,0 +1,73 @@
+URL: https://docs.pybricks.com/en/latest/micropython/usys.html
+Tytuł: usys – System specific functions — pybricks v4.0.0 documentation
+============================================================
+
+
+usys– System specific functions
+===============================
+
+This MicroPython module is a subset of thesys modulein Python.
+
+Input and output streams
+
+
+stdin
+    This is a stream object (uio.FileIO) that receives input from a
+connected terminal, if any.Also seekbd_intrto disableKeyboardInterruptwhen passing binary data viastdin.
+
+This is a stream object (uio.FileIO) that receives input from a
+connected terminal, if any.
+
+Also seekbd_intrto disableKeyboardInterruptwhen passing binary data viastdin.
+
+
+stdout
+    This is a stream object (uio.FileIO) that sends output to a connected
+terminal, if any.
+
+This is a stream object (uio.FileIO) that sends output to a connected
+terminal, if any.
+
+
+stderr
+    Alias forstdout.
+
+Alias forstdout.
+
+Version info
+
+
+implementation
+    MicroPython version tuple. See format and example below.
+
+MicroPython version tuple. See format and example below.
+
+
+version
+    Python compatibility version, Pybricks version, and build date.
+See format and example below.
+
+Python compatibility version, Pybricks version, and build date.
+See format and example below.
+
+
+version_info
+    Python compatibility version. See format and example below.
+
+Python compatibility version. See format and example below.
+
+
+Examples
+--------
+
+
+Version information
+~~~~~~~~~~~~~~~~~~~
+
+
+Standard input and output
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Thestdinstream can be used to capture input via the Pybricks Code
+input/output window. See thekeyboard inputproject to learn how this works.
+This approach can be extended to exchange data with anyother deviceas well.

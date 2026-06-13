@@ -1,0 +1,39 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/tiltsensor.html
+Tytuł: Tilt Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Tilt Sensor
+===========
+
+
+classTiltSensor(port)
+    LEGO® Powered Up Tilt Sensor.Parameters:port(Port) – Port to which the sensor is connected.tilt sensorgetpitchtilt sensorgetrollawaittilt()→Tuple[int,int]:degMeasures the tilt relative to the horizontal plane.Returns:Tuple of pitch and roll angles.
+
+LEGO® Powered Up Tilt Sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.
+
+port(Port) – Port to which the sensor is connected.
+
+
+awaittilt()→Tuple[int,int]:deg
+    Measures the tilt relative to the horizontal plane.Returns:Tuple of pitch and roll angles.
+
+Measures the tilt relative to the horizontal plane.
+
+
+Returns:
+    Tuple of pitch and roll angles.
+
+Tuple of pitch and roll angles.
+
+
+Examples
+--------
+
+
+Measuring pitch and roll
+~~~~~~~~~~~~~~~~~~~~~~~~

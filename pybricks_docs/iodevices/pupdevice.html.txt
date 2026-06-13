@@ -1,0 +1,166 @@
+URL: https://docs.pybricks.com/en/latest/iodevices/pupdevice.html
+Tytuł: Powered Up Device — pybricks v4.0.0 documentation
+============================================================
+
+
+Powered Up Device
+=================
+
+
+classPUPDevice(port)
+    Powered Up motor or sensor.Parameters:port(Port) – Port to which the device is connected.info()→DictGets information about the device.For passive devices (such as DC motors or lights), returns a
+dictionary with only theidkey.For UART devices, returns a dictionary with anidkey and amodeskey. Themodesvalue is a tuple of tuples, one per
+mode, each containing the mode name, number of values, and data
+type.Returns:Dictionary with device information.awaitread(mode)→TupleReads values from a given mode.For passive touch sensors, this returns a single boolean value
+indicating whether the sensor is pressed, regardless of themodeargument.Raises an error for other passive devices such as DC motors and
+lights, which do not support reading.Parameters:mode(int) – Device mode.Returns:Values read from the device.Raises:OSError– If the device is a passive device that does not
+    support reading (e.g. a DC motor or light).awaitwrite(mode,data)Writes values to the device. Only selected UART devices and modes
+support this.Parameters:mode(int) – Device mode.data(tuple) – Values to be written. The number of values and
+their types must match what the device expects for the
+given mode.Raises:OSError– If the device is a passive device that does not
+    support writing.ValueError– If the mode is invalid, the mode is not writable,
+    the number of values does not match, or a value is out of
+    range for its data type.reset()Resets the UART device. After this, it should automatically synchronize
+and be ready for use after a few seconds. This is useful to forcefully
+re-trigger what such a sensor does when plugged in.Raises:OSError– If the device is a passive device that does not
+    support reset.
+
+Powered Up motor or sensor.
+
+
+Parameters:
+    port(Port) – Port to which the device is connected.
+
+port(Port) – Port to which the device is connected.
+
+
+info()→Dict
+    Gets information about the device.For passive devices (such as DC motors or lights), returns a
+dictionary with only theidkey.For UART devices, returns a dictionary with anidkey and amodeskey. Themodesvalue is a tuple of tuples, one per
+mode, each containing the mode name, number of values, and data
+type.Returns:Dictionary with device information.
+
+Gets information about the device.
+
+For passive devices (such as DC motors or lights), returns a
+dictionary with only theidkey.
+
+For UART devices, returns a dictionary with anidkey and amodeskey. Themodesvalue is a tuple of tuples, one per
+mode, each containing the mode name, number of values, and data
+type.
+
+
+Returns:
+    Dictionary with device information.
+
+Dictionary with device information.
+
+
+awaitread(mode)→Tuple
+    Reads values from a given mode.For passive touch sensors, this returns a single boolean value
+indicating whether the sensor is pressed, regardless of themodeargument.Raises an error for other passive devices such as DC motors and
+lights, which do not support reading.Parameters:mode(int) – Device mode.Returns:Values read from the device.Raises:OSError– If the device is a passive device that does not
+    support reading (e.g. a DC motor or light).
+
+Reads values from a given mode.
+
+For passive touch sensors, this returns a single boolean value
+indicating whether the sensor is pressed, regardless of themodeargument.
+
+Raises an error for other passive devices such as DC motors and
+lights, which do not support reading.
+
+
+Parameters:
+    mode(int) – Device mode.
+
+mode(int) – Device mode.
+
+
+Returns:
+    Values read from the device.
+
+Values read from the device.
+
+
+Raises:
+    OSError– If the device is a passive device that does not
+    support reading (e.g. a DC motor or light).
+
+OSError– If the device is a passive device that does not
+    support reading (e.g. a DC motor or light).
+
+
+awaitwrite(mode,data)
+    Writes values to the device. Only selected UART devices and modes
+support this.Parameters:mode(int) – Device mode.data(tuple) – Values to be written. The number of values and
+their types must match what the device expects for the
+given mode.Raises:OSError– If the device is a passive device that does not
+    support writing.ValueError– If the mode is invalid, the mode is not writable,
+    the number of values does not match, or a value is out of
+    range for its data type.
+
+Writes values to the device. Only selected UART devices and modes
+support this.
+
+
+Parameters:
+    mode(int) – Device mode.data(tuple) – Values to be written. The number of values and
+their types must match what the device expects for the
+given mode.
+
+  - mode(int) – Device mode.
+mode(int) – Device mode.
+
+  - data(tuple) – Values to be written. The number of values and
+their types must match what the device expects for the
+given mode.
+data(tuple) – Values to be written. The number of values and
+their types must match what the device expects for the
+given mode.
+
+
+Raises:
+    OSError– If the device is a passive device that does not
+    support writing.ValueError– If the mode is invalid, the mode is not writable,
+    the number of values does not match, or a value is out of
+    range for its data type.
+
+  - OSError– If the device is a passive device that does not
+    support writing.
+OSError– If the device is a passive device that does not
+    support writing.
+
+  - ValueError– If the mode is invalid, the mode is not writable,
+    the number of values does not match, or a value is out of
+    range for its data type.
+ValueError– If the mode is invalid, the mode is not writable,
+    the number of values does not match, or a value is out of
+    range for its data type.
+
+
+reset()
+    Resets the UART device. After this, it should automatically synchronize
+and be ready for use after a few seconds. This is useful to forcefully
+re-trigger what such a sensor does when plugged in.Raises:OSError– If the device is a passive device that does not
+    support reset.
+
+Resets the UART device. After this, it should automatically synchronize
+and be ready for use after a few seconds. This is useful to forcefully
+re-trigger what such a sensor does when plugged in.
+
+
+Raises:
+    OSError– If the device is a passive device that does not
+    support reset.
+
+OSError– If the device is a passive device that does not
+    support reset.
+
+
+Examples
+--------
+
+
+Detecting devices
+~~~~~~~~~~~~~~~~~

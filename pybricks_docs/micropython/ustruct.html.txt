@@ -1,0 +1,283 @@
+URL: https://docs.pybricks.com/en/latest/micropython/ustruct.html
+Tytuł: ustruct – Pack and unpack binary data — pybricks v4.0.0 documentation
+============================================================
+
+
+ustruct– Pack and unpack binary data
+====================================
+
+This module provides functions to convert between Python values and C-like
+data structs.
+
+
+calcsize(format:str)→int
+    Gets the data size corresponding to a format stringParameters:format(str) – Data format string.Returns:The number of bytes needed to represent this format.
+
+Gets the data size corresponding to a format string
+
+
+Parameters:
+    format(str) – Data format string.
+
+format(str) – Data format string.
+
+
+Returns:
+    The number of bytes needed to represent this format.
+
+The number of bytes needed to represent this format.
+
+
+pack(format,value1,value2,...)
+    Packs the values using the given format.Parameters:format(str) – Data format string.Returns:The data encoded as bytes.
+
+Packs the values using the given format.
+
+
+Parameters:
+    format(str) – Data format string.
+
+format(str) – Data format string.
+
+
+Returns:
+    The data encoded as bytes.
+
+The data encoded as bytes.
+
+
+pack_into(format,buffer,offset,value1,value2,...)
+    Encode the values using the given format and write them to a given buffer.Parameters:format(str) – Data format string.buffer(bytearray) – Buffer to store the encoded data.offset(int) – Offset from the start of the buffer. Use a negative value
+to count from the end of the buffer.
+
+Encode the values using the given format and write them to a given buffer.
+
+
+Parameters:
+    format(str) – Data format string.buffer(bytearray) – Buffer to store the encoded data.offset(int) – Offset from the start of the buffer. Use a negative value
+to count from the end of the buffer.
+
+  - format(str) – Data format string.
+format(str) – Data format string.
+
+  - buffer(bytearray) – Buffer to store the encoded data.
+buffer(bytearray) – Buffer to store the encoded data.
+
+  - offset(int) – Offset from the start of the buffer. Use a negative value
+to count from the end of the buffer.
+offset(int) – Offset from the start of the buffer. Use a negative value
+to count from the end of the buffer.
+
+
+unpack(format,data)→Tuple
+    Decodes the binary data using the given format.Parameters:format(str) – Data format string.data(bytesorbytearray) – Data to unpack.Returns:The decoded data as a tuple of values.
+
+Decodes the binary data using the given format.
+
+
+Parameters:
+    format(str) – Data format string.data(bytesorbytearray) – Data to unpack.
+
+  - format(str) – Data format string.
+format(str) – Data format string.
+
+  - data(bytesorbytearray) – Data to unpack.
+data(bytesorbytearray) – Data to unpack.
+
+
+Returns:
+    The decoded data as a tuple of values.
+
+The decoded data as a tuple of values.
+
+
+unpack_from(format,data,offset)→Tuple
+    Decodes binary data from a buffer using the given format.Parameters:format(str) – Data format string.data(bytesorbytearray) – Data buffer to unpack.offset(int) – Offset from the start of the data. Use a negative value
+to count from the end of the data.Returns:The decoded data as a tuple of values.
+
+Decodes binary data from a buffer using the given format.
+
+
+Parameters:
+    format(str) – Data format string.data(bytesorbytearray) – Data buffer to unpack.offset(int) – Offset from the start of the data. Use a negative value
+to count from the end of the data.
+
+  - format(str) – Data format string.
+format(str) – Data format string.
+
+  - data(bytesorbytearray) – Data buffer to unpack.
+data(bytesorbytearray) – Data buffer to unpack.
+
+  - offset(int) – Offset from the start of the data. Use a negative value
+to count from the end of the data.
+offset(int) – Offset from the start of the data. Use a negative value
+to count from the end of the data.
+
+
+Returns:
+    The decoded data as a tuple of values.
+
+The decoded data as a tuple of values.
+
+The following byte orders are supported:
+
+Character
+
+Byte order
+
+Size
+
+Alignment
+
+@
+
+native
+
+native
+
+native
+
+<
+
+little-endian
+
+standard
+
+none
+
+>
+
+big-endian
+
+standard
+
+none
+
+!
+
+network (= big-endian)
+
+standard
+
+none
+
+The following data types are supported:
+
+Format
+
+C Type
+
+Python type
+
+Standard size
+
+b
+
+signed char
+
+integer
+
+1
+
+B
+
+unsigned char
+
+integer
+
+1
+
+h
+
+short
+
+integer
+
+2
+
+H
+
+unsigned short
+
+integer
+
+2
+
+i
+
+int
+
+integer
+
+4
+
+I
+
+unsigned int
+
+integer
+
+4
+
+l
+
+long
+
+integer (1)
+
+4
+
+L
+
+unsigned long
+
+integer (1)
+
+4
+
+q
+
+long long
+
+integer (1)
+
+8
+
+Q
+
+unsigned long long
+
+integer (1)
+
+8
+
+f
+
+float
+
+float
+
+4
+
+d
+
+double
+
+float
+
+8
+
+s
+
+char[]
+
+bytes
+
+P
+
+void *
+
+integer
+
+  - (1) Supports values up to +/-1073741823
+(1) Supports values up to +/-1073741823

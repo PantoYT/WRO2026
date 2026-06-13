@@ -1,0 +1,90 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/forcesensor.html
+Tytuł: Force Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Force Sensor
+============
+
+
+classForceSensor(port)
+    LEGO® SPIKE Force Sensor.Parameters:port(Port) – Port to which the sensor is connected.force sensorforceawaitforce()→float:NMeasures the force exerted on the sensor.Returns:Measured force (up to approximately 10.00 N).force sensordistanceawaitdistance()→float:mmMeasures by how much the sensor button has moved.Returns:Movement up to approximately 8.00 mm.awaitpressed(force=3)→boolChecks if the sensor button is pressed.Parameters:force(Number,N) – Minimum force to be considered pressed.Returns:Trueif the sensor is pressed,Falseif it is not.awaittouched()→boolChecks if the sensor is touched.This is similar topressed(), but it detects slight movements of
+the button even when the measured force is still considered zero.Returns:Trueif the sensor is touched or pressed,Falseif it is not.
+
+LEGO® SPIKE Force Sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.
+
+port(Port) – Port to which the sensor is connected.
+
+
+awaitforce()→float:N
+    Measures the force exerted on the sensor.Returns:Measured force (up to approximately 10.00 N).
+
+Measures the force exerted on the sensor.
+
+
+Returns:
+    Measured force (up to approximately 10.00 N).
+
+Measured force (up to approximately 10.00 N).
+
+
+awaitdistance()→float:mm
+    Measures by how much the sensor button has moved.Returns:Movement up to approximately 8.00 mm.
+
+Measures by how much the sensor button has moved.
+
+
+Returns:
+    Movement up to approximately 8.00 mm.
+
+Movement up to approximately 8.00 mm.
+
+
+awaitpressed(force=3)→bool
+    Checks if the sensor button is pressed.Parameters:force(Number,N) – Minimum force to be considered pressed.Returns:Trueif the sensor is pressed,Falseif it is not.
+
+Checks if the sensor button is pressed.
+
+
+Parameters:
+    force(Number,N) – Minimum force to be considered pressed.
+
+force(Number,N) – Minimum force to be considered pressed.
+
+
+Returns:
+    Trueif the sensor is pressed,Falseif it is not.
+
+Trueif the sensor is pressed,Falseif it is not.
+
+
+awaittouched()→bool
+    Checks if the sensor is touched.This is similar topressed(), but it detects slight movements of
+the button even when the measured force is still considered zero.Returns:Trueif the sensor is touched or pressed,Falseif it is not.
+
+Checks if the sensor is touched.
+
+This is similar topressed(), but it detects slight movements of
+the button even when the measured force is still considered zero.
+
+
+Returns:
+    Trueif the sensor is touched or pressed,Falseif it is not.
+
+Trueif the sensor is touched or pressed,Falseif it is not.
+
+
+Examples
+--------
+
+
+Measuring force and movement
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Measuring peak force
+~~~~~~~~~~~~~~~~~~~~

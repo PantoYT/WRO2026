@@ -1,0 +1,147 @@
+URL: https://docs.pybricks.com/en/latest/iodevices/lwp3device.html
+Tytuł: LEGO Wireless Protocol v3 device — pybricks v4.0.0 documentation
+============================================================
+
+
+LEGO Wireless Protocol v3 device
+================================
+
+
+classLWP3Device(hub_kind,name=None,timeout=10000,pair=False,num_notifications=8,connect=True)
+    Connects to a hub running official LEGO firmware using theLEGO Wireless Protocol v3.Parameters:hub_kind(int) – Thehub type identifierof the hub to connect to.name(str) – The name of the hub to connect to orNoneto connect to any
+hub.timeout(int) – The time, in milliseconds, to wait for a connection before
+raising an exception.pair(bool) – Whether to attempt pairing for a secure connection.
+This is required for some newer hubs.num_notifications(int) – Number of incoming messages from the remote
+hub to store before discarding older messages.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.Changed in version 3.6:Addedpairparameter.Changed in version 3.7:Addednum_notificationsparameter.awaitconnect()Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.name(name)name()→strSets or gets the Bluetooth name of the device.Parameters:name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.Raises:OSError– If the device is not connected.awaitwrite(buf)Sends a message to the remote hub.Parameters:buf(bytes) – The raw binary message to send. Maximum 20 bytes.Raises:ValueError– If the message exceeds 20 bytes.OSError– If the device is not connected or the write fails.read()→bytes|NoneRetrieves the oldest buffered message received from the remote hub.If all buffered messages have already been read, this returnsNone.Returns:The oldest raw binary message orNoneif there are no more messages.Changed in version 3.7:Now supports reading multiple buffered messages instead of blocking
+until one new message was received.awaitdisconnect()Disconnects the device.Raises:OSError– If disconnecting fails.
+
+Connects to a hub running official LEGO firmware using theLEGO Wireless Protocol v3.
+
+
+Parameters:
+    hub_kind(int) – Thehub type identifierof the hub to connect to.name(str) – The name of the hub to connect to orNoneto connect to any
+hub.timeout(int) – The time, in milliseconds, to wait for a connection before
+raising an exception.pair(bool) – Whether to attempt pairing for a secure connection.
+This is required for some newer hubs.num_notifications(int) – Number of incoming messages from the remote
+hub to store before discarding older messages.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+  - hub_kind(int) – Thehub type identifierof the hub to connect to.
+hub_kind(int) – Thehub type identifierof the hub to connect to.
+
+  - name(str) – The name of the hub to connect to orNoneto connect to any
+hub.
+name(str) – The name of the hub to connect to orNoneto connect to any
+hub.
+
+  - timeout(int) – The time, in milliseconds, to wait for a connection before
+raising an exception.
+timeout(int) – The time, in milliseconds, to wait for a connection before
+raising an exception.
+
+  - pair(bool) – Whether to attempt pairing for a secure connection.
+This is required for some newer hubs.
+pair(bool) – Whether to attempt pairing for a secure connection.
+This is required for some newer hubs.
+
+  - num_notifications(int) – Number of incoming messages from the remote
+hub to store before discarding older messages.
+num_notifications(int) – Number of incoming messages from the remote
+hub to store before discarding older messages.
+
+  - connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+Changed in version 3.6:Addedpairparameter.
+
+Changed in version 3.7:Addednum_notificationsparameter.
+
+
+awaitconnect()
+    Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.
+
+Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+name(name)
+
+name()→str
+    Sets or gets the Bluetooth name of the device.Parameters:name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.Raises:OSError– If the device is not connected.
+
+Sets or gets the Bluetooth name of the device.
+
+
+Parameters:
+    name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.
+
+name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.
+
+
+Raises:
+    OSError– If the device is not connected.
+
+OSError– If the device is not connected.
+
+
+awaitwrite(buf)
+    Sends a message to the remote hub.Parameters:buf(bytes) – The raw binary message to send. Maximum 20 bytes.Raises:ValueError– If the message exceeds 20 bytes.OSError– If the device is not connected or the write fails.
+
+Sends a message to the remote hub.
+
+
+Parameters:
+    buf(bytes) – The raw binary message to send. Maximum 20 bytes.
+
+buf(bytes) – The raw binary message to send. Maximum 20 bytes.
+
+
+Raises:
+    ValueError– If the message exceeds 20 bytes.OSError– If the device is not connected or the write fails.
+
+  - ValueError– If the message exceeds 20 bytes.
+ValueError– If the message exceeds 20 bytes.
+
+  - OSError– If the device is not connected or the write fails.
+OSError– If the device is not connected or the write fails.
+
+
+read()→bytes|None
+    Retrieves the oldest buffered message received from the remote hub.If all buffered messages have already been read, this returnsNone.Returns:The oldest raw binary message orNoneif there are no more messages.Changed in version 3.7:Now supports reading multiple buffered messages instead of blocking
+until one new message was received.
+
+Retrieves the oldest buffered message received from the remote hub.
+
+If all buffered messages have already been read, this returnsNone.
+
+
+Returns:
+    The oldest raw binary message orNoneif there are no more messages.
+
+The oldest raw binary message orNoneif there are no more messages.
+
+Changed in version 3.7:Now supports reading multiple buffered messages instead of blocking
+until one new message was received.
+
+
+awaitdisconnect()
+    Disconnects the device.Raises:OSError– If disconnecting fails.
+
+Disconnects the device.
+
+
+Raises:
+    OSError– If disconnecting fails.
+
+OSError– If disconnecting fails.

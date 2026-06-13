@@ -1,0 +1,70 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/infraredsensor.html
+Tytuł: Infrared Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Infrared Sensor
+===============
+
+
+classInfraredSensor(port)
+    LEGO® Powered Up Infrared Sensor.Parameters:port(Port) – Port to which the sensor is connected.infrared sensordistanceawaitdistance()→int:%Measures the relative distance between the sensor and an object
+using infrared light.Returns:Distance ranging from 0% (closest) to 100% (farthest).infrared sensorreflected lightawaitreflection()→int:%Measures the reflection of a surface using an infrared light.Returns:Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).awaitcount()→intCounts the number of objects that have passed by the sensor.Returns:Number of objects counted.
+
+LEGO® Powered Up Infrared Sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.
+
+port(Port) – Port to which the sensor is connected.
+
+
+awaitdistance()→int:%
+    Measures the relative distance between the sensor and an object
+using infrared light.Returns:Distance ranging from 0% (closest) to 100% (farthest).
+
+Measures the relative distance between the sensor and an object
+using infrared light.
+
+
+Returns:
+    Distance ranging from 0% (closest) to 100% (farthest).
+
+Distance ranging from 0% (closest) to 100% (farthest).
+
+
+awaitreflection()→int:%
+    Measures the reflection of a surface using an infrared light.Returns:Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+Measures the reflection of a surface using an infrared light.
+
+
+Returns:
+    Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+
+awaitcount()→int
+    Counts the number of objects that have passed by the sensor.Returns:Number of objects counted.
+
+Counts the number of objects that have passed by the sensor.
+
+
+Returns:
+    Number of objects counted.
+
+Number of objects counted.
+
+
+Examples
+--------
+
+
+Measuring distance, object count, and reflection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

@@ -1,0 +1,163 @@
+URL: https://docs.pybricks.com/en/latest/iodevices/i2cdevice.html
+Tytuł: Generic I2C Device — pybricks v4.0.0 documentation
+============================================================
+
+
+Generic I2C Device
+==================
+
+EV3 and NXT support connecting generic I2C devices to the hub.
+Seepinout here.
+
+
+classI2CDevice(port,address,custom=False,power_pin=0,nxt_quirk=False)
+    Generic or custom I2C device.Note: Use thepower_pinoption at your own risk. Applying power to the
+pins can damage your hub or device if you are not careful. When you use
+this option, you will be prompted to confirm that you understand the risks.Parameters:port(Port) – Port to which the device is connected.address(int) – I2C address of the client device. SeeI2C Addresses.custom(bool) – Set toTrueif you are using a custom I2C device.power_pin(int) – Power requirements for the device. Use0(default) for no power on the pins. On NXT and EV3, use1to apply battery power to pin 1. Other pins are not supported.nxt_quirk(bool) – Set toTruefor older NXT I2C sensors that
+need slower compatibility timing to communicate reliably,
+such as the old NXT Ultrasonic Sensor.awaitread(reg=None,length=1)→bytesawaitread(reg=None,length=1,map=callable)→AnyReads bytes starting at a given register.Parameters:reg(int) – Register at which to begin reading: 0–255 or
+0x00–0xFF. UseNoneto read without writing a register
+address first.length(int) – How many bytes to read.map(callable) – Optional callable to convert the returned bytes.
+If given, it is called with the bytes as its argument and its
+return value is returned instead.Returns:Bytes returned from the device, or the return value ofmapif a callable was provided.awaitwrite(reg=None,data=None)Writes bytes, optionally starting at a given register.Parameters:reg(int) – Register at which to begin writing: 0–255 or
+0x00–0xFF. UseNoneto write without a register prefix.data(bytes) – Bytes to be written. UseNoneto write nothing
+after the register.Raises:ValueError– Ifregis given anddatais more than 32 bytes.
+    To write more data, omit theregargument and include the
+    register as the first byte ofdata.
+
+Generic or custom I2C device.
+
+Note: Use thepower_pinoption at your own risk. Applying power to the
+pins can damage your hub or device if you are not careful. When you use
+this option, you will be prompted to confirm that you understand the risks.
+
+
+Parameters:
+    port(Port) – Port to which the device is connected.address(int) – I2C address of the client device. SeeI2C Addresses.custom(bool) – Set toTrueif you are using a custom I2C device.power_pin(int) – Power requirements for the device. Use0(default) for no power on the pins. On NXT and EV3, use1to apply battery power to pin 1. Other pins are not supported.nxt_quirk(bool) – Set toTruefor older NXT I2C sensors that
+need slower compatibility timing to communicate reliably,
+such as the old NXT Ultrasonic Sensor.
+
+  - port(Port) – Port to which the device is connected.
+port(Port) – Port to which the device is connected.
+
+  - address(int) – I2C address of the client device. SeeI2C Addresses.
+address(int) – I2C address of the client device. SeeI2C Addresses.
+
+  - custom(bool) – Set toTrueif you are using a custom I2C device.
+custom(bool) – Set toTrueif you are using a custom I2C device.
+
+  - power_pin(int) – Power requirements for the device. Use0(default) for no power on the pins. On NXT and EV3, use1to apply battery power to pin 1. Other pins are not supported.
+power_pin(int) – Power requirements for the device. Use0(default) for no power on the pins. On NXT and EV3, use1to apply battery power to pin 1. Other pins are not supported.
+
+  - nxt_quirk(bool) – Set toTruefor older NXT I2C sensors that
+need slower compatibility timing to communicate reliably,
+such as the old NXT Ultrasonic Sensor.
+nxt_quirk(bool) – Set toTruefor older NXT I2C sensors that
+need slower compatibility timing to communicate reliably,
+such as the old NXT Ultrasonic Sensor.
+
+
+awaitread(reg=None,length=1)→bytes
+
+awaitread(reg=None,length=1,map=callable)→Any
+    Reads bytes starting at a given register.Parameters:reg(int) – Register at which to begin reading: 0–255 or
+0x00–0xFF. UseNoneto read without writing a register
+address first.length(int) – How many bytes to read.map(callable) – Optional callable to convert the returned bytes.
+If given, it is called with the bytes as its argument and its
+return value is returned instead.Returns:Bytes returned from the device, or the return value ofmapif a callable was provided.
+
+Reads bytes starting at a given register.
+
+
+Parameters:
+    reg(int) – Register at which to begin reading: 0–255 or
+0x00–0xFF. UseNoneto read without writing a register
+address first.length(int) – How many bytes to read.map(callable) – Optional callable to convert the returned bytes.
+If given, it is called with the bytes as its argument and its
+return value is returned instead.
+
+  - reg(int) – Register at which to begin reading: 0–255 or
+0x00–0xFF. UseNoneto read without writing a register
+address first.
+reg(int) – Register at which to begin reading: 0–255 or
+0x00–0xFF. UseNoneto read without writing a register
+address first.
+
+  - length(int) – How many bytes to read.
+length(int) – How many bytes to read.
+
+  - map(callable) – Optional callable to convert the returned bytes.
+If given, it is called with the bytes as its argument and its
+return value is returned instead.
+map(callable) – Optional callable to convert the returned bytes.
+If given, it is called with the bytes as its argument and its
+return value is returned instead.
+
+
+Returns:
+    Bytes returned from the device, or the return value ofmapif a callable was provided.
+
+Bytes returned from the device, or the return value ofmapif a callable was provided.
+
+
+awaitwrite(reg=None,data=None)
+    Writes bytes, optionally starting at a given register.Parameters:reg(int) – Register at which to begin writing: 0–255 or
+0x00–0xFF. UseNoneto write without a register prefix.data(bytes) – Bytes to be written. UseNoneto write nothing
+after the register.Raises:ValueError– Ifregis given anddatais more than 32 bytes.
+    To write more data, omit theregargument and include the
+    register as the first byte ofdata.
+
+Writes bytes, optionally starting at a given register.
+
+
+Parameters:
+    reg(int) – Register at which to begin writing: 0–255 or
+0x00–0xFF. UseNoneto write without a register prefix.data(bytes) – Bytes to be written. UseNoneto write nothing
+after the register.
+
+  - reg(int) – Register at which to begin writing: 0–255 or
+0x00–0xFF. UseNoneto write without a register prefix.
+reg(int) – Register at which to begin writing: 0–255 or
+0x00–0xFF. UseNoneto write without a register prefix.
+
+  - data(bytes) – Bytes to be written. UseNoneto write nothing
+after the register.
+data(bytes) – Bytes to be written. UseNoneto write nothing
+after the register.
+
+
+Raises:
+    ValueError– Ifregis given anddatais more than 32 bytes.
+    To write more data, omit theregargument and include the
+    register as the first byte ofdata.
+
+ValueError– Ifregis given anddatais more than 32 bytes.
+    To write more data, omit theregargument and include the
+    register as the first byte ofdata.
+
+Example: Read and write to an I2C device
+
+
+I2C Addresses
+-------------
+
+I2C addresses are 7-bit values. However, most vendors who make LEGO compatible
+sensors provide an 8-bit address in their documentation.
+To use those addresses, you must shift them by 1 bit.
+For example, if the documented address is0xD2, you can doaddress=0xD2>>1.
+
+
+Advanced I2C Commands
+---------------------
+
+Some rudimentary I2C devices do not require a register argument or even any
+data. You can achieve this behavior as shown in the examples below.
+
+Example: Advanced I2C read and write techniques
+
+Additional technical resources
+
+TheI2CDeviceclass methods call functions from the Linux SMBus driver.
+To find out which commands are called under the hood, check thePybricks source code.
+More details about using I2C without MicroPython can be found on
+theev3dev I2Cpage.

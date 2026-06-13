@@ -1,0 +1,107 @@
+URL: https://docs.pybricks.com/en/latest/parameters/color.html
+Tytuł: Color — pybricks v4.0.0 documentation
+============================================================
+
+
+Color
+=====
+
+
+classColor(h,s=100,v=100)
+    Light or surface color.Parameters:h(Number,deg) – Hue.s(Number,%) – Saturation.v(Number,%) – Brightness value.Saturated colorsThese colors have maximum saturation and brightness value.
+They differ only in hue.RED:Color=Color(h=0,s=100,v=100)_ORANGE:Color=Color(h=30,s=100,v=100)_YELLOW:Color=Color(h=60,s=100,v=100)_GREEN:Color=Color(h=120,s=100,v=100)_CYAN:Color=Color(h=180,s=100,v=100)_BLUE:Color=Color(h=240,s=100,v=100)_VIOLET:Color=Color(h=270,s=100,v=100)_MAGENTA:Color=Color(h=300,s=100,v=100)_Unsaturated colorsThese colors have zero hue and saturation. They differ only in brightness
+value.When detecting these colors using sensors, their values depend a lot
+on the distance to the object. If the distance between the sensor and the
+object is not constant in your robot, it is better to use only one of these
+colors in your programs.WHITE:Color=Color(h=0,s=0,v=100)_GRAY:Color=Color(h=0,s=0,v=50)_BLACK:Color=Color(h=0,s=0,v=10)This represents dark objects that still reflect
+a very small amount of light._NONE:Color=Color(h=0,s=0,v=0)This is total darkness, with no reflection or light at all._
+
+Light or surface color.
+
+
+Parameters:
+    h(Number,deg) – Hue.s(Number,%) – Saturation.v(Number,%) – Brightness value.
+
+  - h(Number,deg) – Hue.
+h(Number,deg) – Hue.
+
+  - s(Number,%) – Saturation.
+s(Number,%) – Saturation.
+
+  - v(Number,%) – Brightness value.
+v(Number,%) – Brightness value.
+
+Saturated colors
+
+These colors have maximum saturation and brightness value.
+They differ only in hue.
+
+
+RED:Color=Color(h=0,s=100,v=100)
+    _
+
+
+ORANGE:Color=Color(h=30,s=100,v=100)
+    _
+
+
+YELLOW:Color=Color(h=60,s=100,v=100)
+    _
+
+
+GREEN:Color=Color(h=120,s=100,v=100)
+    _
+
+
+CYAN:Color=Color(h=180,s=100,v=100)
+    _
+
+
+BLUE:Color=Color(h=240,s=100,v=100)
+    _
+
+
+VIOLET:Color=Color(h=270,s=100,v=100)
+    _
+
+
+MAGENTA:Color=Color(h=300,s=100,v=100)
+    _
+
+Unsaturated colors
+
+These colors have zero hue and saturation. They differ only in brightness
+value.
+
+When detecting these colors using sensors, their values depend a lot
+on the distance to the object. If the distance between the sensor and the
+object is not constant in your robot, it is better to use only one of these
+colors in your programs.
+
+
+WHITE:Color=Color(h=0,s=0,v=100)
+    _
+
+
+GRAY:Color=Color(h=0,s=0,v=50)
+    _
+
+
+BLACK:Color=Color(h=0,s=0,v=10)
+    This represents dark objects that still reflect
+a very small amount of light._
+
+This represents dark objects that still reflect
+a very small amount of light.
+
+
+NONE:Color=Color(h=0,s=0,v=0)
+    This is total darkness, with no reflection or light at all._
+
+This is total darkness, with no reflection or light at all.
+
+Making your own colors
+
+This example shows the basics of color properties, and how to define new colors.
+
+This example shows more advanced use cases of theColorclass.

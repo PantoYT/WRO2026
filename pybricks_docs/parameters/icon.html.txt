@@ -1,0 +1,163 @@
+URL: https://docs.pybricks.com/en/latest/parameters/icon.html
+Tytuł: Icon — pybricks v4.0.0 documentation
+============================================================
+
+
+Icon
+====
+
+
+classIcon
+    Icons to display on a light matrix.Each of the following attributes are matrices. This means you can scale
+icons to adjust the brightness or add icons to make composites.See theMaking your own imagessection for examples.UP:Matrix=Ellipsis⬜⬜🟨⬜⬜⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜DOWN:Matrix=Ellipsis⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜LEFT:Matrix=Ellipsis⬜⬜🟨⬜⬜⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜🟨🟨🟨🟨⬜⬜🟨⬜⬜RIGHT:Matrix=Ellipsis⬜⬜🟨⬜⬜🟨🟨🟨🟨⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜⬜⬜🟨⬜⬜ARROW_RIGHT_UP:Matrix=Ellipsis⬜⬜🟨🟨🟨⬜⬜⬜🟨🟨⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨⬜⬜⬜⬜ARROW_RIGHT_DOWN:Matrix=Ellipsis🟨⬜⬜⬜⬜⬜🟨⬜⬜⬜⬜⬜🟨⬜🟨⬜⬜⬜🟨🟨⬜⬜🟨🟨🟨ARROW_LEFT_UP:Matrix=Ellipsis🟨🟨🟨⬜⬜🟨🟨⬜⬜⬜🟨⬜🟨⬜⬜⬜⬜⬜🟨⬜⬜⬜⬜⬜🟨ARROW_LEFT_DOWN:Matrix=Ellipsis⬜⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜🟨🟨⬜⬜⬜🟨🟨🟨⬜⬜ARROW_UP:Matrix=Ellipsis⬜⬜🟨⬜⬜⬜🟨🟨🟨⬜🟨⬜🟨⬜🟨⬜⬜🟨⬜⬜⬜⬜🟨⬜⬜ARROW_DOWN:Matrix=Ellipsis⬜⬜🟨⬜⬜⬜⬜🟨⬜⬜🟨⬜🟨⬜🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜ARROW_LEFT:Matrix=Ellipsis⬜⬜🟨⬜⬜⬜🟨⬜⬜⬜🟨🟨🟨🟨🟨⬜🟨⬜⬜⬜⬜⬜🟨⬜⬜ARROW_RIGHT:Matrix=Ellipsis⬜⬜🟨⬜⬜⬜⬜⬜🟨⬜🟨🟨🟨🟨🟨⬜⬜⬜🟨⬜⬜⬜🟨⬜⬜HAPPY:Matrix=Ellipsis🟨🟨⬜🟨🟨🟨🟨⬜🟨🟨⬜⬜⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨🟨🟨⬜SAD:Matrix=Ellipsis🟨🟨⬜🟨🟨🟨🟨⬜🟨🟨⬜⬜⬜⬜⬜⬜🟨🟨🟨⬜🟨⬜⬜⬜🟨EYE_LEFT:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜EYE_RIGHT:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜EYE_LEFT_BLINK:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜EYE_RIGHT_BLINK:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜EYE_RIGHT_BROW:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜EYE_LEFT_BROW:Matrix=Ellipsis⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜EYE_LEFT_BROW_UP:Matrix=Ellipsis🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜EYE_RIGHT_BROW_UP:Matrix=Ellipsis⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜HEART:Matrix=Ellipsis⬜🟨⬜🟨⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜PAUSE:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜⬜⬜⬜⬜EMPTY:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜FULL:Matrix=Ellipsis🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨SQUARE:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜⬜⬜⬜⬜⬜TRIANGLE_RIGHT:Matrix=Ellipsis⬜🟨⬜⬜⬜⬜🟨🟨⬜⬜⬜🟨🟨🟨⬜⬜🟨🟨⬜⬜⬜🟨⬜⬜⬜TRIANGLE_LEFT:Matrix=Ellipsis⬜⬜⬜🟨⬜⬜⬜🟨🟨⬜⬜🟨🟨🟨⬜⬜⬜🟨🟨⬜⬜⬜⬜🟨⬜TRIANGLE_UP:Matrix=Ellipsis⬜⬜⬜⬜⬜⬜⬜🟨⬜⬜⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨⬜⬜⬜⬜⬜TRIANGLE_DOWN:Matrix=Ellipsis⬜⬜⬜⬜⬜🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜⬜⬜⬜⬜⬜CIRCLE:Matrix=Ellipsis⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜CLOCKWISE:Matrix=Ellipsis🟨🟨🟨🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜🟨⬜🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜COUNTERCLOCKWISE:Matrix=Ellipsis⬜🟨🟨🟨🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜🟨🟨🟨🟨⬜🟨⬜🟨⬜⬜⬜TRUE:Matrix=Ellipsis⬜⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨⬜⬜⬜⬜⬜⬜⬜⬜FALSE:Matrix=Ellipsis🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨
+
+Icons to display on a light matrix.
+
+Each of the following attributes are matrices. This means you can scale
+icons to adjust the brightness or add icons to make composites.
+
+See theMaking your own imagessection for examples.
+
+
+UP:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜
+
+
+DOWN:Matrix=Ellipsis
+    ⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜
+
+
+LEFT:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜🟨🟨🟨🟨⬜⬜🟨⬜⬜
+
+
+RIGHT:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜🟨🟨🟨🟨⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜⬜⬜🟨⬜⬜
+
+
+ARROW_RIGHT_UP:Matrix=Ellipsis
+    ⬜⬜🟨🟨🟨⬜⬜⬜🟨🟨⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨⬜⬜⬜⬜
+
+
+ARROW_RIGHT_DOWN:Matrix=Ellipsis
+    🟨⬜⬜⬜⬜⬜🟨⬜⬜⬜⬜⬜🟨⬜🟨⬜⬜⬜🟨🟨⬜⬜🟨🟨🟨
+
+
+ARROW_LEFT_UP:Matrix=Ellipsis
+    🟨🟨🟨⬜⬜🟨🟨⬜⬜⬜🟨⬜🟨⬜⬜⬜⬜⬜🟨⬜⬜⬜⬜⬜🟨
+
+
+ARROW_LEFT_DOWN:Matrix=Ellipsis
+    ⬜⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜🟨🟨⬜⬜⬜🟨🟨🟨⬜⬜
+
+
+ARROW_UP:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜⬜🟨🟨🟨⬜🟨⬜🟨⬜🟨⬜⬜🟨⬜⬜⬜⬜🟨⬜⬜
+
+
+ARROW_DOWN:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜⬜⬜🟨⬜⬜🟨⬜🟨⬜🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜
+
+
+ARROW_LEFT:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜⬜🟨⬜⬜⬜🟨🟨🟨🟨🟨⬜🟨⬜⬜⬜⬜⬜🟨⬜⬜
+
+
+ARROW_RIGHT:Matrix=Ellipsis
+    ⬜⬜🟨⬜⬜⬜⬜⬜🟨⬜🟨🟨🟨🟨🟨⬜⬜⬜🟨⬜⬜⬜🟨⬜⬜
+
+
+HAPPY:Matrix=Ellipsis
+    🟨🟨⬜🟨🟨🟨🟨⬜🟨🟨⬜⬜⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨🟨🟨⬜
+
+
+SAD:Matrix=Ellipsis
+    🟨🟨⬜🟨🟨🟨🟨⬜🟨🟨⬜⬜⬜⬜⬜⬜🟨🟨🟨⬜🟨⬜⬜⬜🟨
+
+
+EYE_LEFT:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+EYE_RIGHT:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜
+
+
+EYE_LEFT_BLINK:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+EYE_RIGHT_BLINK:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜
+
+
+EYE_RIGHT_BROW:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+EYE_LEFT_BROW:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+EYE_LEFT_BROW_UP:Matrix=Ellipsis
+    🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+EYE_RIGHT_BROW_UP:Matrix=Ellipsis
+    ⬜⬜⬜🟨🟨⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+HEART:Matrix=Ellipsis
+    ⬜🟨⬜🟨⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜
+
+
+PAUSE:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜⬜⬜⬜⬜
+
+
+EMPTY:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+FULL:Matrix=Ellipsis
+    🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨
+
+
+SQUARE:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜⬜🟨🟨🟨⬜⬜⬜⬜⬜⬜
+
+
+TRIANGLE_RIGHT:Matrix=Ellipsis
+    ⬜🟨⬜⬜⬜⬜🟨🟨⬜⬜⬜🟨🟨🟨⬜⬜🟨🟨⬜⬜⬜🟨⬜⬜⬜
+
+
+TRIANGLE_LEFT:Matrix=Ellipsis
+    ⬜⬜⬜🟨⬜⬜⬜🟨🟨⬜⬜🟨🟨🟨⬜⬜⬜🟨🟨⬜⬜⬜⬜🟨⬜
+
+
+TRIANGLE_UP:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜⬜⬜🟨⬜⬜⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨⬜⬜⬜⬜⬜
+
+
+TRIANGLE_DOWN:Matrix=Ellipsis
+    ⬜⬜⬜⬜⬜🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜⬜⬜⬜⬜⬜⬜
+
+
+CIRCLE:Matrix=Ellipsis
+    ⬜🟨🟨🟨⬜🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨🟨⬜🟨🟨🟨⬜
+
+
+CLOCKWISE:Matrix=Ellipsis
+    🟨🟨🟨🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜🟨⬜🟨⬜🟨🟨🟨⬜⬜⬜🟨⬜
+
+
+COUNTERCLOCKWISE:Matrix=Ellipsis
+    ⬜🟨🟨🟨🟨⬜🟨⬜⬜🟨⬜🟨⬜⬜🟨🟨🟨🟨⬜🟨⬜🟨⬜⬜⬜
+
+
+TRUE:Matrix=Ellipsis
+    ⬜⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨⬜⬜⬜⬜⬜⬜⬜⬜
+
+
+FALSE:Matrix=Ellipsis
+    🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨⬜⬜⬜🟨⬜🟨⬜🟨⬜⬜⬜🟨

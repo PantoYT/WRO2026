@@ -113,7 +113,18 @@ PYTHON = sys.executable
 HUB_PY_FILE = BASE_DIR / "hub.py"
 
 HUB_NAME = "Espero-bot"
-PYBRICKS_CMD_UUID = "c5f50002-8280-46da-89f4-6d8051e4aeef"
+
+# --- Pybricks BLE protocol (Pybricks Profile v1.3.0+, see pybricks_docs/) ---
+# One characteristic carries both directions:
+#   PC -> hub : write  [command_byte, payload...]
+#   hub -> PC : notify [event_byte, payload...]
+PYBRICKS_CMD_UUID  = "c5f50002-8280-46da-89f4-6d8051e4aeef"  # command/event
+PYBRICKS_CAP_UUID  = "c5f50003-8280-46da-89f4-6d8051e4aeef"  # hub capabilities
+CMD_START_PROGRAM  = 0x01  # start the stored user program
+CMD_WRITE_STDIN    = 0x06  # payload goes to the hub's usys.stdin
+EVT_WRITE_STDOUT   = 0x01  # payload is what the hub printed to stdout
+
+# Legacy Nordic UART Service (Pybricks firmware < 3.3 only)
 NUS_RX_UUID       = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"
 NUS_TX_UUID       = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"
 
@@ -252,6 +263,23 @@ def _ensure_mixer():
         pygame.mixer.init()
 
 _signal_queue: queue.Queue = queue.Queue()
+
+# PC -> hub sender. Set by the BLE thread once connected, None while offline.
+# Any part of the program can call hub_send("SIGNAL") — see hub.py
+# handle_pc_signal() for the accepted commands.
+_hub_send_fn = None
+
+def hub_send(msg: str):
+    """Queue a line for the hub's stdin (sent as '<msg>\\n' over BLE)."""
+    fn = _hub_send_fn
+    if fn is None:
+        print(f"[BLE] (hub offline) dropped: {msg!r}")
+        return
+    try:
+        fn(msg)
+    except Exception as e:
+        print(f"[BLE] hub_send({msg!r}) failed: {e}")
+
 _speaking = False
 _speaking_lock = threading.Lock()
 _tts_stop_event = threading.Event()
@@ -1258,17 +1286,26 @@ class ConversationMode(Mode):
 
     def _get_wav2vec2(self):
         if self._wav2vec2_model is None:
-            try:
-                from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
-                model_id = "cpierse/wav2vec2-large-xlsr-53-esperanto"
-                print(f"[CONV] Loading wav2vec2 Esperanto model...")
-                self._wav2vec2_processor = Wav2Vec2Processor.from_pretrained(model_id)
-                self._wav2vec2_model     = Wav2Vec2ForCTC.from_pretrained(model_id)
-                self._wav2vec2_model.eval()
-                print("[CONV] wav2vec2 esperanto ready.")
-            except Exception as e:
-                print(f"[CONV] wav2vec2 load failed: {e}")
-                self._wav2vec2_model = None
+            # On Windows, torch's c10.dll can transiently fail to init with
+            # WinError 1114 when antivirus is scanning freshly-installed DLLs.
+            # Retry a few times — the DLLs warm up and the next attempt succeeds.
+            for attempt in range(1, 4):
+                try:
+                    from transformers import Wav2Vec2ForCTC, Wav2Vec2Processor
+                    model_id = "cpierse/wav2vec2-large-xlsr-53-esperanto"
+                    print(f"[CONV] Loading wav2vec2 Esperanto model...")
+                    self._wav2vec2_processor = Wav2Vec2Processor.from_pretrained(model_id)
+                    self._wav2vec2_model     = Wav2Vec2ForCTC.from_pretrained(model_id)
+                    self._wav2vec2_model.eval()
+                    print("[CONV] wav2vec2 esperanto ready.")
+                    break
+                except Exception as e:
+                    self._wav2vec2_model = None
+                    if attempt < 3:
+                        print(f"[CONV] wav2vec2 load failed (attempt {attempt}/3): {e} — retrying in 3s...")
+                        time.sleep(3)
+                    else:
+                        print(f"[CONV] wav2vec2 load failed (gave up): {e}")
         return self._wav2vec2_model
 
     def _transcribe_wav2vec2(self, audio: np.ndarray) -> str:
@@ -1299,8 +1336,10 @@ class ConversationMode(Mode):
         try:
             sr     = CFG["audio_sample_rate"]
             maxsec = CFG["audio_record_seconds"]
+            hub_send("CONV_LISTEN")          # hub shows the MIC icon
             print("CONV_LISTEN")
             audio = _record_audio(maxsec, sr)
+            hub_send("CONV_DONE")            # hub returns to the K icon
             ACTIVITY.poke()
             user_text = self._transcribe_wav2vec2(audio)
             if not user_text:
@@ -1600,6 +1639,7 @@ class AttractMode(Mode):
 
     def _run_sequence(self):
         self._speaking = True
+        hub_send("ATTRACT_SPEAK_START")   # hub pauses its attract-lost timer
         print("ATTRACT_SPEAKING")
         try:
             seq_type = self._pick_seq_type()
@@ -1613,6 +1653,7 @@ class AttractMode(Mode):
             print(f"[ATTRACT] Sequence error: {e}")
         finally:
             self._speaking = False
+            hub_send("ATTRACT_SPEAK_DONE")
             print("ATTRACT_IDLE")
 
     def _loop(self):
@@ -1687,6 +1728,7 @@ class AttractMode(Mode):
         text, lang = random.choice(_ATTRACT_GOODBYES)
         _speak(text, lang=lang)
         print("[ATTRACT] Person left — going to sleep.")
+        hub_send("SLEEP")   # put the hub to sleep right after the goodbye
 
     def on_attract_timeout(self):
         self.on_attract_lost()
@@ -1752,6 +1794,11 @@ class ModeManager:
         self.tui_mode_changed.set()
 
     def handle(self, signal: str):
+        if signal.startswith("DEBUG:"):
+            # Hub echoes every received command as DEBUG:RX:<cmd> — this is
+            # the ACK that the PC -> hub direction works.
+            print(f"[hub-ack] {signal}")
+            return
         if signal in ("READY",) or signal.startswith("INFO:") or signal.startswith("WARN:"):
             print(f"[hub-init] {signal}")
             if signal == "READY" and getattr(self, '_ble_send', None):
@@ -1857,31 +1904,45 @@ def _wait_for_input_or_switch(prompt: str) -> str | None:
     The dangling input() thread is daemon so it dies with the process; if the
     user presses Enter after the switch the output is simply discarded.
     """
-    result: list[str | None] = [None]
-    ready  = threading.Event()
+    while True:
+        result: list[str | None] = [None]
+        ready  = threading.Event()
 
-    def _read():
-        try:
-            result[0] = input(prompt)
-        except (EOFError, KeyboardInterrupt):
-            result[0] = ""
-        ready.set()
+        def _read():
+            try:
+                result[0] = input(prompt)
+            except (EOFError, KeyboardInterrupt):
+                result[0] = ""
+            ready.set()
 
-    t = threading.Thread(target=_read, daemon=True)
-    t.start()
+        t = threading.Thread(target=_read, daemon=True)
+        t.start()
 
-    while not ready.is_set():
+        while not ready.is_set():
+            if _tui_mode_switch.is_set():
+                # Print a blank line so the dangling cursor doesn't merge with next header
+                print()
+                return None
+            time.sleep(0.05)
+
+        # Input finished — but check if a switch also happened (race)
         if _tui_mode_switch.is_set():
-            # Print a blank line so the dangling cursor doesn't merge with next header
-            print()
             return None
-        time.sleep(0.05)
 
-    # Input finished — but check if a switch also happened (race)
-    if _tui_mode_switch.is_set():
-        return None
+        raw = result[0] or ""
 
-    return result[0]
+        # Global command, available in every sub-TUI:
+        #   hub <CMD>  — send a raw line to the hub (e.g. "hub MODE:2",
+        #   "hub SLEEP", "hub CONV_LISTEN"). The hub answers DEBUG:RX:<CMD>,
+        #   which is the live proof that two-way BLE works.
+        if raw.strip().lower().startswith("hub "):
+            payload = raw.strip()[4:].strip()
+            if payload:
+                hub_send(payload)
+                print(f"  [HUB] sent: {payload!r} — expect [hub-ack] DEBUG:RX:{payload}")
+            continue
+
+        return raw
 
 
 # ─── FLASHCARDS TUI ───────────────────────────────────────
@@ -2398,6 +2459,8 @@ def _terminal_tui(manager: ModeManager):
     print("\n" + _sep("═"))
     print("  ESPERO-BOT TERMINAL  —  locked-mode TUI")
     print("  Waiting for hub to set mode…")
+    print("  Global command: hub <CMD>  — send a raw line to the hub")
+    print("  (e.g. 'hub MODE:2', 'hub SLEEP' — hub replies DEBUG:RX:<CMD>)")
     print(_sep("═"))
 
     current_tui_idx = -1
@@ -2434,6 +2497,7 @@ def _terminal_tui(manager: ModeManager):
 # ============================================================
 
 async def _hub_main(manager: ModeManager):
+    global _hub_send_fn
     print("[BLE] _hub_main started.")
     attempt = 0
 
@@ -2486,7 +2550,7 @@ async def _hub_main(manager: ModeManager):
                     rx_buf[0] += ch
 
         def handle_pybricks_event(_, data: bytearray):
-            if data[0] == 0x01:
+            if data and data[0] == EVT_WRITE_STDOUT:
                 handle_rx(_, data[1:])
 
         try:
@@ -2503,13 +2567,25 @@ async def _hub_main(manager: ModeManager):
                         if char.uuid.lower() == NUS_RX_UUID.lower():
                             nus_rx_char = char
 
+                # Hub capabilities: first uint16 LE = max characteristic write
+                # size. Stdin payload per write = that minus 1 command byte.
+                max_stdin_chunk = 19
+                try:
+                    caps = await client.read_gatt_char(PYBRICKS_CAP_UUID)
+                    max_stdin_chunk = max(int.from_bytes(caps[0:2], "little") - 1, 1)
+                    print(f"[BLE] Hub capabilities: max stdin chunk = {max_stdin_chunk} B")
+                except Exception as e:
+                    print(f"[BLE] Capabilities read failed ({e}) — using {max_stdin_chunk} B chunks")
+
                 print("[OK] Hub connected. Waiting for signals...")
 
                 try:
-                    await client.write_gatt_char(PYBRICKS_CMD_UUID, b"\x01", response=True)
+                    await client.write_gatt_char(
+                        PYBRICKS_CMD_UUID, bytes([CMD_START_PROGRAM]), response=True
+                    )
                     print("[BLE] Hub program started.")
                 except Exception as e:
-                    print(f"[BLE] Could not auto-start hub program: {e}")
+                    print(f"[BLE] Could not auto-start hub program (already running?): {e}")
 
                 async def _sender():
                     while not disconnected_event.is_set():
@@ -2517,11 +2593,18 @@ async def _hub_main(manager: ModeManager):
                             msg = await asyncio.wait_for(send_queue.get(), timeout=0.1)
                             data = (msg + "\n").encode("utf-8")
                             if nus_rx_char:
+                                # Legacy firmware (< 3.3): raw write to NUS RX
                                 await client.write_gatt_char(nus_rx_char, data, response=False)
                             else:
-                                await client.write_gatt_char(
-                                    PYBRICKS_CMD_UUID, b"\x04" + data, response=False
-                                )
+                                # Pybricks Profile v1.3+: WRITE_STDIN command,
+                                # chunked to the hub's max write size
+                                for i in range(0, len(data), max_stdin_chunk):
+                                    chunk = data[i:i + max_stdin_chunk]
+                                    await client.write_gatt_char(
+                                        PYBRICKS_CMD_UUID,
+                                        bytes([CMD_WRITE_STDIN]) + chunk,
+                                        response=True,
+                                    )
                             print(f"[BLE→hub] {msg!r}")
                         except asyncio.TimeoutError:
                             continue
@@ -2530,6 +2613,7 @@ async def _hub_main(manager: ModeManager):
 
                 sender_task = asyncio.create_task(_sender())
                 manager._ble_send = send_queue.put_nowait
+                _hub_send_fn = send_queue.put_nowait
 
                 while not disconnected_event.is_set():
                     try:
@@ -2574,6 +2658,9 @@ async def _hub_main(manager: ModeManager):
 
         except Exception as e:
             print(f"[ERR] BLE error: {e}")
+        finally:
+            _hub_send_fn = None
+            manager._ble_send = None
 
         await asyncio.sleep(3)
 

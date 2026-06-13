@@ -1,0 +1,366 @@
+URL: https://docs.pybricks.com/en/latest/signaltypes.html
+Tytuł: Signals and Units — pybricks v4.0.0 documentation
+============================================================
+
+
+Signals and Units
+=================
+
+Many commands allow you to specify arguments in terms of well-known physical
+quantities. This page gives an overview of each quantity and its unit.
+
+
+Numbers
+-------
+
+
+Number
+    Numbers can be represented as integers or floating point values:Integers (int) are whole numbers
+like15or-123.Floating point values (float) are decimal
+numbers like3.14or-123.45.If you seeNumberas the argument type, bothintandfloatmay be used.For example,wait(15)andwait(15.75)are both allowed. In most functions,
+however, your input value will be truncated to a whole number anyway. In this
+example, either command makes the program pause for just 15 milliseconds.NoteThe BOOST Move hub doesn’t support floating point numbers due to
+limited system resources. Only integers can be used on that hub.alias ofUnion[int,float]
+
+Numbers can be represented as integers or floating point values:
+
+  - Integers (int) are whole numbers
+like15or-123.
+Integers (int) are whole numbers
+like15or-123.
+
+  - Floating point values (float) are decimal
+numbers like3.14or-123.45.
+Floating point values (float) are decimal
+numbers like3.14or-123.45.
+
+If you seeNumberas the argument type, bothintandfloatmay be used.
+
+For example,wait(15)andwait(15.75)are both allowed. In most functions,
+however, your input value will be truncated to a whole number anyway. In this
+example, either command makes the program pause for just 15 milliseconds.
+
+Note
+
+The BOOST Move hub doesn’t support floating point numbers due to
+limited system resources. Only integers can be used on that hub.
+
+alias ofUnion[int,float]
+
+
+Time
+----
+
+
+time: ms
+~~~~~~~~
+
+All time and duration values are measured in milliseconds (ms).
+
+For example, the duration of motion withrun_time, and the duration
+ofwaitare
+specified in milliseconds.
+
+
+Angles and angular motion
+-------------------------
+
+
+angle: deg
+~~~~~~~~~~
+
+All angles are measured in degrees (deg). One full rotation corresponds to 360
+degrees.
+
+For example, the angle values of aMotoror
+theGyroSensorare expressed in degrees.
+
+
+rotational speed: deg/s
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Rotational speed, orangular velocitydescribes how fast something rotates,
+expressed as the number of degrees per second (deg/s).
+
+For example, the rotational speed values of aMotoror theGyroSensorare expressed in degrees
+per second.
+
+While we recommend working with degrees per second in your programs, you can
+use the following table to convert between commonly used units.
+
+deg/s
+
+rpm
+
+1 deg/s =
+
+1
+
+1/6=0.167
+
+1 rpm =
+
+6
+
+1
+
+
+rotational acceleration: deg/s²
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Rotational acceleration, orangular accelerationdescribes how fast the
+rotational speed changes. This is expressed as the change of the number of
+degrees per second, during one second (deg/s²). This is also commonly written
+as\(deg/s^2\).
+
+For example, you can adjust the rotational acceleration setting of aMotorto change how smoothly or
+how quickly it reaches the constant speed set point.
+
+
+Distance and linear motion
+--------------------------
+
+
+distance: mm
+~~~~~~~~~~~~
+
+Distances are expressed in millimeters (mm) whenever possible.
+
+For example, the distance value of theUltrasonicSensoris measured in millimeters.
+
+While we recommend working with millimeters in your programs, you can use the
+following table to convert between commonly used units.
+
+mm
+
+cm
+
+inch
+
+1 mm =
+
+1
+
+0.1
+
+0.0394
+
+1 cm =
+
+10
+
+1
+
+0.394
+
+1 inch =
+
+25.4
+
+2.54
+
+1
+
+
+dimension: mm
+~~~~~~~~~~~~~
+
+Dimensions are expressed in millimeters (mm), just like
+distances.
+
+For example, the diameter of a wheel is measured in millimeters.
+
+
+speed: mm/s
+~~~~~~~~~~~
+
+Linear speeds are expressed as millimeters per second (mm/s).
+
+For example, the speed of a robotic vehicle is expressed in mm/s.
+
+
+linear acceleration: mm/s²
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Linear acceleration describes how fast the speed changes. This is expressed as
+the change of the millimeters per second, during one second (mm/s²).
+This is also commonly written as\(mm/s^2\).
+
+For example, you can adjust the acceleration setting of aDriveBaseto change how
+smoothly or how quickly it reaches the constant speed set point.
+
+
+Approximate and relative units
+------------------------------
+
+
+percentage: %
+~~~~~~~~~~~~~
+
+Some signals do not have specific units. They range from a minimum (0%) to a
+maximum (100%). Specifics type of percentages arerelative distancesorbrightness.
+
+Another example is the sound volume,
+which ranges from 0% (silent) to 100% (loudest).
+
+
+relative distance: %
+~~~~~~~~~~~~~~~~~~~~
+
+Some distance measurements do not provide an accurate value with a specific
+unit, but they range from very close (0%) to very far (100%). These are
+referred to as relative distances.
+
+For example, the distance value of theInfraredSensoris a relative distance.
+
+
+brightness: %
+~~~~~~~~~~~~~
+
+The perceived brightness of a light is expressed as a percentage. It is 0% when
+the light is off and 100% when the light is fully on. When you choose 50%, this
+means that the light is perceived as approximately half as bright to the human
+eye.
+
+
+Force and torque
+----------------
+
+
+force: N
+~~~~~~~~
+
+Force values are expressed in newtons (N).
+
+While we recommend working with newtons in your programs, you can use the
+following table to convert to and from other units.
+
+mN
+
+N
+
+lbf
+
+1 mN =
+
+1
+
+0.001
+
+\(2.248 \cdot 10^{-4}\)
+
+1 N =
+
+1000
+
+1
+
+0.2248
+
+1 lbf =
+
+4448
+
+4.448
+
+1
+
+
+torque: mNm
+~~~~~~~~~~~
+
+Torque values are expressed in millinewtonmeter (mNm) unless stated otherwise.
+
+
+Electricity
+-----------
+
+
+voltage: mV
+~~~~~~~~~~~
+
+Voltages are expressed in millivolt (mV).
+
+For example, you can check the voltage of the battery.
+
+
+current: mA
+~~~~~~~~~~~
+
+Electrical currents are expressed in milliampere (mA).
+
+For example, you can check the current supplied by the battery.
+
+
+energy: J
+~~~~~~~~~
+
+Stored energy or energy consumption can be expressed in Joules (J).
+
+
+power: mW
+~~~~~~~~~
+
+Power is the rate at which energy is stored or consumed. It is expressed in
+milliwatt (mW).
+
+
+Ambient environment
+-------------------
+
+
+frequency: Hz
+~~~~~~~~~~~~~
+
+Sound frequencies are expressed in Hertz (Hz).
+
+For example, you can choose the frequency of a beep to change the pitch.
+
+
+temperature: °C
+~~~~~~~~~~~~~~~
+
+Temperature is measured in degrees Celsius (°C). To convert to degrees
+Fahrenheit (°F) or Kelvin (K), you can use the following conversion formulas:
+
+\(^{\circ}\kern1pt\!F =\kern1pt^{\circ}\kern1pt\!C \cdot \frac{9}{5} + 32\).
+
+\(K =\kern1pt^{\circ}\kern1pt\!C + 273.15\).
+
+
+hue: deg
+~~~~~~~~
+
+Hue of a color (0-359 degrees).
+
+
+Reference frames
+----------------
+
+The Pybricks module and this documentation use the following conventions:
+
+  - X: Positive means forward. Negative means backward.
+X: Positive means forward. Negative means backward.
+
+  - Y: Positive means to the left. Negative means to the right.
+Y: Positive means to the left. Negative means to the right.
+
+  - Z: Positive means upward. Negative means downward.
+Z: Positive means upward. Negative means downward.
+
+To make sure that all hub measurements (such as acceleration) have the correct
+value and sign, you can specify how the hub is mounted in your creation. This
+adjust the measurements so that it is easy to see how yourrobotis moving,
+rather than how thehubis moving.
+
+For example, the hub may be mounted upside down in your design. If you
+configure the settings as shown inFigure 4, the hub
+measurements will be adjusted accordingly. This way, a positive acceleration
+value in the X direction means that yourrobotaccelerates forward, even
+though thehubaccelerates backward.
+
+Figure 4How to configure thetop_sideandfront_sidesettings for three
+different robot designs. The same technique can be applied to other hubs
+and other creations, by noting which way the top and
+frontSideof the hub are pointing. The example
+on the left is the default configuration.

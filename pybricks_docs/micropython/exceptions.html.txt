@@ -1,0 +1,215 @@
+URL: https://docs.pybricks.com/en/latest/micropython/exceptions.html
+Tytuł: Exceptions and errors — pybricks v4.0.0 documentation
+============================================================
+
+
+Exceptions and errors
+=====================
+
+This section lists all available exceptions in alphabetical order.
+
+
+classArithmeticError
+    The base class for those built-in exceptions that are raised for various
+arithmetic errors.
+
+The base class for those built-in exceptions that are raised for various
+arithmetic errors.
+
+
+classAssertionError
+    Raised when an assert statement fails.
+
+Raised when an assert statement fails.
+
+
+classAttributeError
+    Raised when an attribute reference or assignment fails.
+
+Raised when an attribute reference or assignment fails.
+
+
+classBaseException
+    The base class for all built-in exceptions.It is not meant to be directly inherited by user-defined classes (for that,
+useException).
+
+The base class for all built-in exceptions.
+
+It is not meant to be directly inherited by user-defined classes (for that,
+useException).
+
+
+classEOFError
+    Raised when theinput()function hits an end-of-file condition (EOF)
+without reading any data.
+
+Raised when theinput()function hits an end-of-file condition (EOF)
+without reading any data.
+
+
+classException
+    All built-in exceptions are derived from this class.All user-defined exceptions should also be derived from this class.
+
+All built-in exceptions are derived from this class.
+
+All user-defined exceptions should also be derived from this class.
+
+
+classGeneratorExit
+    Raised when a generator or coroutine is closed.
+
+Raised when a generator or coroutine is closed.
+
+
+classImportError
+    Raised when theimportstatement is unable to load a module.
+
+Raised when theimportstatement is unable to load a module.
+
+
+classIndentationError
+    Base class for syntax errors related to incorrect indentation.
+
+Base class for syntax errors related to incorrect indentation.
+
+
+classIndexError
+    Raised when a sequence subscript is out of range.
+
+Raised when a sequence subscript is out of range.
+
+
+classKeyboardInterrupt
+    Raised when the user hits the interrupt key (normallyCtrlC).
+
+Raised when the user hits the interrupt key (normallyCtrlC).
+
+
+classKeyError
+    Raised when a mapping (dictionary) key is not found in the set of existing keys.
+
+Raised when a mapping (dictionary) key is not found in the set of existing keys.
+
+
+classLookupError
+    The base class for the exceptions that are raised when a key or index used
+on a mapping or sequence is invalid.
+
+The base class for the exceptions that are raised when a key or index used
+on a mapping or sequence is invalid.
+
+
+classMemoryError
+    Raised when an operation runs out of memory.
+
+Raised when an operation runs out of memory.
+
+
+classNameError
+    Raised when a local or global name is not found.
+
+Raised when a local or global name is not found.
+
+
+classNotImplementedError
+    In user defined base classes, abstract methods should raise this exception
+when they require derived classes to override the method, or while the
+class is being developed to indicate that the real implementation still
+needs to be added.
+
+In user defined base classes, abstract methods should raise this exception
+when they require derived classes to override the method, or while the
+class is being developed to indicate that the real implementation still
+needs to be added.
+
+
+classOSError
+    This exception is raised by the firmware, which is
+the Operating System that runs on the hub.
+Forexample, it
+raises anOSErrorif you callMotor(Port.A)when there is no
+motor on port A.errno:intSpecifies which kind ofOSErroroccurred, as listed in theuerrnomodule.
+
+This exception is raised by the firmware, which is
+the Operating System that runs on the hub.
+Forexample, it
+raises anOSErrorif you callMotor(Port.A)when there is no
+motor on port A.
+
+
+errno:int
+    Specifies which kind ofOSErroroccurred, as listed in theuerrnomodule.
+
+Specifies which kind ofOSErroroccurred, as listed in theuerrnomodule.
+
+
+classOverflowError
+    Raised when the result of an arithmetic operation is too large to be represented.
+
+Raised when the result of an arithmetic operation is too large to be represented.
+
+
+classRuntimeError
+    Raised when an error is detected that doesn’t fall in any of the other categories.The associated value is a string indicating what precisely went wrong.
+
+Raised when an error is detected that doesn’t fall in any of the other categories.
+
+The associated value is a string indicating what precisely went wrong.
+
+
+classStopIteration
+    Raised by built-in functionnext()and an iterator’s__next__()method to signal that there are no further items produced by the iterator.Generator functions should return instead of raising this directly.
+
+Raised by built-in functionnext()and an iterator’s__next__()method to signal that there are no further items produced by the iterator.
+
+Generator functions should return instead of raising this directly.
+
+
+classSyntaxError
+    Raised when the parser encounters a syntax error.
+
+Raised when the parser encounters a syntax error.
+
+
+classSystemExit
+    Raised when you press the stop button on the hub or in the Pybricks Code app.
+
+Raised when you press the stop button on the hub or in the Pybricks Code app.
+
+
+classTypeError
+    Raised when an operation or function is applied to an object of inappropriate type.
+
+Raised when an operation or function is applied to an object of inappropriate type.
+
+
+classValueError
+    Raised when an operation or function receives an argument that has the right
+type but an inappropriate value. This is used when the situation is
+not described by a more precise exception such asIndexError.
+
+Raised when an operation or function receives an argument that has the right
+type but an inappropriate value. This is used when the situation is
+not described by a more precise exception such asIndexError.
+
+
+classZeroDivisionError
+    Raised when the second argument of a division or modulo operation is zero.
+
+Raised when the second argument of a division or modulo operation is zero.
+
+
+Examples
+--------
+
+
+Debugging in the REPL terminal
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Running code when the stop button is pressed
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Detecting devices usingOSError
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

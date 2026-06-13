@@ -1,0 +1,213 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/duplotrain.html
+Tytuł: Duplo Train — pybricks v4.0.0 documentation
+============================================================
+
+
+Duplo Train
+===========
+
+
+classDuploTrain(name=None,timeout=10000,connect=True)
+    LEGO® Duplo Train hub (sets 10874, 10875, 10427, 10428 similar).The Duplo Hub cannot be updated, so you cannot install Pybricks on it.
+However, you can connect a supported hub running Pybricks to the Duplo Hub
+and control the train that way.You can you control the motor, sound, and headlights, and read the speed
+and color sensors.Parameters:name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Duplo Train hub it finds.timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.Raises:OSError– If the connection attempt fails or times out.awaitconnect()Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.awaitdisconnect()Disconnects the device.Raises:OSError– If disconnecting fails.name(name)name()→strSets or gets the Bluetooth name of the device.Parameters:name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.Raises:OSError– If the device is not connected.awaitdrive(speed)Drives the train motor at the given speed.Parameters:speed(int) – Speed as a percentage (-100 to 100). Negative values
+drive in reverse.Raises:OSError– If the hub is not connected.awaitheadlights(color)Sets the color of the train headlights. Not all colors are supported,
+so the hub will choose the closest color it can produce.Parameters:color(Color) – Color of the headlights.Raises:OSError– If the hub is not connected.awaitsound(sound)Plays one of the built-in train sounds.For the newer (dark blue) train, we have not yet figured out the right
+sound codes. Please open a discussion or pull request if you know how
+to do it. Thanks!Parameters:sound(str) – Name of the sound to play. Choose from"brake","depart","water","horn",
+or"steam".Raises:OSError– If the hub is not connected.speed()→int:%Reads the train speed from the latest received notification.Returns:Speed as a percentage (-100 to 100).Raises:OSError– If the hub is not connected.color()→ColorReads the color detected by the color sensor from the latest received
+notification.Returns:Detected color.Raises:OSError– If the hub is not connected.
+
+LEGO® Duplo Train hub (sets 10874, 10875, 10427, 10428 similar).
+
+The Duplo Hub cannot be updated, so you cannot install Pybricks on it.
+However, you can connect a supported hub running Pybricks to the Duplo Hub
+and control the train that way.
+
+You can you control the motor, sound, and headlights, and read the speed
+and color sensors.
+
+
+Parameters:
+    name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Duplo Train hub it finds.timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+  - name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Duplo Train hub it finds.
+name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Duplo Train hub it finds.
+
+  - timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.
+timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.
+
+  - connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+awaitconnect()
+    Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.
+
+Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+awaitdisconnect()
+    Disconnects the device.Raises:OSError– If disconnecting fails.
+
+Disconnects the device.
+
+
+Raises:
+    OSError– If disconnecting fails.
+
+OSError– If disconnecting fails.
+
+
+name(name)
+
+name()→str
+    Sets or gets the Bluetooth name of the device.Parameters:name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.Raises:OSError– If the device is not connected.
+
+Sets or gets the Bluetooth name of the device.
+
+
+Parameters:
+    name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.
+
+name(str) – New Bluetooth name of the device. If no name is given,
+this method returns the current name.
+
+
+Raises:
+    OSError– If the device is not connected.
+
+OSError– If the device is not connected.
+
+
+awaitdrive(speed)
+    Drives the train motor at the given speed.Parameters:speed(int) – Speed as a percentage (-100 to 100). Negative values
+drive in reverse.Raises:OSError– If the hub is not connected.
+
+Drives the train motor at the given speed.
+
+
+Parameters:
+    speed(int) – Speed as a percentage (-100 to 100). Negative values
+drive in reverse.
+
+speed(int) – Speed as a percentage (-100 to 100). Negative values
+drive in reverse.
+
+
+Raises:
+    OSError– If the hub is not connected.
+
+OSError– If the hub is not connected.
+
+
+awaitheadlights(color)
+    Sets the color of the train headlights. Not all colors are supported,
+so the hub will choose the closest color it can produce.Parameters:color(Color) – Color of the headlights.Raises:OSError– If the hub is not connected.
+
+Sets the color of the train headlights. Not all colors are supported,
+so the hub will choose the closest color it can produce.
+
+
+Parameters:
+    color(Color) – Color of the headlights.
+
+color(Color) – Color of the headlights.
+
+
+Raises:
+    OSError– If the hub is not connected.
+
+OSError– If the hub is not connected.
+
+
+awaitsound(sound)
+    Plays one of the built-in train sounds.For the newer (dark blue) train, we have not yet figured out the right
+sound codes. Please open a discussion or pull request if you know how
+to do it. Thanks!Parameters:sound(str) – Name of the sound to play. Choose from"brake","depart","water","horn",
+or"steam".Raises:OSError– If the hub is not connected.
+
+Plays one of the built-in train sounds.
+
+For the newer (dark blue) train, we have not yet figured out the right
+sound codes. Please open a discussion or pull request if you know how
+to do it. Thanks!
+
+
+Parameters:
+    sound(str) – Name of the sound to play. Choose from"brake","depart","water","horn",
+or"steam".
+
+sound(str) – Name of the sound to play. Choose from"brake","depart","water","horn",
+or"steam".
+
+
+Raises:
+    OSError– If the hub is not connected.
+
+OSError– If the hub is not connected.
+
+
+speed()→int:%
+    Reads the train speed from the latest received notification.Returns:Speed as a percentage (-100 to 100).Raises:OSError– If the hub is not connected.
+
+Reads the train speed from the latest received notification.
+
+
+Returns:
+    Speed as a percentage (-100 to 100).
+
+Speed as a percentage (-100 to 100).
+
+
+Raises:
+    OSError– If the hub is not connected.
+
+OSError– If the hub is not connected.
+
+
+color()→Color
+    Reads the color detected by the color sensor from the latest received
+notification.Returns:Detected color.Raises:OSError– If the hub is not connected.
+
+Reads the color detected by the color sensor from the latest received
+notification.
+
+
+Returns:
+    Detected color.
+
+Detected color.
+
+
+Raises:
+    OSError– If the hub is not connected.
+
+OSError– If the hub is not connected.

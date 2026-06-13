@@ -1,0 +1,167 @@
+URL: https://docs.pybricks.com/en/latest/micropython/urandom.html
+Tytuł: urandom – Pseudo-random numbers — pybricks v4.0.0 documentation
+============================================================
+
+
+urandom– Pseudo-random numbers
+==============================
+
+This module implements pseudo-random number generators.
+
+All functions in this module should be used with positional arguments. Keyword
+arguments are not supported.
+
+Basic random numbers
+
+
+randint(a,b)→int
+    Gets a random integer\(N\)satisfying\(a \leq N \leq b\).Parameters:a(int) – Lowest value. This valueisincluded in the range.b(int) – Highest value. This valueisincluded in the range.Returns:The random integer.
+
+Gets a random integer\(N\)satisfying\(a \leq N \leq b\).
+
+
+Parameters:
+    a(int) – Lowest value. This valueisincluded in the range.b(int) – Highest value. This valueisincluded in the range.
+
+  - a(int) – Lowest value. This valueisincluded in the range.
+a(int) – Lowest value. This valueisincluded in the range.
+
+  - b(int) – Highest value. This valueisincluded in the range.
+b(int) – Highest value. This valueisincluded in the range.
+
+
+Returns:
+    The random integer.
+
+The random integer.
+
+
+random()→float
+    Gets a random value\(x\)satisfying\(0 \leq x < 1\).Returns:The random value.
+
+Gets a random value\(x\)satisfying\(0 \leq x < 1\).
+
+
+Returns:
+    The random value.
+
+The random value.
+
+Random numbers from a range
+
+
+getrandbits(k)→int
+    Gets a random integer\(N\)satisfying\(0 \leq N < 2^{\text{k}}\).Parameters:k(int) – How many bits to use for the result.
+
+Gets a random integer\(N\)satisfying\(0 \leq N < 2^{\text{k}}\).
+
+
+Parameters:
+    k(int) – How many bits to use for the result.
+
+k(int) – How many bits to use for the result.
+
+
+randrange(stop)→int
+
+randrange(start,stop)→int
+
+randrange(start,stop,step)→int
+    Returns a randomly selected element fromrange(start,stop,step).For example,randrange(1,7,2)returns random numbers from1up to
+(but excluding)7, in increments of2. In other words, it
+returns1,3, or5.Parameters:start(int) – Lowest value. Defaults to0if only one argument is given.stop(int) – Highest value. This value isnotincluded in the range.step(int) – Increment between values. Defaults to1if only one
+or two arguments are given.Returns:The random number.
+
+Returns a randomly selected element fromrange(start,stop,step).
+
+For example,randrange(1,7,2)returns random numbers from1up to
+(but excluding)7, in increments of2. In other words, it
+returns1,3, or5.
+
+
+Parameters:
+    start(int) – Lowest value. Defaults to0if only one argument is given.stop(int) – Highest value. This value isnotincluded in the range.step(int) – Increment between values. Defaults to1if only one
+or two arguments are given.
+
+  - start(int) – Lowest value. Defaults to0if only one argument is given.
+start(int) – Lowest value. Defaults to0if only one argument is given.
+
+  - stop(int) – Highest value. This value isnotincluded in the range.
+stop(int) – Highest value. This value isnotincluded in the range.
+
+  - step(int) – Increment between values. Defaults to1if only one
+or two arguments are given.
+step(int) – Increment between values. Defaults to1if only one
+or two arguments are given.
+
+
+Returns:
+    The random number.
+
+The random number.
+
+
+uniform(a,b)→float
+    Gets a random floating point value\(x\)satisfying\(a \leq x \leq b\).Parameters:a(float) – Lowest value.b(float) – Highest value.Returns:The random value.
+
+Gets a random floating point value\(x\)satisfying\(a \leq x \leq b\).
+
+
+Parameters:
+    a(float) – Lowest value.b(float) – Highest value.
+
+  - a(float) – Lowest value.
+a(float) – Lowest value.
+
+  - b(float) – Highest value.
+b(float) – Highest value.
+
+
+Returns:
+    The random value.
+
+The random value.
+
+Random elements from a sequence
+
+
+choice(sequence)→Any
+    Gets a random element from a sequence such as a tuple or list.Parameters:sequence– Sequence from which to select a random element.Returns:The randomly selected element.Raises:IndexError– If the sequence is empty.
+
+Gets a random element from a sequence such as a tuple or list.
+
+
+Parameters:
+    sequence– Sequence from which to select a random element.
+
+sequence– Sequence from which to select a random element.
+
+
+Returns:
+    The randomly selected element.
+
+The randomly selected element.
+
+
+Raises:
+    IndexError– If the sequence is empty.
+
+IndexError– If the sequence is empty.
+
+Updating the random seed
+
+
+seed(value=None)
+    Initializes the random number generator.This gets called when the module is imported, so normally you do
+not need to call this.Parameters:value– Seed value. When usingNone, the system timer will be used.
+
+Initializes the random number generator.
+
+This gets called when the module is imported, so normally you do
+not need to call this.
+
+
+Parameters:
+    value– Seed value. When usingNone, the system timer will be used.
+
+value– Seed value. When usingNone, the system timer will be used.

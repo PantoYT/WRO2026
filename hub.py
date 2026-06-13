@@ -263,26 +263,33 @@ def emit(event, value=None):
 # SERIAL INPUT — non-blocking
 # ============================================================
 
+_pending_lines = []
+
 def poll_serial():
+    """Drain everything waiting on stdin, return one complete line (or None).
+    Call repeatedly until it returns None to process all buffered lines."""
     global _serial_buf
-    if not _keyboard.poll(0):
-        return None
     try:
-        ch = stdin.buffer.read(1)
-        if not ch:
-            return None
-        ch = ch.decode("utf-8", "ignore")
-        if ch == "\n":
-            line = _serial_buf.strip()
-            _serial_buf = ""
-            return line if line else None
-        _serial_buf += ch
+        while _keyboard.poll(0):
+            ch = stdin.buffer.read(1)
+            if not ch:
+                break
+            ch = ch.decode("utf-8", "ignore")
+            if ch == "\n":
+                line = _serial_buf.strip()
+                _serial_buf = ""
+                if line:
+                    _pending_lines.append(line)
+            else:
+                _serial_buf += ch
     except Exception:
         pass
+    if _pending_lines:
+        return _pending_lines.pop(0)
     return None
 
 def handle_pc_signal(line):
-    global conv_listening
+    global conv_listening, attract_speaking, sleeping, in_menu
 
     emit("DEBUG", f"RX:{line}")
 
@@ -296,22 +303,30 @@ def handle_pc_signal(line):
             draw_conv_idle()
 
     elif line == "ATTRACT_SPEAK_START":
-        global attract_speaking
         attract_speaking = True
 
     elif line == "ATTRACT_SPEAK_DONE":
-        global attract_speaking
         attract_speaking = False
 
     elif line.startswith("MODE:"):
         try:
-            idx = int(line.split(":")[1])
-            enter_mode(idx)
+            idx = int(line.split(":")[1]) % NUM_MODES
         except Exception:
-            pass
+            return
+        if sleeping:
+            # Wake quietly into the requested mode (no attract detour)
+            sleeping = False
+            play_wake_sound()
+            _motor_home()
+        elif idx == current_mode and not in_menu:
+            # Echo of our own MODE: emit — already there, don't re-enter
+            return
+        in_menu = False
+        enter_mode(idx)
 
     elif line == "SLEEP":
-        enter_sleep()
+        if not sleeping:
+            enter_sleep()
 
     elif line == "WAKE":
         if sleeping:
@@ -644,8 +659,10 @@ scan_tick = 0
 while True:
     _inc_tick()
 
-    line = poll_serial()
-    if line:
+    while True:
+        line = poll_serial()
+        if line is None:
+            break
         handle_pc_signal(line)
 
     # --- SLEEP ---

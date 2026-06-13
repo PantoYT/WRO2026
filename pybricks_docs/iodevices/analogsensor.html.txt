@@ -1,0 +1,117 @@
+URL: https://docs.pybricks.com/en/latest/iodevices/analogsensor.html
+Tytuł: Analog Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Analog Sensor
+=============
+
+
+classAnalogSensor(port,custom=False)
+    Generic or custom analog sensor.Parameters:port(Port) – Port to which the sensor is connected.custom(bool) – Set toTrueif you are using a custom analog
+sensor.Raises:OSError– If no standard LEGO analog sensor is
+    detected on the port. Only applies ifcustom=False.voltage()→int:mVMeasures analog voltage.Returns:Analog voltage.resistance()→int:ΩMeasures resistance.This value is only meaningful if the analog device is a passive load
+such as a resistor or thermistor. It is calculated assuming a 10 kΩ
+internal pull-up resistor forming a voltage divider.If the circuit is open (no load connected), the maximum integer value
+is returned.Returns:Resistance of the analog device, or the maximum integer value
+if the circuit is open.active()Sets sensor to active mode. This sets pin 5 of the sensor
+port tohigh.This is used in some analog
+sensors to control a switch. For example, if you use the NXT Light
+Sensor as a custom analog sensor, this method will turn the light on.
+From then on,voltage()returns the raw reflected light value.passive()Sets sensor to passive mode. This sets pin 5 of the sensor
+port tolow.This is used in some analog
+sensors to control a switch. For example, if you use the NXT Light
+Sensor as a custom analog sensor, this method will turn the light off.
+From then on,voltage()returns the raw ambient light value.
+
+Generic or custom analog sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.custom(bool) – Set toTrueif you are using a custom analog
+sensor.
+
+  - port(Port) – Port to which the sensor is connected.
+port(Port) – Port to which the sensor is connected.
+
+  - custom(bool) – Set toTrueif you are using a custom analog
+sensor.
+custom(bool) – Set toTrueif you are using a custom analog
+sensor.
+
+
+Raises:
+    OSError– If no standard LEGO analog sensor is
+    detected on the port. Only applies ifcustom=False.
+
+OSError– If no standard LEGO analog sensor is
+    detected on the port. Only applies ifcustom=False.
+
+
+voltage()→int:mV
+    Measures analog voltage.Returns:Analog voltage.
+
+Measures analog voltage.
+
+
+Returns:
+    Analog voltage.
+
+Analog voltage.
+
+
+resistance()→int:Ω
+    Measures resistance.This value is only meaningful if the analog device is a passive load
+such as a resistor or thermistor. It is calculated assuming a 10 kΩ
+internal pull-up resistor forming a voltage divider.If the circuit is open (no load connected), the maximum integer value
+is returned.Returns:Resistance of the analog device, or the maximum integer value
+if the circuit is open.
+
+Measures resistance.
+
+This value is only meaningful if the analog device is a passive load
+such as a resistor or thermistor. It is calculated assuming a 10 kΩ
+internal pull-up resistor forming a voltage divider.
+
+If the circuit is open (no load connected), the maximum integer value
+is returned.
+
+
+Returns:
+    Resistance of the analog device, or the maximum integer value
+if the circuit is open.
+
+Resistance of the analog device, or the maximum integer value
+if the circuit is open.
+
+
+active()
+    Sets sensor to active mode. This sets pin 5 of the sensor
+port tohigh.This is used in some analog
+sensors to control a switch. For example, if you use the NXT Light
+Sensor as a custom analog sensor, this method will turn the light on.
+From then on,voltage()returns the raw reflected light value.
+
+Sets sensor to active mode. This sets pin 5 of the sensor
+port tohigh.
+
+This is used in some analog
+sensors to control a switch. For example, if you use the NXT Light
+Sensor as a custom analog sensor, this method will turn the light on.
+From then on,voltage()returns the raw reflected light value.
+
+
+passive()
+    Sets sensor to passive mode. This sets pin 5 of the sensor
+port tolow.This is used in some analog
+sensors to control a switch. For example, if you use the NXT Light
+Sensor as a custom analog sensor, this method will turn the light off.
+From then on,voltage()returns the raw ambient light value.
+
+Sets sensor to passive mode. This sets pin 5 of the sensor
+port tolow.
+
+This is used in some analog
+sensors to control a switch. For example, if you use the NXT Light
+Sensor as a custom analog sensor, this method will turn the light off.
+From then on,voltage()returns the raw ambient light value.

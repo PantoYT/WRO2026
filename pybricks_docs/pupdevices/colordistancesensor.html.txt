@@ -1,0 +1,203 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/colordistancesensor.html
+Tytuł: Color and Distance Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Color and Distance Sensor
+=========================
+
+
+classColorDistanceSensor(port)
+    LEGO® Powered Up Color and Distance Sensor.Parameters:port(Port) – Port to which the sensor is connected.sensorcolorawaitcolor()→ColorScans the color of a surface.You choose which colors are detected using thedetectable_colors()method. By default, it detectsColor.RED,Color.YELLOW,Color.GREEN,Color.BLUE,Color.WHITE, orColor.NONE.Returns:Detected color.sensorreflected lightawaitreflection()→int:%Measures how much a surface reflects the light emitted by the
+sensor.Returns:Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).sensorambient lightawaitambient()→int:%Measures the ambient light intensity.Returns:Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).sensordistanceawaitdistance()→int:%Measures the relative distance between the sensor and an object
+using infrared light.Returns:Distance ranging from 0% (closest) to 100% (farthest).sensorhsvawaithsv()→ColorScans the color of a surface.This method is similar tocolor(), but it gives the full range
+of hue, saturation and brightness values, instead of rounding it to the
+nearest detectable color.Returns:Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).detectable_colors(colors)detectable_colors()→Collection[Color]Configures which colors thecolor()method should detect.Specify only colors that you wish to detect in your application.
+This way, the full-color measurements are rounded to the nearest
+desired color, and other colors are ignored. This improves reliability.If you give no arguments, the currently chosen colors will be returned.When coding with blocks, this is configured in the sensor setup block.Parameters:colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.Built-in lightThis sensor has a built-in light. You can make it red, green, blue, or turn
+it off. If you use the sensor to measure something afterwards, the light
+automatically turns back on at the default color for that sensing method.redsensorlightonawaitlight.on(color)Turns on the light at the specified color.Parameters:color(Color) – Color of the light.sensorlightoffawaitlight.off()Turns off the light.
+
+LEGO® Powered Up Color and Distance Sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.
+
+port(Port) – Port to which the sensor is connected.
+
+
+awaitcolor()→Color
+    Scans the color of a surface.You choose which colors are detected using thedetectable_colors()method. By default, it detectsColor.RED,Color.YELLOW,Color.GREEN,Color.BLUE,Color.WHITE, orColor.NONE.Returns:Detected color.
+
+Scans the color of a surface.
+
+You choose which colors are detected using thedetectable_colors()method. By default, it detectsColor.RED,Color.YELLOW,Color.GREEN,Color.BLUE,Color.WHITE, orColor.NONE.
+
+
+Returns:
+    Detected color.
+
+Detected color.
+
+
+awaitreflection()→int:%
+    Measures how much a surface reflects the light emitted by the
+sensor.Returns:Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+Measures how much a surface reflects the light emitted by the
+sensor.
+
+
+Returns:
+    Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+Measured reflection, ranging from 0% (no reflection) to
+100% (high reflection).
+
+
+awaitambient()→int:%
+    Measures the ambient light intensity.Returns:Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).
+
+Measures the ambient light intensity.
+
+
+Returns:
+    Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).
+
+Ambient light intensity, ranging from 0% (dark)
+to 100% (bright).
+
+
+awaitdistance()→int:%
+    Measures the relative distance between the sensor and an object
+using infrared light.Returns:Distance ranging from 0% (closest) to 100% (farthest).
+
+Measures the relative distance between the sensor and an object
+using infrared light.
+
+
+Returns:
+    Distance ranging from 0% (closest) to 100% (farthest).
+
+Distance ranging from 0% (closest) to 100% (farthest).
+
+
+awaithsv()→Color
+    Scans the color of a surface.This method is similar tocolor(), but it gives the full range
+of hue, saturation and brightness values, instead of rounding it to the
+nearest detectable color.Returns:Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).
+
+Scans the color of a surface.
+
+This method is similar tocolor(), but it gives the full range
+of hue, saturation and brightness values, instead of rounding it to the
+nearest detectable color.
+
+
+Returns:
+    Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).
+
+Measured color. The color is described by a hue (0–359), a
+saturation (0–100), and a brightness value (0–100).
+
+
+detectable_colors(colors)
+
+detectable_colors()→Collection[Color]
+    Configures which colors thecolor()method should detect.Specify only colors that you wish to detect in your application.
+This way, the full-color measurements are rounded to the nearest
+desired color, and other colors are ignored. This improves reliability.If you give no arguments, the currently chosen colors will be returned.When coding with blocks, this is configured in the sensor setup block.Parameters:colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.
+
+Configures which colors thecolor()method should detect.
+
+Specify only colors that you wish to detect in your application.
+This way, the full-color measurements are rounded to the nearest
+desired color, and other colors are ignored. This improves reliability.
+
+If you give no arguments, the currently chosen colors will be returned.
+
+When coding with blocks, this is configured in the sensor setup block.
+
+
+Parameters:
+    colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.
+
+colors(listortuple) – List ofColorobjects: the colors that you want to detect. You can pick
+standard colors such asColor.MAGENTA, or provide your
+own colors likeColor(h=348,s=96,v=40)for even
+better results. You measure your own colors with thehsv()method.
+
+Built-in light
+
+This sensor has a built-in light. You can make it red, green, blue, or turn
+it off. If you use the sensor to measure something afterwards, the light
+automatically turns back on at the default color for that sensing method.
+
+
+awaitlight.on(color)
+    Turns on the light at the specified color.Parameters:color(Color) – Color of the light.
+
+Turns on the light at the specified color.
+
+
+Parameters:
+    color(Color) – Color of the light.
+
+color(Color) – Color of the light.
+
+
+awaitlight.off()
+    Turns off the light.
+
+Turns off the light.
+
+
+Examples
+--------
+
+
+Measuring color
+~~~~~~~~~~~~~~~
+
+
+Waiting for a color
+~~~~~~~~~~~~~~~~~~~
+
+
+Measuring distance and blinking the light
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Reading hue, saturation, value
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing the detectable colors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, the sensor is configured to detect red, yellow, green,
+blue, white, or no color, which suits many applications.
+
+For better results in your application, you can measure your desired
+colors in advance, and tell the sensor to look only for those colors.
+Be sure to measure them at thesame distance and light conditionsas in your final application. Then you’ll get very accurate results
+even for colors that are otherwise hard to detect.

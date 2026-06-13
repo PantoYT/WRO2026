@@ -1,0 +1,20 @@
+URL: https://docs.pybricks.com/en/latest/hubs/index.html
+Tytuł: hubs – Built-in hub functions — pybricks v4.0.0 documentation
+============================================================
+
+
+hubs– Built-in hub functions
+============================
+
+
+classMoveHub
+
+classCityHub
+
+classTechnicHub
+
+classInventorHub
+
+classPrimeHub
+
+classEssentialHub

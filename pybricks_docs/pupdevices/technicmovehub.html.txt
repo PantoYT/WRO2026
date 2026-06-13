@@ -1,0 +1,107 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/technicmovehub.html
+Tytuł: Technic Move Hub — pybricks v4.0.0 documentation
+============================================================
+
+
+Technic Move Hub
+================
+
+
+classTechnicMoveHub(name=None,timeout=10000,connect=True)
+    LEGO® Technic Move Hub (set 42176, 42214, 42239).This newer hub is found in the latest Technic Control+ sets. It requires
+a special password to update the firmware, so Pybricks cannot be installed
+on it. However, you can connect a supported hub running Pybricks to it
+and control its motors that way.Parameters:name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Technic Move Hub it finds.timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.Raises:OSError– If the connection attempt fails or times out.awaitconnect()Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.awaitdisconnect()Disconnects the device.Raises:OSError– If disconnecting fails.awaitdrive(speed,steering)Drives the hub’s motor outputs at the given speed and steering.Parameters:speed(int) – Drive speed as a percentage (-100 to 100).steering(int) – Steering as a percentage (-100 to 100). Positive
+values steer right. Values exceeding ±97 are clamped to ±97
+to avoid pushing against the mechanical constraint.Raises:OSError– If the hub is not connected.
+
+LEGO® Technic Move Hub (set 42176, 42214, 42239).
+
+This newer hub is found in the latest Technic Control+ sets. It requires
+a special password to update the firmware, so Pybricks cannot be installed
+on it. However, you can connect a supported hub running Pybricks to it
+and control its motors that way.
+
+
+Parameters:
+    name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Technic Move Hub it finds.timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+  - name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Technic Move Hub it finds.
+name(str) – Bluetooth name of the hub. If no name is given,
+the hub connects to the first Technic Move Hub it finds.
+
+  - timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.
+timeout(Number,ms) – How long to search for the hub.
+ChooseNoneto wait indefinitely.
+
+  - connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+connect(bool) – ChooseFalseto skip connecting.connect()can be called later to connect.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+awaitconnect()
+    Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.Raises:OSError– If the connection attempt fails or times out.
+
+Connects to the device. Only needed if you disconnected or initialized
+withconnect=False.
+
+
+Raises:
+    OSError– If the connection attempt fails or times out.
+
+OSError– If the connection attempt fails or times out.
+
+
+awaitdisconnect()
+    Disconnects the device.Raises:OSError– If disconnecting fails.
+
+Disconnects the device.
+
+
+Raises:
+    OSError– If disconnecting fails.
+
+OSError– If disconnecting fails.
+
+
+awaitdrive(speed,steering)
+    Drives the hub’s motor outputs at the given speed and steering.Parameters:speed(int) – Drive speed as a percentage (-100 to 100).steering(int) – Steering as a percentage (-100 to 100). Positive
+values steer right. Values exceeding ±97 are clamped to ±97
+to avoid pushing against the mechanical constraint.Raises:OSError– If the hub is not connected.
+
+Drives the hub’s motor outputs at the given speed and steering.
+
+
+Parameters:
+    speed(int) – Drive speed as a percentage (-100 to 100).steering(int) – Steering as a percentage (-100 to 100). Positive
+values steer right. Values exceeding ±97 are clamped to ±97
+to avoid pushing against the mechanical constraint.
+
+  - speed(int) – Drive speed as a percentage (-100 to 100).
+speed(int) – Drive speed as a percentage (-100 to 100).
+
+  - steering(int) – Steering as a percentage (-100 to 100). Positive
+values steer right. Values exceeding ±97 are clamped to ±97
+to avoid pushing against the mechanical constraint.
+steering(int) – Steering as a percentage (-100 to 100). Positive
+values steer right. Values exceeding ±97 are clamped to ±97
+to avoid pushing against the mechanical constraint.
+
+
+Raises:
+    OSError– If the hub is not connected.
+
+OSError– If the hub is not connected.

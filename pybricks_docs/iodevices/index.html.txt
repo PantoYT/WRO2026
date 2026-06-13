@@ -1,0 +1,38 @@
+URL: https://docs.pybricks.com/en/latest/iodevices/index.html
+Tytuł: iodevices – Custom devices — pybricks v4.0.0 documentation
+============================================================
+
+
+iodevices– Custom devices
+=========================
+
+This module has classes for generic and custom input/output devices.
+
+
+Wireless devices
+----------------
+
+
+classXboxController
+
+LEGO protocol devices
+---------------------
+
+
+classLWP3Device
+
+classLUMPDevice
+
+classPUPDevice
+
+Generic protocols
+-----------------
+
+
+classUARTDevice
+
+classI2CDevice
+
+classAnalogSensor
+
+classDCMotor

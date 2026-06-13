@@ -1,0 +1,348 @@
+URL: https://docs.pybricks.com/en/latest/hubs/cityhub.html
+Tytuł: City Hub — pybricks v4.0.0 documentation
+============================================================
+
+
+City Hub
+========
+
+
+classCityHub
+    LEGO® City Hub.Using the hub status lightredcity hublightonlight.on(color)Turns on the light at the specified color.Parameters:color(Color) – Color of the light.city hublightofflight.off()Turns off the light.light.blink(color,durations)Blinks the light at a given color by turning it on and off for given
+durations.The light keeps blinking indefinitely while the rest of your
+program keeps running.This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.Parameters:color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].light.animate(colors,interval)Animates the light with a sequence of colors, shown one by
+one for the given interval.The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.Parameters:colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.Using the batterycity hubbatteryvoltagebattery.voltage()→int:mVGets the voltage of the battery.Returns:Battery voltage.city hubbatterycurrentbattery.current()→int:mAGets the current supplied by the battery.Returns:Battery current.Button and system controlcity hubcenteris pressedbuttons.pressed()→Set[Button]Checks which buttons are currently pressed.Returns:Set of pressed buttons.system.info()→dictGets information about the hub as a dictionary with the following keys:"name": The hub name. This is the name you see when connecting
+via Bluetooth."reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue."host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise."host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise."program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.“program_id”: Program (slot) number of the currently running program.Returns:A dictionary with system info.Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.city hubcenterstop button iscity hubnonestop button issystem.set_stop_button(button)Sets the button or button combination that stops a running script.Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.Parameters:button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.system.storage(offset,write=)system.storage(offset,read=)→bytesReads or writes binary data to persistent storage.This lets you store data that can be used the next time you run the
+program.The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.Once saved, the data will remain available even after you remove the
+batteries.Parameters:offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.Returns:The bytes read if reading, otherwiseNone.Raises:ValueError– If you try to read or write data outside of the allowed range.You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.system.reset_storage()Resets all user settings to default values and erases user programs.city hubshut downsystem.shutdown()Stops your program and shuts the hub down.
+
+LEGO® City Hub.
+
+Using the hub status light
+
+
+light.on(color)
+    Turns on the light at the specified color.Parameters:color(Color) – Color of the light.
+
+Turns on the light at the specified color.
+
+
+Parameters:
+    color(Color) – Color of the light.
+
+color(Color) – Color of the light.
+
+
+light.off()
+    Turns off the light.
+
+Turns off the light.
+
+
+light.blink(color,durations)
+    Blinks the light at a given color by turning it on and off for given
+durations.The light keeps blinking indefinitely while the rest of your
+program keeps running.This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.Parameters:color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+Blinks the light at a given color by turning it on and off for given
+durations.
+
+The light keeps blinking indefinitely while the rest of your
+program keeps running.
+
+This method provides a simple way to make basic but useful patterns.
+For more generic and multi-color patterns, useanimate()instead.
+
+
+Parameters:
+    color(Color) – Color of the light.durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+  - color(Color) – Color of the light.
+color(Color) – Color of the light.
+
+  - durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+durations(list) – Sequence of time values of the
+form[on_1,off_1,on_2,off_2,...].
+
+
+light.animate(colors,interval)
+    Animates the light with a sequence of colors, shown one by
+one for the given interval.The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.Parameters:colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.
+
+Animates the light with a sequence of colors, shown one by
+one for the given interval.
+
+The animation runs in the background while the rest of your program
+keeps running. When the animation completes, it repeats.
+
+
+Parameters:
+    colors(list) – Sequence ofColorvalues.interval(Number,ms) – Time between color updates.
+
+  - colors(list) – Sequence ofColorvalues.
+colors(list) – Sequence ofColorvalues.
+
+  - interval(Number,ms) – Time between color updates.
+interval(Number,ms) – Time between color updates.
+
+Using the battery
+
+
+battery.voltage()→int:mV
+    Gets the voltage of the battery.Returns:Battery voltage.
+
+Gets the voltage of the battery.
+
+
+Returns:
+    Battery voltage.
+
+Battery voltage.
+
+
+battery.current()→int:mA
+    Gets the current supplied by the battery.Returns:Battery current.
+
+Gets the current supplied by the battery.
+
+
+Returns:
+    Battery current.
+
+Battery current.
+
+Button and system control
+
+
+buttons.pressed()→Set[Button]
+    Checks which buttons are currently pressed.Returns:Set of pressed buttons.
+
+Checks which buttons are currently pressed.
+
+
+Returns:
+    Set of pressed buttons.
+
+Set of pressed buttons.
+
+
+system.info()→dict
+    Gets information about the hub as a dictionary with the following keys:"name": The hub name. This is the name you see when connecting
+via Bluetooth."reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue."host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise."host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise."program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.“program_id”: Program (slot) number of the currently running program.Returns:A dictionary with system info.Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.
+
+Gets information about the hub as a dictionary with the following keys:
+
+  - "name": The hub name. This is the name you see when connecting
+via Bluetooth.
+"name": The hub name. This is the name you see when connecting
+via Bluetooth.
+
+  - "reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue.
+"reset_reason": Why the hub (re)booted. It is0if the hub
+was previously powered off normally. It is1if the hub rebooted
+automatically, like after a firmware update. It is2if the hub
+previously crashed due to a watchdog timeout, which indicates a
+firmware issue.
+
+  - "host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise.
+"host_connected_ble":Trueif the hub is connected to a
+computer, tablet, or phone via Bluetooth, andFalseotherwise.
+
+  - "host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise.
+"host_connected_usb":Trueif the hub is connected to a computer
+via USB and activated in the app.Falseotherwise.
+
+  - "program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.
+"program_start_type": It is1if the program started
+automatically when the hub was powered on. It is2if the program
+was started with the hub buttons. It is3if the program was
+started from your connected computer.
+
+  - “program_id”: Program (slot) number of the currently running program.
+“program_id”: Program (slot) number of the currently running program.
+
+
+Returns:
+    A dictionary with system info.
+
+A dictionary with system info.
+
+Changed in version 3.6:The name and reset reason where previously available as separate
+methods. Now they are included in the info dictionary. The methods
+are still available for backwards compatibility.
+
+
+system.set_stop_button(button)
+    Sets the button or button combination that stops a running script.Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.Parameters:button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+Sets the button or button combination that stops a running script.
+
+Normally, the center button is used to stop a running script. You can
+change or disable this behavior in order to use the button for other
+purposes.
+
+
+Parameters:
+    button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+button(Button) – A button such
+asButton.CENTER,
+or a tuple of multiple buttons. ChooseNoneto disable the
+stop button altogether. If you do, you can still turn the hub
+off by holding the center button for three seconds.
+
+
+system.storage(offset,write=)
+
+system.storage(offset,read=)→bytes
+    Reads or writes binary data to persistent storage.This lets you store data that can be used the next time you run the
+program.The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.Once saved, the data will remain available even after you remove the
+batteries.Parameters:offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.Returns:The bytes read if reading, otherwiseNone.Raises:ValueError– If you try to read or write data outside of the allowed range.You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.
+
+Reads or writes binary data to persistent storage.
+
+This lets you store data that can be used the next time you run the
+program.
+
+The data will be saved to flash memory when you turn the hub off
+normally. It will not be saved if the batteries are removedwhilethe
+hub is still running.
+
+Once saved, the data will remain available even after you remove the
+batteries.
+
+
+Parameters:
+    offset(int) – The offset from the start of the user storage memory, in bytes.read(int) – The number of bytes to read. Omit this argument when writing.write(bytes) – The bytes to write. Omit this argument when reading.
+
+  - offset(int) – The offset from the start of the user storage memory, in bytes.
+offset(int) – The offset from the start of the user storage memory, in bytes.
+
+  - read(int) – The number of bytes to read. Omit this argument when writing.
+read(int) – The number of bytes to read. Omit this argument when writing.
+
+  - write(bytes) – The bytes to write. Omit this argument when reading.
+write(bytes) – The bytes to write. Omit this argument when reading.
+
+
+Returns:
+    The bytes read if reading, otherwiseNone.
+
+The bytes read if reading, otherwiseNone.
+
+
+Raises:
+    ValueError– If you try to read or write data outside of the allowed range.
+
+ValueError– If you try to read or write data outside of the allowed range.
+
+You can store up to 128 bytes of data on this hub. The data is cleared
+when you update the Pybricks firmware or if you restore the original
+firmware.
+
+
+system.reset_storage()
+    Resets all user settings to default values and erases user programs.
+
+Resets all user settings to default values and erases user programs.
+
+
+system.shutdown()
+    Stops your program and shuts the hub down.
+
+Stops your program and shuts the hub down.
+
+
+Status light examples
+---------------------
+
+
+Turning the light on and off
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Changing brightness and using custom colors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Making the light blink
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+Creating light animations
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Button and system examples
+--------------------------
+
+
+Using the stop button during your program
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Turning the hub off
+~~~~~~~~~~~~~~~~~~~

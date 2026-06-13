@@ -1,0 +1,89 @@
+URL: https://docs.pybricks.com/en/latest/micropython/uio.html
+Tytuł: uio – Input/output streams — pybricks v4.0.0 documentation
+============================================================
+
+
+uio– Input/output streams
+=========================
+
+This module containsstreamobjects that behave like files.
+
+
+classBytesIO(​)
+
+classBytesIO(data)
+
+classBytesIO(alloc_size)
+    A binary stream using an in-memory bytes buffer.Parameters:data(bytesorbytearray) – Optional bytes-like object
+that contains initial data.alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.getvalue()→bytesGets the contents of the underlying buffer.
+
+A binary stream using an in-memory bytes buffer.
+
+
+Parameters:
+    data(bytesorbytearray) – Optional bytes-like object
+that contains initial data.alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.
+
+  - data(bytesorbytearray) – Optional bytes-like object
+that contains initial data.
+data(bytesorbytearray) – Optional bytes-like object
+that contains initial data.
+
+  - alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.
+alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.
+
+
+getvalue()→bytes
+    Gets the contents of the underlying buffer.
+
+Gets the contents of the underlying buffer.
+
+
+classStringIO(​)
+
+classStringIO(string)
+
+classStringIO(alloc_size)
+    A stream using an in-memory string buffer.Parameters:string(str) – Optional string with initial data.alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.getvalue()→strGets the contents of the underlying buffer.
+
+A stream using an in-memory string buffer.
+
+
+Parameters:
+    string(str) – Optional string with initial data.alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.
+
+  - string(str) – Optional string with initial data.
+string(str) – Optional string with initial data.
+
+  - alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.
+alloc_size(int) – Optional number of preallocated bytes. This
+parameter is unique to MicroPython. It is not recommended to
+use it in end-user code.
+
+
+getvalue()→str
+    Gets the contents of the underlying buffer.
+
+Gets the contents of the underlying buffer.
+
+
+classFileIO
+    This type represents a file opened in binary mode withopen(name,'rb').
+You should not instantiate this class directly.
+
+This type represents a file opened in binary mode withopen(name,'rb').
+You should not instantiate this class directly.

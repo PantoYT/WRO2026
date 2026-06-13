@@ -1,0 +1,45 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/colorlightmatrix.html
+Tytuł: Color Light Matrix — pybricks v4.0.0 documentation
+============================================================
+
+
+Color Light Matrix
+==================
+
+
+classColorLightMatrix(port)
+    LEGO® SPIKE 3x3 Color Light Matrix.Parameters:port(Port) – Port to which the device is connected.redmatrixlightonmatrix3redwhitebluelist with×lightonawaiton(colors)Turns the lights on.Parameters:colors(Colororlist) – If a singleColoris given, then all 9 lights are set
+to that color. If a list of colors is given, then each light is
+set to that color.matrixlightoffawaitoff()Turns all lights off.
+
+LEGO® SPIKE 3x3 Color Light Matrix.
+
+
+Parameters:
+    port(Port) – Port to which the device is connected.
+
+port(Port) – Port to which the device is connected.
+
+
+awaiton(colors)
+    Turns the lights on.Parameters:colors(Colororlist) – If a singleColoris given, then all 9 lights are set
+to that color. If a list of colors is given, then each light is
+set to that color.
+
+Turns the lights on.
+
+
+Parameters:
+    colors(Colororlist) – If a singleColoris given, then all 9 lights are set
+to that color. If a list of colors is given, then each light is
+set to that color.
+
+colors(Colororlist) – If a singleColoris given, then all 9 lights are set
+to that color. If a list of colors is given, then each light is
+set to that color.
+
+
+awaitoff()
+    Turns all lights off.
+
+Turns all lights off.

@@ -1,0 +1,49 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/light.html
+Tytuł: Light — pybricks v4.0.0 documentation
+============================================================
+
+
+Light
+=====
+
+
+classLight(port)
+    LEGO® Powered Up Light.Parameters:port(Port) – Port to which the device is connected.100%lightlightonon(brightness=100)Turns on the light at the specified brightness.Parameters:brightness(Number,%) – Brightness of the light.lightlightoffoff()Turns off the light.
+
+LEGO® Powered Up Light.
+
+
+Parameters:
+    port(Port) – Port to which the device is connected.
+
+port(Port) – Port to which the device is connected.
+
+
+on(brightness=100)
+    Turns on the light at the specified brightness.Parameters:brightness(Number,%) – Brightness of the light.
+
+Turns on the light at the specified brightness.
+
+
+Parameters:
+    brightness(Number,%) – Brightness of the light.
+
+brightness(Number,%) – Brightness of the light.
+
+
+off()
+    Turns off the light.
+
+Turns off the light.
+
+
+Examples
+--------
+
+
+Making the light blink
+~~~~~~~~~~~~~~~~~~~~~~
+
+
+Gradually change the brightness
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

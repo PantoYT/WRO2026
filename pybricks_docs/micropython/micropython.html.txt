@@ -1,0 +1,199 @@
+URL: https://docs.pybricks.com/en/latest/micropython/micropython.html
+Tytuł: micropython – MicroPython internals — pybricks v4.0.0 documentation
+============================================================
+
+
+micropython– MicroPython internals
+==================================
+
+Access and control MicroPython internals.
+
+
+const(value)→Any
+    Declares the value as a constant, which makes your code more efficient.To reduce memory usage further, prefix its name with an
+underscore (_ORANGES). This constant can only be used within the
+same file.If you want to import the value from another module, use a name without an
+underscore (APPLES). This uses a bit more memory.Parameters:value(intorfloatorstrortuple) – The literal to be made constant.Returns:The constant value.
+
+Declares the value as a constant, which makes your code more efficient.
+
+To reduce memory usage further, prefix its name with an
+underscore (_ORANGES). This constant can only be used within the
+same file.
+
+If you want to import the value from another module, use a name without an
+underscore (APPLES). This uses a bit more memory.
+
+
+Parameters:
+    value(intorfloatorstrortuple) – The literal to be made constant.
+
+value(intorfloatorstrortuple) – The literal to be made constant.
+
+
+Returns:
+    The constant value.
+
+The constant value.
+
+
+heap_lock()
+    Locks the heap. When locked, no memory allocation can occur. AMemoryErrorwill be raised if any heap allocation is attempted.
+
+Locks the heap. When locked, no memory allocation can occur. AMemoryErrorwill be raised if any heap allocation is attempted.
+
+
+heap_unlock()→int
+    Unlocks the heap. Memory allocation is now allowed again.Ifheap_lock()was called multiple times,heap_unlock()must be called the same number of times to make the heap available again.Returns:The lock depth after unlocking. It is0once it is unlocked.
+
+Unlocks the heap. Memory allocation is now allowed again.
+
+Ifheap_lock()was called multiple times,heap_unlock()must be called the same number of times to make the heap available again.
+
+
+Returns:
+    The lock depth after unlocking. It is0once it is unlocked.
+
+The lock depth after unlocking. It is0once it is unlocked.
+
+
+kbd_intr(chr)
+    Sets the character that triggers aKeyboardInterruptexception when
+you type it in the input window. By default it is set to3,
+which corresponds to pressingCtrlC.Parameters:chr(int) – Character that should raise theKeyboardInterrupt.
+Choose-1to disable this feature.
+
+Sets the character that triggers aKeyboardInterruptexception when
+you type it in the input window. By default it is set to3,
+which corresponds to pressingCtrlC.
+
+
+Parameters:
+    chr(int) – Character that should raise theKeyboardInterrupt.
+Choose-1to disable this feature.
+
+chr(int) – Character that should raise theKeyboardInterrupt.
+Choose-1to disable this feature.
+
+
+mem_info()
+
+mem_info(verbose)→None
+    Prints information about stack and heap memory usage.Parameters:verbose– If any value is given, it also prints out the entire heap.
+This indicates which blocks are used and which are free.
+
+Prints information about stack and heap memory usage.
+
+
+Parameters:
+    verbose– If any value is given, it also prints out the entire heap.
+This indicates which blocks are used and which are free.
+
+verbose– If any value is given, it also prints out the entire heap.
+This indicates which blocks are used and which are free.
+
+
+opt_level()→int
+
+opt_level(level:int)→None
+    Sets the optimization level for code compiled on the hub:Assertion statements are enabled. The built-in__debug__variable
+isTrue. Script line numbers are saved, so they can be reported when
+an Exception occurs.Assertions are ignored and__debug__isFalse.
+Script line numbers are saved.Assertions are ignored and__debug__isFalse.
+Script line numbers are saved.Assertions are ignored and__debug__isFalse.
+Script line numbers arenotsaved.This applies only to code that you run in the REPL, because regular scripts
+are already compiled before they are sent to the hub.Parameters:level(int) – The level to be set.Returns:If no argument is given, this returns the current optimization level.
+
+Sets the optimization level for code compiled on the hub:
+
+  - Assertion statements are enabled. The built-in__debug__variable
+isTrue. Script line numbers are saved, so they can be reported when
+an Exception occurs.
+Assertion statements are enabled. The built-in__debug__variable
+isTrue. Script line numbers are saved, so they can be reported when
+an Exception occurs.
+
+  - Assertions are ignored and__debug__isFalse.
+Script line numbers are saved.
+Assertions are ignored and__debug__isFalse.
+Script line numbers are saved.
+
+  - Assertions are ignored and__debug__isFalse.
+Script line numbers are saved.
+Assertions are ignored and__debug__isFalse.
+Script line numbers are saved.
+
+  - Assertions are ignored and__debug__isFalse.
+Script line numbers arenotsaved.
+Assertions are ignored and__debug__isFalse.
+Script line numbers arenotsaved.
+
+This applies only to code that you run in the REPL, because regular scripts
+are already compiled before they are sent to the hub.
+
+
+Parameters:
+    level(int) – The level to be set.
+
+level(int) – The level to be set.
+
+
+Returns:
+    If no argument is given, this returns the current optimization level.
+
+If no argument is given, this returns the current optimization level.
+
+
+qstr_info()
+
+qstr_info(verbose)→None
+    Prints how many strings are interned and how much RAM they use.MicroPython uses string interning to save both RAM and ROM.
+This avoids having to store duplicate copies of the same string.Parameters:verbose– If any value is given, it also prints out the names of all
+RAM-interned strings.
+
+Prints how many strings are interned and how much RAM they use.
+
+MicroPython uses string interning to save both RAM and ROM.
+This avoids having to store duplicate copies of the same string.
+
+
+Parameters:
+    verbose– If any value is given, it also prints out the names of all
+RAM-interned strings.
+
+verbose– If any value is given, it also prints out the names of all
+RAM-interned strings.
+
+
+stack_use()→int
+    Checks the amount of stack that is being used. This can be used to
+compute differences in stack usage at different points in a script.Returns:The amount of stack in use.
+
+Checks the amount of stack that is being used. This can be used to
+compute differences in stack usage at different points in a script.
+
+
+Returns:
+    The amount of stack in use.
+
+The amount of stack in use.
+
+
+Examples
+--------
+
+
+Using constants for efficiency
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Checking free RAM
+~~~~~~~~~~~~~~~~~
+
+This prints information in the format shown below. In this example for the
+SPIKE Prime Hub, there are 257696 bytes (251 KB) worth of memory remaining for
+the variables in your code.
+
+
+Getting more memory statistics
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

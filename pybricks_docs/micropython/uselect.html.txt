@@ -1,0 +1,223 @@
+URL: https://docs.pybricks.com/en/latest/micropython/uselect.html
+Tytuł: uselect – Wait for events — pybricks v4.0.0 documentation
+============================================================
+
+
+uselect– Wait for events
+========================
+
+This module provides functions to efficiently wait for events on multiple streams.
+
+Poll instance and class
+
+
+poll()→Poll
+    Creates an instance of thePollclass.Returns:ThePollinstance.
+
+Creates an instance of thePollclass.
+
+
+Returns:
+    ThePollinstance.
+
+ThePollinstance.
+
+
+classPoll
+    register(object,eventmask=POLLOUT|POLLOUT)Register a stream object for polling. The stream object will now be
+monitored for events. If an event happens, it becomes part of the
+return value ofpoll().If this method is called again for the same stream object, the object
+will not be registered again, but theeventmaskflags will be
+updated, as if callingmodify().Parameters:object(FileIO) – Stream to be registered for polling.eventmask(int) – Which events to use. Should bePOLLIN,POLLOUT, or their logical disjunction:POLLIN|POLLOUT.unregister(poll)Unregister an object from polling.Parameters:object(FileIO) – Stream to be unregistered from polling.modify(object,eventmask)Modifies the event mask for the stream object.Parameters:object(FileIO) – Stream to be registered for polling.eventmask(int) – Which events to use.Raises:OSError– If the object is not registered. The error isENOENT.poll(timeout=-1)→List[Tuple[FileIO,int]]Wait until at least one of the registered objects has a new event or
+exceptional condition ready to be handled.Parameters:timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.Returns:A list of tuples. There is one (object,eventmask, …)
+tuple for each object with an event, or no tuples if there are no
+events to be handled. Theeventmaskvalue
+is a combination of poll flags to indicate what happened. This may
+includePOLLERRandPOLLHUPeven if they were not registered.ipoll(timeout=-1,flags=1)→Iterator[Tuple[FileIO,int]]First, just likepoll(), wait until at least one of the registered
+objects has a new event or exceptional condition ready to be handled.But instead of a list, this method returns an iterator for improved
+efficiency. The iterator yields one (object,eventmask, …)
+tuple at a time, and overwrites it when yielding the next value. If you
+need the values later, make sure to copy them explicitly.Parameters:timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.flags(int) – If set to1, one-shot behavior for events is
+employed. This means that streams for which events happened
+will have their event masks automatically reset usingpoll.modify(obj,0). This way, new events for such a stream
+won’t be processed until a new mask is set withmodify(),
+which is useful for asynchronous I/O schedulers.
+
+
+register(object,eventmask=POLLOUT|POLLOUT)
+    Register a stream object for polling. The stream object will now be
+monitored for events. If an event happens, it becomes part of the
+return value ofpoll().If this method is called again for the same stream object, the object
+will not be registered again, but theeventmaskflags will be
+updated, as if callingmodify().Parameters:object(FileIO) – Stream to be registered for polling.eventmask(int) – Which events to use. Should bePOLLIN,POLLOUT, or their logical disjunction:POLLIN|POLLOUT.
+
+Register a stream object for polling. The stream object will now be
+monitored for events. If an event happens, it becomes part of the
+return value ofpoll().
+
+If this method is called again for the same stream object, the object
+will not be registered again, but theeventmaskflags will be
+updated, as if callingmodify().
+
+
+Parameters:
+    object(FileIO) – Stream to be registered for polling.eventmask(int) – Which events to use. Should bePOLLIN,POLLOUT, or their logical disjunction:POLLIN|POLLOUT.
+
+  - object(FileIO) – Stream to be registered for polling.
+object(FileIO) – Stream to be registered for polling.
+
+  - eventmask(int) – Which events to use. Should bePOLLIN,POLLOUT, or their logical disjunction:POLLIN|POLLOUT.
+eventmask(int) – Which events to use. Should bePOLLIN,POLLOUT, or their logical disjunction:POLLIN|POLLOUT.
+
+
+unregister(poll)
+    Unregister an object from polling.Parameters:object(FileIO) – Stream to be unregistered from polling.
+
+Unregister an object from polling.
+
+
+Parameters:
+    object(FileIO) – Stream to be unregistered from polling.
+
+object(FileIO) – Stream to be unregistered from polling.
+
+
+modify(object,eventmask)
+    Modifies the event mask for the stream object.Parameters:object(FileIO) – Stream to be registered for polling.eventmask(int) – Which events to use.Raises:OSError– If the object is not registered. The error isENOENT.
+
+Modifies the event mask for the stream object.
+
+
+Parameters:
+    object(FileIO) – Stream to be registered for polling.eventmask(int) – Which events to use.
+
+  - object(FileIO) – Stream to be registered for polling.
+object(FileIO) – Stream to be registered for polling.
+
+  - eventmask(int) – Which events to use.
+eventmask(int) – Which events to use.
+
+
+Raises:
+    OSError– If the object is not registered. The error isENOENT.
+
+OSError– If the object is not registered. The error isENOENT.
+
+
+poll(timeout=-1)→List[Tuple[FileIO,int]]
+    Wait until at least one of the registered objects has a new event or
+exceptional condition ready to be handled.Parameters:timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.Returns:A list of tuples. There is one (object,eventmask, …)
+tuple for each object with an event, or no tuples if there are no
+events to be handled. Theeventmaskvalue
+is a combination of poll flags to indicate what happened. This may
+includePOLLERRandPOLLHUPeven if they were not registered.
+
+Wait until at least one of the registered objects has a new event or
+exceptional condition ready to be handled.
+
+
+Parameters:
+    timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.
+
+timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.
+
+
+Returns:
+    A list of tuples. There is one (object,eventmask, …)
+tuple for each object with an event, or no tuples if there are no
+events to be handled. Theeventmaskvalue
+is a combination of poll flags to indicate what happened. This may
+includePOLLERRandPOLLHUPeven if they were not registered.
+
+A list of tuples. There is one (object,eventmask, …)
+tuple for each object with an event, or no tuples if there are no
+events to be handled. Theeventmaskvalue
+is a combination of poll flags to indicate what happened. This may
+includePOLLERRandPOLLHUPeven if they were not registered.
+
+
+ipoll(timeout=-1,flags=1)→Iterator[Tuple[FileIO,int]]
+    First, just likepoll(), wait until at least one of the registered
+objects has a new event or exceptional condition ready to be handled.But instead of a list, this method returns an iterator for improved
+efficiency. The iterator yields one (object,eventmask, …)
+tuple at a time, and overwrites it when yielding the next value. If you
+need the values later, make sure to copy them explicitly.Parameters:timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.flags(int) – If set to1, one-shot behavior for events is
+employed. This means that streams for which events happened
+will have their event masks automatically reset usingpoll.modify(obj,0). This way, new events for such a stream
+won’t be processed until a new mask is set withmodify(),
+which is useful for asynchronous I/O schedulers.
+
+First, just likepoll(), wait until at least one of the registered
+objects has a new event or exceptional condition ready to be handled.
+
+But instead of a list, this method returns an iterator for improved
+efficiency. The iterator yields one (object,eventmask, …)
+tuple at a time, and overwrites it when yielding the next value. If you
+need the values later, make sure to copy them explicitly.
+
+
+Parameters:
+    timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.flags(int) – If set to1, one-shot behavior for events is
+employed. This means that streams for which events happened
+will have their event masks automatically reset usingpoll.modify(obj,0). This way, new events for such a stream
+won’t be processed until a new mask is set withmodify(),
+which is useful for asynchronous I/O schedulers.
+
+  - timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.
+timeout(int) – Timeout in milliseconds. Choose0to return
+immediately or choose-1to wait indefinitely.
+
+  - flags(int) – If set to1, one-shot behavior for events is
+employed. This means that streams for which events happened
+will have their event masks automatically reset usingpoll.modify(obj,0). This way, new events for such a stream
+won’t be processed until a new mask is set withmodify(),
+which is useful for asynchronous I/O schedulers.
+flags(int) – If set to1, one-shot behavior for events is
+employed. This means that streams for which events happened
+will have their event masks automatically reset usingpoll.modify(obj,0). This way, new events for such a stream
+won’t be processed until a new mask is set withmodify(),
+which is useful for asynchronous I/O schedulers.
+
+Event mask flags
+
+
+POLLIN:int
+    Data is available for reading.
+
+Data is available for reading.
+
+
+POLLOUT:int
+    More data can be written.
+
+More data can be written.
+
+
+POLLERR:int
+    Error condition happened on the associated stream. Should be handled explicitly
+or else further invocations ofpoll()may return right away.
+
+Error condition happened on the associated stream. Should be handled explicitly
+or else further invocations ofpoll()may return right away.
+
+
+POLLHUP:int
+    Hang up happened on the associated stream. Should be handled explicitly
+or else further invocations ofpoll()may return right away.
+
+Hang up happened on the associated stream. Should be handled explicitly
+or else further invocations ofpoll()may return right away.
+
+
+Examples
+--------
+
+See theprojects websitefor a demo that uses this module.

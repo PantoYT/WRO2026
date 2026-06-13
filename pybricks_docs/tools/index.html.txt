@@ -1,0 +1,329 @@
+URL: https://docs.pybricks.com/en/latest/tools/index.html
+Tytuł: tools – General purpose tools — pybricks v4.0.0 documentation
+============================================================
+
+
+tools– General purpose tools
+============================
+
+Common tools for timing, data logging, and linear algebra.
+
+
+Timing tools
+------------
+
+
+awaitwait(time)
+    Pauses the user program for a specified amount of time.Parameters:time(Number,ms) – How long to wait.
+
+Pauses the user program for a specified amount of time.
+
+
+Parameters:
+    time(Number,ms) – How long to wait.
+
+time(Number,ms) – How long to wait.
+
+
+classStopWatch
+    A stopwatch to measure time intervals. Similar to the stopwatch
+feature on your phone.watchtimetime()→int:msGets the current time of the stopwatch.Returns:Elapsed time.watchpausepause()Pauses the stopwatch.watchresumeresume()Resumes the stopwatch.watchresetreset()Resets the stopwatch time to 0.The run state is unaffected:If it was paused, it stays paused (but now at 0).If it was running, it stays running (but starting again from 0).
+
+A stopwatch to measure time intervals. Similar to the stopwatch
+feature on your phone.
+
+
+time()→int:ms
+    Gets the current time of the stopwatch.Returns:Elapsed time.
+
+Gets the current time of the stopwatch.
+
+
+Returns:
+    Elapsed time.
+
+Elapsed time.
+
+
+pause()
+    Pauses the stopwatch.
+
+Pauses the stopwatch.
+
+
+resume()
+    Resumes the stopwatch.
+
+Resumes the stopwatch.
+
+
+reset()
+    Resets the stopwatch time to 0.The run state is unaffected:If it was paused, it stays paused (but now at 0).If it was running, it stays running (but starting again from 0).
+
+Resets the stopwatch time to 0.
+
+The run state is unaffected:
+
+  - If it was paused, it stays paused (but now at 0).
+If it was paused, it stays paused (but now at 0).
+
+  - If it was running, it stays running (but starting again from 0).
+If it was running, it stays running (but starting again from 0).
+
+
+Input tools
+-----------
+
+
+read_input_byte()→int|str|None
+    Reads one byte from standard input without blocking and removes it from the
+input buffer.Parameters:last(bool) – ChooseTrueto read the last (most recent) byte in the buffer and discard the rest.
+ChooseFalseto read only the first (oldest) byte.chr(bool) – ChooseTrueto convert the result to a one-character string.Returns:The byte that was read, as a numeric value (0to255) or
+string (e.g."B"). ReturnsNoneif no data is available. Ifchr=True, it also returnNoneif the byte that was read is not
+printable as a character.
+
+Reads one byte from standard input without blocking and removes it from the
+input buffer.
+
+
+Parameters:
+    last(bool) – ChooseTrueto read the last (most recent) byte in the buffer and discard the rest.
+ChooseFalseto read only the first (oldest) byte.chr(bool) – ChooseTrueto convert the result to a one-character string.
+
+  - last(bool) – ChooseTrueto read the last (most recent) byte in the buffer and discard the rest.
+ChooseFalseto read only the first (oldest) byte.
+last(bool) – ChooseTrueto read the last (most recent) byte in the buffer and discard the rest.
+ChooseFalseto read only the first (oldest) byte.
+
+  - chr(bool) – ChooseTrueto convert the result to a one-character string.
+chr(bool) – ChooseTrueto convert the result to a one-character string.
+
+
+Returns:
+    The byte that was read, as a numeric value (0to255) or
+string (e.g."B"). ReturnsNoneif no data is available. Ifchr=True, it also returnNoneif the byte that was read is not
+printable as a character.
+
+The byte that was read, as a numeric value (0to255) or
+string (e.g."B"). ReturnsNoneif no data is available. Ifchr=True, it also returnNoneif the byte that was read is not
+printable as a character.
+
+Changed in version 3.3:Addedlastandchroptions.
+
+
+hub_menu(symbol1,symbol2,...)→int|str
+    Shows a menu on the hub display and waits for the user to select an item
+using the buttons. Can be used in your own menu-program that lets you
+choose which of your other programs to run.Note that this is just a convenience function that combines the display,
+buttons, and waits to make a simple menu. This means that it can be used
+anywhere in a program, not just at the start.Parameters:symbol1(intorstr) – The first symbol to show in the menu.symbol2(intorstr) – The second symbol, and so on…Returns:The selected symbol.
+
+Shows a menu on the hub display and waits for the user to select an item
+using the buttons. Can be used in your own menu-program that lets you
+choose which of your other programs to run.
+
+Note that this is just a convenience function that combines the display,
+buttons, and waits to make a simple menu. This means that it can be used
+anywhere in a program, not just at the start.
+
+
+Parameters:
+    symbol1(intorstr) – The first symbol to show in the menu.symbol2(intorstr) – The second symbol, and so on…
+
+  - symbol1(intorstr) – The first symbol to show in the menu.
+symbol1(intorstr) – The first symbol to show in the menu.
+
+  - symbol2(intorstr) – The second symbol, and so on…
+symbol2(intorstr) – The second symbol, and so on…
+
+
+Returns:
+    The selected symbol.
+
+The selected symbol.
+
+
+Linear algebra tools
+--------------------
+
+Changed in version 3.3:These tools were previously located in thepybricks.geometrymodule.
+
+
+classMatrix(rows)
+    Mathematical representation of a matrix. It supports
+addition (A+B), subtraction (A-B),
+and matrix multiplication (A*B) for matrices of compatible size.It also supports scalar multiplication (c*AorA*c)
+and scalar division (A/c).AMatrixobject is immutable.Parameters:rows(list) – List of rows. Each row is itself a list of numbers.TReturns a newMatrixthat is the transpose of the
+original.shapeReturns a tuple (m,n),
+wheremis the number of rows andnis the number of columns.
+
+Mathematical representation of a matrix. It supports
+addition (A+B), subtraction (A-B),
+and matrix multiplication (A*B) for matrices of compatible size.
+
+It also supports scalar multiplication (c*AorA*c)
+and scalar division (A/c).
+
+AMatrixobject is immutable.
+
+
+Parameters:
+    rows(list) – List of rows. Each row is itself a list of numbers.
+
+rows(list) – List of rows. Each row is itself a list of numbers.
+
+
+T
+    Returns a newMatrixthat is the transpose of the
+original.
+
+Returns a newMatrixthat is the transpose of the
+original.
+
+
+shape
+    Returns a tuple (m,n),
+wheremis the number of rows andnis the number of columns.
+
+Returns a tuple (m,n),
+wheremis the number of rows andnis the number of columns.
+
+
+vector(x,y)→Matrix
+
+vector(x,y,z)→Matrix
+    Convenience function to create aMatrixwith the
+shape (2,1) or (3,1).Parameters:x(float) – x-coordinate of the vector.y(float) – y-coordinate of the vector.z(float) – z-coordinate of the vector (optional).Returns:A matrix with the shape of a column vector.
+
+Convenience function to create aMatrixwith the
+shape (2,1) or (3,1).
+
+
+Parameters:
+    x(float) – x-coordinate of the vector.y(float) – y-coordinate of the vector.z(float) – z-coordinate of the vector (optional).
+
+  - x(float) – x-coordinate of the vector.
+x(float) – x-coordinate of the vector.
+
+  - y(float) – y-coordinate of the vector.
+y(float) – y-coordinate of the vector.
+
+  - z(float) – z-coordinate of the vector (optional).
+z(float) – z-coordinate of the vector (optional).
+
+
+Returns:
+    A matrix with the shape of a column vector.
+
+A matrix with the shape of a column vector.
+
+
+cross(a,b)→Matrix
+    Gets the cross producta×bof two vectors.Parameters:a(Matrix) – A three-dimensional vector.b(Matrix) – A three-dimensional vector.Returns:The cross product, also a three-dimensional vector.
+
+Gets the cross producta×bof two vectors.
+
+
+Parameters:
+    a(Matrix) – A three-dimensional vector.b(Matrix) – A three-dimensional vector.
+
+  - a(Matrix) – A three-dimensional vector.
+a(Matrix) – A three-dimensional vector.
+
+  - b(Matrix) – A three-dimensional vector.
+b(Matrix) – A three-dimensional vector.
+
+
+Returns:
+    The cross product, also a three-dimensional vector.
+
+The cross product, also a three-dimensional vector.
+
+
+Multitasking
+------------
+
+New in version 3.3.
+
+Pybricks supports cooperative multitasking using theasyncandawaitkeywords. This allows operations that normally take some time to complete to
+run in parallel with other operations.
+
+
+awaitmultitask(coroutine1,coroutine2,...)→Tuple
+    Runs multiple coroutines concurrently. This creates a new coroutine that
+can be used like any other, including in anothermultitaskstatement.Parameters:coroutines(coroutine,coroutine,...) – One or more coroutines to run
+in parallel.race(bool) – ChooseFalseto wait for all coroutines to finish.
+ChooseTrueto wait for one coroutine to finish and then
+cancel the others, as if it’s a “race”.Returns:Tuple of the return values of each coroutine. Unfinished coroutines
+will haveNoneas their return value.
+
+Runs multiple coroutines concurrently. This creates a new coroutine that
+can be used like any other, including in anothermultitaskstatement.
+
+
+Parameters:
+    coroutines(coroutine,coroutine,...) – One or more coroutines to run
+in parallel.race(bool) – ChooseFalseto wait for all coroutines to finish.
+ChooseTrueto wait for one coroutine to finish and then
+cancel the others, as if it’s a “race”.
+
+  - coroutines(coroutine,coroutine,...) – One or more coroutines to run
+in parallel.
+coroutines(coroutine,coroutine,...) – One or more coroutines to run
+in parallel.
+
+  - race(bool) – ChooseFalseto wait for all coroutines to finish.
+ChooseTrueto wait for one coroutine to finish and then
+cancel the others, as if it’s a “race”.
+race(bool) – ChooseFalseto wait for all coroutines to finish.
+ChooseTrueto wait for one coroutine to finish and then
+cancel the others, as if it’s a “race”.
+
+
+Returns:
+    Tuple of the return values of each coroutine. Unfinished coroutines
+will haveNoneas their return value.
+
+Tuple of the return values of each coroutine. Unfinished coroutines
+will haveNoneas their return value.
+
+
+run_task(coroutine)→bool|None
+    Runs a coroutine from start to finish while blocking the rest of the
+program. This is used primarily to run the main coroutine of a program.Calls to this function are not allowed to be nested.Parameters:coroutine(coroutine) – The main coroutine to run.Returns:If nocoroutineis given, this function returns whether the
+run loop is currently active (True) or not (False).
+
+Runs a coroutine from start to finish while blocking the rest of the
+program. This is used primarily to run the main coroutine of a program.
+
+Calls to this function are not allowed to be nested.
+
+
+Parameters:
+    coroutine(coroutine) – The main coroutine to run.
+
+coroutine(coroutine) – The main coroutine to run.
+
+
+Returns:
+    If nocoroutineis given, this function returns whether the
+run loop is currently active (True) or not (False).
+
+If nocoroutineis given, this function returns whether the
+run loop is currently active (True) or not (False).
+
+The following example shows how to use multitasking to make a robot drive
+forward, then turn and move a gripper at the same time, and then drive
+backward.
+
+
+classcoroutine
+
+classawait
+Whenever you see a function or method prefixed byawait, this means that
+it supports multitasking. When running a coroutine withrun_task, all
+methods and functions prefixed byawaitwill act as coroutines.
+
+If you don’t use multitasking, you can ignore theawaitkeyword and write
+programs as usual. Specifically, whenrun_taskis not used, functions
+prefixed byawaitwill act as normal functions.

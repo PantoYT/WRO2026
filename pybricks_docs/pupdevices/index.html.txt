@@ -1,0 +1,40 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/index.html
+Tytuł: pupdevices – Motors, sensors, lights — pybricks v4.0.0 documentation
+============================================================
+
+
+pupdevices– Motors, sensors, lights
+===================================
+
+LEGO® Powered Up motor, sensors, and lights.
+
+
+classDCMotor
+
+classMotor
+
+classTiltSensor
+
+classInfraredSensor
+
+classColorDistanceSensor
+
+classPFMotor
+
+classColorSensor
+
+classUltrasonicSensor
+
+classForceSensor
+
+classColorLightMatrix
+
+classLight
+
+classRemote
+
+classTechnicMoveHub
+
+classMarioHub
+
+classDuploTrain

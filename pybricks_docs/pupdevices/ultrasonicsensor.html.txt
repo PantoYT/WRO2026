@@ -1,0 +1,101 @@
+URL: https://docs.pybricks.com/en/latest/pupdevices/ultrasonicsensor.html
+Tytuł: Ultrasonic Sensor — pybricks v4.0.0 documentation
+============================================================
+
+
+Ultrasonic Sensor
+=================
+
+
+classUltrasonicSensor(port)
+    LEGO® SPIKE Color Sensor.Parameters:port(Port) – Port to which the sensor is connected.distance sensordistanceawaitdistance()→int:mmMeasures the distance between the sensor and an object using
+ultrasonic sound waves.Returns:Measured distance. If no valid distance was measured,
+it returns 2000 mm.awaitpresence()→boolChecks for the presence of other ultrasonic sensors by detecting
+ultrasonic sounds.Returns:Trueif ultrasonic sounds are detected,Falseif not.Built-in lightsThis sensor has 4 built-in lights. You can adjust the brightness of each
+light.100%distance sensorlightondistance sensor10001000list withlightonawaitlights.on(brightness)Turns on the lights at the specified brightness.Parameters:brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of four values to set the brightness
+of each light individually. The order of the lights is shown
+in the image above.distance sensorlightoffawaitlights.off()Turns off all the lights.
+
+LEGO® SPIKE Color Sensor.
+
+
+Parameters:
+    port(Port) – Port to which the sensor is connected.
+
+port(Port) – Port to which the sensor is connected.
+
+
+awaitdistance()→int:mm
+    Measures the distance between the sensor and an object using
+ultrasonic sound waves.Returns:Measured distance. If no valid distance was measured,
+it returns 2000 mm.
+
+Measures the distance between the sensor and an object using
+ultrasonic sound waves.
+
+
+Returns:
+    Measured distance. If no valid distance was measured,
+it returns 2000 mm.
+
+Measured distance. If no valid distance was measured,
+it returns 2000 mm.
+
+
+awaitpresence()→bool
+    Checks for the presence of other ultrasonic sensors by detecting
+ultrasonic sounds.Returns:Trueif ultrasonic sounds are detected,Falseif not.
+
+Checks for the presence of other ultrasonic sensors by detecting
+ultrasonic sounds.
+
+
+Returns:
+    Trueif ultrasonic sounds are detected,Falseif not.
+
+Trueif ultrasonic sounds are detected,Falseif not.
+
+Built-in lights
+
+This sensor has 4 built-in lights. You can adjust the brightness of each
+light.
+
+
+awaitlights.on(brightness)
+    Turns on the lights at the specified brightness.Parameters:brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of four values to set the brightness
+of each light individually. The order of the lights is shown
+in the image above.
+
+Turns on the lights at the specified brightness.
+
+
+Parameters:
+    brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of four values to set the brightness
+of each light individually. The order of the lights is shown
+in the image above.
+
+brightness(Numberortuple,%) – Use a single value to set the brightness of all lights at the
+same time. Use a tuple of four values to set the brightness
+of each light individually. The order of the lights is shown
+in the image above.
+
+
+awaitlights.off()
+    Turns off all the lights.
+
+Turns off all the lights.
+
+
+Examples
+--------
+
+
+Measuring distance and switching on the lights
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+Gradually change the brightness of the lights
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
